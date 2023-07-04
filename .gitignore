@@ -1,0 +1,15 @@
+# OS Files
+##########
+.DS_Store
+.vscode
+
+# Python Files
+##############
+# setup.py working directory
+build
+# setup.py dist directory
+dist
+# Egg metadata
+*.egg-info
+# Caches
+__pycache__
