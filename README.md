@@ -25,7 +25,7 @@ Scribe apps are available on [iOS](https://github.com/scribe-org/Scribe-iOS), [A
 
 - [Contributing](#contributing)
 - [Setup](#setup)
-- [Keyboard Features](#keyboard-features)
+- [Supported Languages](#supported-languages)
 - [Featured By](#featured-by)
 
 <a id="contributing"></a>
