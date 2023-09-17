@@ -4,15 +4,15 @@
 
 [![platforms](https://img.shields.io/static/v1?message=Toolforge&logo=Wikidata&color=990000&logoColor=white&label=%20)](https://github.com/scribe-org/Scribe-Server)
 [![issues](https://img.shields.io/github/issues/scribe-org/Scribe-Server?label=%20&logo=github)](https://github.com/scribe-org/Scribe-Server/issues)
-[![language](https://img.shields.io/badge/Python%203-306998.svg?logo=python&logoColor=ffffff)](https://github.com/scribe-org/Scribe-Server/blob/main/CONTRIBUTING.md)
+[![language](https://img.shields.io/github/go-mod/go-version/scribe-org/Scribe-Server)](https://github.com/scribe-org/Scribe-Server/blob/main/CONTRIBUTING.md)
 [![license](https://img.shields.io/github/license/scribe-org/Scribe-Server.svg?label=%20)](https://github.com/scribe-org/Scribe-Server/blob/main/LICENSE.txt)
 [![coc](https://img.shields.io/badge/Contributor%20Covenant-ff69b4.svg)](https://github.com/scribe-org/Scribe-Server/blob/main/.github/CODE_OF_CONDUCT.md)
 [![mastodon](https://img.shields.io/badge/Mastodon-6364FF.svg?logo=mastodon&logoColor=ffffff)](https://wikis.world/@scribe)
 [![matrix](https://img.shields.io/badge/Matrix-000000.svg?logo=matrix&logoColor=ffffff)](https://matrix.to/#/#scribe_community:matrix.org)
 
-## Toolforge service for Scribe app data downloads
+## Backend service for Scribe app data downloads
 
-**Scribe-Server** is a Toolforge service that provides the API by which data is available for download within Scribe apps. The goal is to create a [Scribe-Data](https://github.com/scribe-org/Scribe-Data) based regularly updating dataset that can signal new data availability as well as allow for language pack downloads.
+**Scribe-Server** is a backend service that provides the API by which data is available for download within Scribe apps. The goal is to create a [Scribe-Data](https://github.com/scribe-org/Scribe-Data) based regularly updating dataset that can signal new data availability as well as allow for language pack downloads.
 
 > [!NOTE]\
 > The [contributing](#contributing) section has information for those interested, with the articles and presentations in [featured by](#featured-by) also being good resources for learning more about Scribe.

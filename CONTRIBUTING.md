@@ -24,7 +24,19 @@ If you have questions or would like to communicate with the team, please [join u
 
 # Development environment [`⇧`](#contents)
 
-Notes on the development environment forthcoming.
+Scribe-Server is developed using the [Go](https://go.dev/) programming language. Those new to Go or wanting to develop their skills are more than welcome to contribute! The first step on your Go journey would be to take a peek at the [Go documentation](https://go.dev/doc); the [Effective Go](https://go.dev/doc/effective_go) page in particular has some great insight into the language's good practices and standards. The general steps to setting up a development environment are:
+
+1. Download and install [Go](https://go.dev/doc/install)
+2. At the root directory of the project, start a local Scribe-Server:
+
+   ```bash
+   # Run the following target from the 'Makefile'
+   make run
+   ```
+    - NOTE: This `make` target simply runs `go run .` on the project
+    - Scribe-Server should now be running locally!
+
+Again, those new to Go or wanting to work on their Go skills are more than welcome to contribute! Scribe itself was developed as a way to learn Go and backend development. The team would be happy to help you on your coding journey :)
 
 <a id="issues-projects"></a>
 
