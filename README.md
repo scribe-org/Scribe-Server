@@ -4,7 +4,7 @@
 
 [![platforms](https://img.shields.io/static/v1?message=Toolforge&logo=Wikidata&color=990000&logoColor=white&label=%20)](https://github.com/scribe-org/Scribe-Server)
 [![issues](https://img.shields.io/github/issues/scribe-org/Scribe-Server?label=%20&logo=github)](https://github.com/scribe-org/Scribe-Server/issues)
-[![language](https://img.shields.io/github/go-mod/go-version/scribe-org/Scribe-Server)](https://github.com/scribe-org/Scribe-Server/blob/main/CONTRIBUTING.md)
+[![language](https://img.shields.io/badge/Golang%201-00ADD8.svg?logo=go&logoColor=ffffff)](https://github.com/scribe-org/Scribe-Server/blob/main/CONTRIBUTING.md)
 [![license](https://img.shields.io/github/license/scribe-org/Scribe-Server.svg?label=%20)](https://github.com/scribe-org/Scribe-Server/blob/main/LICENSE.txt)
 [![coc](https://img.shields.io/badge/Contributor%20Covenant-ff69b4.svg)](https://github.com/scribe-org/Scribe-Server/blob/main/.github/CODE_OF_CONDUCT.md)
 [![mastodon](https://img.shields.io/badge/Mastodon-6364FF.svg?logo=mastodon&logoColor=ffffff)](https://wikis.world/@scribe)
