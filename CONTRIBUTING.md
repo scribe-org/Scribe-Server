@@ -30,13 +30,13 @@ Scribe-Server is developed using the [Go](https://go.dev/) programming language.
 2. At the root directory of the project, start a local Scribe-Server:
 
    ```bash
-   # Run the following target from the 'Makefile'
+   # Run the following target from the 'Makefile'.
    make run
    ```
     - NOTE: This `make` target simply runs `go run .` on the project
     - Scribe-Server should now be running locally!
 
-Again, those new to Go or wanting to work on their Go skills are more than welcome to contribute! Scribe itself was developed as a way to learn Go and backend development. The team would be happy to help you on your coding journey :)
+Again, those new to Go or wanting to work on their Go skills are more than welcome to contribute! Scribe-Server itself was developed as a way to learn Go and backend development. The team would be happy to help you on your coding journey :)
 
 <a id="issues-projects"></a>
 
