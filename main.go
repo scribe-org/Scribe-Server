@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/spf13/viper"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -11,6 +13,20 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+
+	// Read in the config file.
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(fmt.Errorf("fatal error config file: %w", err))
+	}
+
+	port := fmt.Sprintf(":%s", viper.GetStringMapString("host")["port"])
+
 	http.HandleFunc("/", handler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+
+	log.Printf("listening on port %s", port)
+	log.Fatal(http.ListenAndServe(port, nil))
 }
