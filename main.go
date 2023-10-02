@@ -2,15 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"net/http"
+
+	"scribe-org/scribe-server/internal/handler"
 
 	"github.com/spf13/viper"
 )
-
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, I'm Scribe!")
-}
 
 func main() {
 
@@ -23,10 +19,5 @@ func main() {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 
-	port := fmt.Sprintf(":%s", viper.GetStringMapString("host")["port"])
-
-	http.HandleFunc("/", handler)
-
-	log.Printf("listening on port %s", port)
-	log.Fatal(http.ListenAndServe(port, nil))
+	handler.HandleRequests()
 }
