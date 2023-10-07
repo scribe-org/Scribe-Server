@@ -1,0 +1,3 @@
+host:
+  port: # 8080
+fileSystem: # "./some-directory"

@@ -21,3 +21,6 @@
 
 # Built go binaries
 bin/
+
+# Config files
+*config.yaml

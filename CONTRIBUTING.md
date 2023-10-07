@@ -27,7 +27,10 @@ If you have questions or would like to communicate with the team, please [join u
 Scribe-Server is developed using the [Go](https://go.dev/) programming language. Those new to Go or wanting to develop their skills are more than welcome to contribute! The first step on your Go journey would be to take a peek at the [Go documentation](https://go.dev/doc); the [Effective Go](https://go.dev/doc/effective_go) page in particular has some great insight into the language's good practices and standards. The general steps to setting up a development environment are:
 
 1. Download and install [Go](https://go.dev/doc/install)
-2. At the root directory of the project, start a local Scribe-Server:
+2. Navigate to the root directory of the project 
+3. Create a `config.yaml` file with the configuration needed for the project
+    - Reference the [`config-example.yaml`](./config-example.yaml) to get started
+4. Start a local Scribe-Server:
 
    ```bash
    # Run the following target from the 'Makefile'.
