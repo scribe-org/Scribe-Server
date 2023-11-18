@@ -1,6 +1,6 @@
 module scribe-org/scribe-server
 
-go 1.21.1
+go 1.20
 
 require github.com/spf13/viper v1.16.0
 
