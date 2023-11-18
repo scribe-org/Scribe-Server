@@ -1,6 +1,6 @@
 .PHONY: clean build test run fmt tidy
 
-BINARY_NAME=bin/scribe-server
+BINARY_NAME=./bin/scribe-server
 
 # Clean any build artifacts.
 clean:
@@ -26,3 +26,7 @@ fmt:
 # Sync the 'go.mod' file with dependencies in source code.
 tidy:
 	go mod tidy
+
+# Run the binary for the project.
+run-binary:
+	${BINARY_NAME}
