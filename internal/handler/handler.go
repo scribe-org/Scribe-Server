@@ -14,8 +14,6 @@ func hello(w http.ResponseWriter, r *http.Request) {
 
 // HandleRequests handles incoming HTTP requests.
 func HandleRequests() {
-	host := viper.GetStringMapString("host")
-	port := fmt.Sprintf(":%s", host["port"])
 
 	// Setup root handler.
 	http.HandleFunc("/", hello)
@@ -25,6 +23,7 @@ func HandleRequests() {
 	http.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir(fileSystem))))
 
 	// Start serving requests.
-	log.Printf("listening on port %s", port)
-	log.Fatal(http.ListenAndServe(port, nil))
+	hostPort := fmt.Sprintf(":%s", viper.GetString("hostPort"))
+	log.Printf("listening on port %s", hostPort)
+	log.Fatal(http.ListenAndServe(hostPort, nil))
 }
