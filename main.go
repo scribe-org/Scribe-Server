@@ -15,8 +15,23 @@ func main() {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
 	err := viper.ReadInConfig()
+
 	if err != nil {
-		panic(fmt.Errorf("fatal error config file: %w", err))
+		_, configFileNotFound := err.(viper.ConfigFileNotFoundError)
+
+		// Config file not found; try reading config from environment variables.
+		if configFileNotFound {
+			viper.AutomaticEnv()
+
+			// Environment variables also not set.
+			if !viper.IsSet("hostPort") || !viper.IsSet("fileSystem") {
+				panic(fmt.Errorf("fatal error config environment: %w", err))
+			}
+		} else {
+
+			// Config file was found, but another error was produced.
+			panic(fmt.Errorf("fatal error config file: %w", err))
+		}
 	}
 
 	handler.HandleRequests()
