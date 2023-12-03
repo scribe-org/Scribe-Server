@@ -20,7 +20,7 @@ func HandleRequests() {
 
 	// Setup /files handler.
 	fileSystem := viper.GetString("fileSystem")
-	http.Handle("/files/", http.StripPrefix("/files/", http.FileServer(http.Dir(fileSystem))))
+	http.Handle("/packs/", http.StripPrefix("/packs/", http.FileServer(http.Dir(fileSystem))))
 
 	// Start serving requests.
 	hostPort := fmt.Sprintf(":%s", viper.GetString("hostPort"))
