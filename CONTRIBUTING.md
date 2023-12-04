@@ -87,7 +87,7 @@ Scribe-Server is developed using the [Go](https://go.dev/) programming language.
 >
 > - e.g. Cloning now becomes `git clone git@github.com:<your-username>/Scribe-Server.git`
 >
-> GitHub also has their documentation on how to [Generate new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent). 🔑
+> GitHub also has their documentation on how to [Generate a new SSH key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) 🔑
 >
 > </p>
 > </details>
@@ -101,10 +101,9 @@ cd Scribe-Server
 git remote add upstream https://github.com/scribe-org/Scibe-Server.git
 ```
 
-Now, if you run `git remote -v` you should see two remote repositories named:
-
-- `origin` (forked repository)
-- `upstream` (Scribe-Server repository)
+- Now, if you run `git remote -v` you should see two remote repositories named:
+  - `origin` (forked repository)
+  - `upstream` (Scribe-Server repository)
 
 3. Navigate to the root directory of the project
 
