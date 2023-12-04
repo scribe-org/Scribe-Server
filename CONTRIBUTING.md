@@ -39,7 +39,7 @@ Thank you for your interest in contributing to Scribe-Server! We look forward to
 - Consider joining our [bi-weekly developer sync](https://etherpad.wikimedia.org/p/scribe-dev-sync)!
 
 > [!NOTE]
-> Those new to Golang or wanting to work on their Go skills are more than welcome to contribute! The team would be happy to help you on your development journey :)
+> Those new to Go or wanting to work on their Go skills are more than welcome to contribute! The team would be happy to help you on your development journey :)
 
 <a id="learning-the-tech"></a>
 
