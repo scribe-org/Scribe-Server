@@ -57,16 +57,16 @@ After your first few pull requests organization members would be happy to discus
 
 The Scribe road map can be followed in the organization's [project board](https://github.com/orgs/scribe-org/projects/1) where we list the most important issues along with their priority, status and an indication of which sub projects they're included in (if applicable).
 
-<a id="environment-setup"></a>
-
-# Environment Setup [`⇧`](#contents)
+### Data Edits [`⇧`](#contents)
 
 > [!NOTE]\
 > Please see the [Wikidata and Scribe Guide](https://github.com/scribe-org/Organization/blob/main/WIKIDATAGUIDE.md) for an overview of [Wikidata](https://www.wikidata.org/) and how Scribe uses it.
 
 Scribe does not accept direct edits to the grammar JSON files as they are sourced from [Wikidata](https://www.wikidata.org/). Edits can be discussed and the [Scribe-Data](https://github.com/scribe-org/Scribe-Data) queries will be changed and ran before an update. If there is a problem with one of the files, then the fix should be made on [Wikidata](https://www.wikidata.org/) and not on Scribe. Feel free to let us know that edits have been made by [opening a data issue](https://github.com/scribe-org/Scribe-Server/issues/new?assignees=&labels=data&template=data_wikidata.yml) or contacting us in the [issues for Scribe-Data](https://github.com/scribe-org/Scribe-Data/issues) and we'll be happy to integrate them!
 
-### Development environment [`⇧`](#contents)
+<a id="environment-setup"></a>
+
+# Environment Setup [`⇧`](#contents)
 
 Scribe-Server is developed using the [Go](https://go.dev/) programming language. Those new to Go or wanting to develop their skills are more than welcome to contribute! The first step on your Go journey would be to read through the [Go documentation](https://go.dev/doc), with the [Effective Go](https://go.dev/doc/effective_go) page in particular having great insights into the language's good practices and standards. The general steps to setting up a development environment are:
 
