@@ -18,7 +18,7 @@ func HandleRequests() {
 	// Setup root handler.
 	http.HandleFunc("/", hello)
 
-	// Setup /files handler.
+	// Setup /packs handler.
 	fileSystem := viper.GetString("fileSystem")
 	http.Handle("/packs/", http.StripPrefix("/packs/", http.FileServer(http.Dir(fileSystem))))
 
