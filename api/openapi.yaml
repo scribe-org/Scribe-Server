@@ -1,0 +1,11 @@
+openapi: 3.1.0
+info:
+  title: Scribe-Server API
+  version: 0.0.0
+paths:
+  /latest:
+    get:
+      operationId: latest
+      responses:
+        "200":
+          description: Returns the datetime of the latest Scribe data update. 
