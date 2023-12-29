@@ -9,3 +9,18 @@ paths:
       responses:
         "200":
           description: Returns the datetime of the latest Scribe data update. 
+        "500":
+          description: An internal server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
