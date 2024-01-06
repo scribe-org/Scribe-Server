@@ -8,7 +8,11 @@ paths:
       operationId: latest
       responses:
         "200":
-          description: Returns the datetime of the latest Scribe data update. 
+          description: Returns the datetime of the latest Scribe data update.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LatestUpdateTime"
         "500":
           description: An internal server error occurred.
           content:
@@ -19,8 +23,11 @@ components:
   schemas:
     Error:
       type: object
-      required:
-        - message
       properties:
         message:
+          type: string
+    LatestUpdateTime:
+      type: object
+      properties:
+        updateTime:
           type: string
