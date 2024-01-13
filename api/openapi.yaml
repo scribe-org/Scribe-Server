@@ -93,3 +93,31 @@ components:
           type: string
         wikidataId:
           type: string
+    LanguageDataCount:
+      type: object
+      properties:
+        nouns:
+          type: integer
+          format: int64
+        verbs:
+          type: integer
+          format: int64
+        prepositions:
+          type: integer
+          format: int64
+        translations:
+          type: array
+          items:
+            type: object
+            $ref: "#/components/schemas/TranslationsCount"
+        emojiKeywords:
+          type: integer
+          format: int64
+    TranslationsCount:
+      type: object
+      properties:
+        code:
+          type: string
+        count:
+          type: integer
+          format: int64
