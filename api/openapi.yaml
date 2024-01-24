@@ -72,6 +72,41 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /language/{iso}/count:
+    get:
+      operationId: get
+      parameters:
+        - name: iso
+          in: path
+          description: ISO 639 code for the language.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Language was found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LanguageDataCount"
+        "400":
+          description: Bad parameters passed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Language was not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 components:
   schemas:
     Error:
@@ -96,13 +131,13 @@ components:
     LanguageDataCount:
       type: object
       properties:
-        nouns:
+        totalNouns:
           type: integer
           format: int64
-        verbs:
+        totalVerbs:
           type: integer
           format: int64
-        prepositions:
+        totalPrepositions:
           type: integer
           format: int64
         translations:
@@ -110,7 +145,7 @@ components:
           items:
             type: object
             $ref: "#/components/schemas/TranslationsCount"
-        emojiKeywords:
+        totalEmojiKeywords:
           type: integer
           format: int64
     TranslationsCount:
@@ -118,6 +153,6 @@ components:
       properties:
         iso:
           type: string
-        count:
+        totalTranslations:
           type: integer
           format: int64
