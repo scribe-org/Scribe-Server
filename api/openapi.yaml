@@ -37,13 +37,13 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /language/{code}:
+  /language/{iso}:
     get:
       operationId: get
       parameters:
-        - name: code
+        - name: iso
           in: path
-          description: Language code of the language.
+          description: ISO 639 code for the language.
           required: true
           schema:
             type: string
@@ -87,7 +87,7 @@ components:
     Language:
       type: object
       properties:
-        code:
+        iso:
           type: string
         name:
           type: string
@@ -116,7 +116,7 @@ components:
     TranslationsCount:
       type: object
       properties:
-        code:
+        iso:
           type: string
         count:
           type: integer
