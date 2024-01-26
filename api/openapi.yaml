@@ -5,7 +5,7 @@ info:
 paths:
   /latest:
     get:
-      operationId: latest
+      operationId: getLatestUpdateTime
       responses:
         "200":
           description: Returns the datetime of the latest Scribe data update.
@@ -21,7 +21,7 @@ paths:
                 $ref: "#/components/schemas/Error"
   /language:
     get:
-      operationId: list
+      operationId: listLanguages
       responses:
         "200":
           description: Returns the list of languages with available Scribe data.
@@ -39,7 +39,7 @@ paths:
                 $ref: "#/components/schemas/Error"
   /language/{iso}:
     get:
-      operationId: get
+      operationId: getLanguage
       parameters:
         - name: iso
           in: path
@@ -74,7 +74,7 @@ paths:
                 $ref: "#/components/schemas/Error"
   /language/{iso}/count:
     get:
-      operationId: get
+      operationId: getLanguageDataCount
       parameters:
         - name: iso
           in: path
