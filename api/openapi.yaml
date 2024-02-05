@@ -19,7 +19,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /language:
+  /languages:
     get:
       operationId: listLanguages
       responses:
@@ -37,7 +37,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /language/{iso}:
+  /languages/{iso}:
     get:
       operationId: getLanguage
       parameters:
@@ -72,7 +72,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /language/{iso}/count:
+  /languages/{iso}/count:
     get:
       operationId: getLanguageDataCount
       parameters:
