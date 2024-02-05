@@ -27,6 +27,11 @@ fmt:
 tidy:
 	go mod tidy
 
+# Create or update generated source code.
+generate:
+	go generate -x ./...
+	@$(MAKE) tidy
+
 # Run the binary for the project.
 run-binary:
 	${BINARY_NAME}
