@@ -1,4 +1,4 @@
-.PHONY: clean build test run fmt tidy
+.PHONY: clean build test run fmt tidy install-tools generate execute-binary
 
 BINARY_NAME=./bin/scribe-server
 
@@ -27,11 +27,17 @@ fmt:
 tidy:
 	go mod tidy
 
-# Create or update generated source code.
+# Install the tools for local development.
+install-tools:
+	go install github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen@latest
+	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+	go install ariga.io/atlas/cmd/atlas@latest
+
+# Create or update the generated source code.
 generate:
 	go generate -x ./...
 	@$(MAKE) tidy
 
-# Run the binary for the project.
-run-binary:
+# Execute the binary for the project.
+execute-binary:
 	${BINARY_NAME}

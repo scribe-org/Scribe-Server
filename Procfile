@@ -1,1 +1,1 @@
-web: make run-binary
+web: make execute-binary
