@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"scribe-org/scribe-server/internal/handler"
+	"github.com/scribe-org/scribe-server/internal/handler"
 
 	"github.com/spf13/viper"
 )

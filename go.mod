@@ -1,4 +1,4 @@
-module scribe-org/scribe-server
+module github.com/scribe-org/scribe-server
 
 go 1.20
 
