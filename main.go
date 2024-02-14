@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/scribe-org/scribe-server/internal/handler"
+	"github.com/scribe-org/scribe-server/api"
 
 	"github.com/spf13/viper"
 )
@@ -34,5 +34,5 @@ func main() {
 		}
 	}
 
-	handler.HandleRequests()
+	api.HandleRequests()
 }
