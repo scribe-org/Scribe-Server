@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+
+  db:
+    volumes: 
+    - testvolume:/home/scribe-server/volume
+    image: mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: example
+    ports:
+      - 3307:3306
+volumes:
+  testvolume: 
