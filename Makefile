@@ -1,4 +1,4 @@
-.PHONY: clean build test run fmt tidy install-tools generate execute-binary
+.PHONY: clean build test run fmt tidy install-tools generate generate-api generate-db execute-binary
 
 BINARY_NAME=./bin/scribe-server
 
@@ -35,7 +35,17 @@ install-tools:
 
 # Create or update the generated source code.
 generate:
-	go generate -x ./...
+	@$(MAKE) generate-api
+	@$(MAKE) generate-db
+
+# Create or update the generated source code for the 'api' package.
+generate-api:
+	go generate -x ./api/...
+	@$(MAKE) tidy
+
+# Create or update the generated source code for the 'db' package.
+generate-db:
+	go generate -x ./db/...
 	@$(MAKE) tidy
 
 # Execute the binary for the project.
