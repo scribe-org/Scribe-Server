@@ -36,3 +36,7 @@ func main() {
 
 	api.HandleRequests()
 }
+
+func testlinter() {
+
+}
