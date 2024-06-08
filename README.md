@@ -59,6 +59,9 @@ After your first few pull requests organization members would be happy to discus
 
 The Scribe road map can be followed in the organization's [project board](https://github.com/orgs/scribe-org/projects/1) where we list the most important issues along with their priority, status and an indication of which sub projects they're included in (if applicable).
 
+> [!NOTE]\
+> Consider joining our [bi-weekly developer syncs](https://etherpad.wikimedia.org/p/scribe-dev-sync)!
+
 ### Data Edits [`⇧`](#contents)
 
 > [!NOTE]\
@@ -162,7 +165,7 @@ The following table shows the supported languages and the amount of data availab
 
 - August: [Scribe-iOS final submission report for Google Summer of Code 2023](https://saurabhjamadagni.hashnode.dev/gsoc-23-final-work-submission)
 - June: [Scribe-iOS development blog post on Nested UITableViews & Apple's built-in ViewControllers in app menu](https://saurabhjamadagni.hashnode.dev/nested-uitableviews-apples-built-in-viewcontrollers) for [GSoC '23](https://www.mediawiki.org/wiki/Google_Summer_of_Code/2023#Accepted_projects:~:text=links%3A%20Phabricator%20issue-,3.%20Adding%20a%20Menu%20and%20Keyboards%20to%20Scribe%2DiOS,-%5Bedit%5D)
-- March: [Presentation slides](https://docs.google.com/presentation/d/1W4ZkGi9UDDiTxM_silEij0gTE8YEubluHxe78xoqEP0/edit?usp=sharing) for a talk at [Berlin Hack and Tell](https://berlinhackandtell.rocks/) ([Hack of the month winner 🏆](https://berlinhackandtell.rocks/2023-03-28-no87-moore-hacks))
+- March: [Presentation slides](https://docs.google.com/presentation/d/1W4ZkGi9UDDiTxM_silEij0gTE8YEubluHxe78xoqEP0/edit?usp=sharing) for a talk at [Berlin Hack and Tell](https://bhnt.c-base.org/) ([Hack of the month winner 🏆](https://bhnt.c-base.org/2023-03-28-no87-moore-hacks))
 
 <strong>2022</strong>
 
@@ -189,7 +192,7 @@ The following table shows the supported languages and the amount of data availab
   <br>
 </div>
 
-# Powered By
+# Powered By [`⇧`](#contents)
 
 ### Contributors
 
