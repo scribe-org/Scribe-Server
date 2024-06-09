@@ -2,7 +2,7 @@
   <a href="https://github.com/scribe-org/Scribe-Server"><img src="https://raw.githubusercontent.com/scribe-org/Organization/main/logo/ScribeGitHubOrgBanner.png" width=1024 alt="Scribe Logo"></a>
 </div>
 
-[![platforms](https://img.shields.io/static/v1?message=Toolforge&logo=Wikidata&color=990000&logoColor=white&label=%20)](https://github.com/scribe-org/Scribe-Server)
+[![platforms](https://img.shields.io/static/v1?message=Toolforge&logo=wikimedia-foundation&color=990000&logoColor=white&label=%20)](https://github.com/scribe-org/Scribe-Server)
 [![issues](https://img.shields.io/github/issues/scribe-org/Scribe-Server?label=%20&logo=github)](https://github.com/scribe-org/Scribe-Server/issues)
 [![language](https://img.shields.io/badge/Go%201.20-00ADD8.svg?logo=go&logoColor=ffffff)](https://github.com/scribe-org/Scribe-Server/blob/main/CONTRIBUTING.md)
 [![license](https://img.shields.io/github/license/scribe-org/Scribe-Server.svg?label=%20)](https://github.com/scribe-org/Scribe-Server/blob/main/LICENSE.txt)
