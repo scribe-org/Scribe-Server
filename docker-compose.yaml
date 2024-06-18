@@ -3,7 +3,7 @@ services:
 
   db:
     volumes: 
-    - testvolume:/home/scribe-server/volume
+    - testvolume:/var/lib/mysql
     image: mariadb
     environment:
       MARIADB_ROOT_PASSWORD: example
