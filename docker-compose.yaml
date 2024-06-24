@@ -1,9 +1,8 @@
 version: "3.8"
 services:
-
   db:
-    volumes: 
-    - testvolume:/var/lib/mysql
+    volumes:
+      - testvolume:/var/lib/mysql
     image: mariadb
     environment:
       MARIADB_ROOT_PASSWORD: password123
@@ -13,4 +12,4 @@ services:
     ports:
       - 3307:3306
 volumes:
-  testvolume: 
+  testvolume:
