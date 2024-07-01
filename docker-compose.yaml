@@ -8,7 +8,7 @@ services:
       MARIADB_ROOT_PASSWORD: password123root
       MARIADB_USER: scribe
       MARIADB_PASSWORD: password123scribe
-      MARIADB_DATABASE: scribe-server-database
+      MARIADB_DATABASE: scribe_server
     ports:
       - 3307:3306
 volumes:
