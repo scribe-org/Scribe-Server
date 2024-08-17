@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://github.com/scribe-org/Scribe-Server"><img src="https://raw.githubusercontent.com/scribe-org/Scribe-Server/main/.github/resources/images/ScribeServerLogo.png" height=150 alt="Scribe-Server Logo"></a>
+  <a href="https://github.com/scribe-org/Scribe-Server"><img src="https://raw.githubusercontent.com/scribe-org/Scribe-Server/main/.github/resources/images/ScribeServerGitHubOrgBanner.png" width=1024 alt="Scribe-Server Logo"></a>
 </div>
 
 [![platforms](https://img.shields.io/static/v1?message=Toolforge&logo=wikimedia-foundation&color=990000&logoColor=white&label=%20)](https://github.com/scribe-org/Scribe-Server)
