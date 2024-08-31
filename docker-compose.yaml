@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  db:
+    volumes:
+      - db_data:/var/lib/mysql
+    image: mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: password123root
+      MARIADB_USER: scribe
+      MARIADB_PASSWORD: password123scribe
+      MARIADB_DATABASE: scribe_server
+    ports:
+      - 3307:3306
+volumes:
+  db_data:
