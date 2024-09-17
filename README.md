@@ -10,7 +10,7 @@
 [![mastodon](https://img.shields.io/badge/Mastodon-6364FF.svg?logo=mastodon&logoColor=ffffff)](https://wikis.world/@scribe)
 [![matrix](https://img.shields.io/badge/Matrix-000000.svg?logo=matrix&logoColor=ffffff)](https://matrix.to/#/#scribe_community:matrix.org)
 
-## Backend service for Scribe app data downloads
+### Backend service for Scribe data downloads
 
 **Scribe-Server** is a backend service that provides the API by which data is available for download within Scribe apps. The goal is to create a [Scribe-Data](https://github.com/scribe-org/Scribe-Data) based regularly updating dataset that can signal new data availability as well as allow for language pack downloads.
 
