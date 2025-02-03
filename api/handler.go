@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/spf13/viper"
 )
@@ -20,6 +21,13 @@ func HandleRequests() {
 
 	// Setup /packs handler.
 	fileSystem := viper.GetString("fileSystem")
+	log.Printf("Serving files from: %s", fileSystem)
+
+	// Check if the directory exists
+	if _, err := os.Stat(fileSystem); os.IsNotExist(err) {
+		log.Fatalf("Directory %s does not exist", fileSystem)
+	}
+
 	http.Handle("/packs/", http.StripPrefix("/packs/", http.FileServer(http.Dir(fileSystem))))
 
 	// Start serving requests.
