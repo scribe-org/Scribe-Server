@@ -32,7 +32,7 @@ install-tools:
 	go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
 	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 	go install ariga.io/atlas/cmd/atlas@latest
-	go install github.com/cosmtrek/air@v1.40.4
+	go install github.com/air-verse/air@v1.40.4
 
 # Create or update the generated source code.
 generate:
