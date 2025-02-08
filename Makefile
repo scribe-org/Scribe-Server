@@ -53,6 +53,6 @@ generate-db:
 execute-binary:
 	${BINARY_NAME}
 
-# Run the project with hot reload
+# Run the project with hot reload.
 dev:
 	$(shell go env GOPATH)/bin/air

@@ -23,7 +23,7 @@ func HandleRequests() {
 	fileSystem := viper.GetString("fileSystem")
 	log.Printf("Serving files from: %s", fileSystem)
 
-	// Check if the directory exists
+	// Check if the directory exists.
 	if _, err := os.Stat(fileSystem); os.IsNotExist(err) {
 		log.Fatalf("Directory %s does not exist", fileSystem)
 	}
@@ -32,6 +32,6 @@ func HandleRequests() {
 
 	// Start serving requests.
 	hostPort := fmt.Sprintf(":%s", viper.GetString("hostPort"))
-	log.Printf("listening on port %s", hostPort)
+	log.Printf("Listening on port %s", hostPort)
 	log.Fatal(http.ListenAndServe(hostPort, nil))
 }
