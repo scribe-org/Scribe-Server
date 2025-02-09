@@ -24,3 +24,6 @@ bin/
 
 # Config files
 *config.yaml
+
+# Temporary files
+tmp/

@@ -1,4 +1,4 @@
-.PHONY: clean build test run fmt tidy install-tools generate generate-api generate-db execute-binary
+.PHONY: clean build test run fmt tidy install-tools generate generate-api generate-db execute-binary dev
 
 BINARY_NAME=./bin/scribe-server
 
@@ -29,9 +29,10 @@ tidy:
 
 # Install the tools for local development.
 install-tools:
-	go install github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen@latest
+	go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
 	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 	go install ariga.io/atlas/cmd/atlas@latest
+	go install github.com/air-verse/air@latest
 
 # Create or update the generated source code.
 generate:
@@ -51,3 +52,7 @@ generate-db:
 # Execute the binary for the project.
 execute-binary:
 	${BINARY_NAME}
+
+# Run the project with hot reload.
+dev:
+	$(shell go env GOPATH)/bin/air
