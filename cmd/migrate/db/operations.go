@@ -54,7 +54,11 @@ func performDataMigration(sqlite *sql.DB, mariaDB *sql.DB, schema *types.TableSc
 	if err != nil {
 		return fmt.Errorf("failed to start transaction: %v", err)
 	}
-	defer tx.Rollback()
+	defer func() {
+		if err := tx.Rollback(); err != nil {
+			log.Printf("Error rolling back transaction: %v", err)
+		}
+	}()
 
 	placeholders := strings.Repeat("?,", len(schema.ColumnNames))
 	placeholders = placeholders[:len(placeholders)-1]

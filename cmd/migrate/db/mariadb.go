@@ -3,7 +3,7 @@ package db
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"database/sql"
 
@@ -15,7 +15,7 @@ import (
 
 // LoadConfig reads and unmarshals the YAML config file.
 func LoadConfig(path string) (*types.Config, error) {
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read config file: %v", err)
 	}
