@@ -1,6 +1,7 @@
 .PHONY: clean build test run fmt tidy install-tools generate generate-api generate-db execute-binary dev
 
 BINARY_NAME=./bin/scribe-server
+MIGRATE_BINARY=./bin/migrate
 
 # Clean any build artifacts.
 clean:
@@ -33,6 +34,8 @@ install-tools:
 	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 	go install ariga.io/atlas/cmd/atlas@latest
 	go install github.com/air-verse/air@latest
+	go get github.com/go-sql-driver/mysql
+	go get github.com/mattn/go-sqlite3
 
 # Create or update the generated source code.
 generate:
@@ -56,3 +59,11 @@ execute-binary:
 # Run the project with hot reload.
 dev:
 	$(shell go env GOPATH)/bin/air
+
+# Build the migration tool
+build-migrate:
+	go build -o ${MIGRATE_BINARY} ./cmd/migrate
+
+# Run the migration tool
+migrate: build-migrate
+	${MIGRATE_BINARY}
