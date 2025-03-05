@@ -1,7 +1,7 @@
 .PHONY: clean build test run fmt tidy install-tools generate generate-api generate-db execute-binary dev
 
 BINARY_NAME=./bin/scribe-server
-MIGRATE_BINARY=./bin/migrate
+MIGRATE_BINARY=./bin/migrate-scribe-data
 
 # Clean any build artifacts.
 clean:
