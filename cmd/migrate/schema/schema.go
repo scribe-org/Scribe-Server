@@ -58,7 +58,7 @@ func GetTableSchema(db *sql.DB, tableName string) (*types.TableSchema, error) {
 			return nil, err
 		}
 		schema.ColumnNames = append(schema.ColumnNames, name)
-		schema.ColumnTypes = append(schema.ColumnTypes, utils.MapSQLiteTypeToMariaDB(typ))
+		schema.ColumnTypes = append(schema.ColumnTypes, utils.MapColumnTypeToMariaDB(name, typ))
 	}
 
 	return schema, nil
