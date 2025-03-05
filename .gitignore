@@ -29,5 +29,5 @@ bin/
 # Temporary files
 tmp/
 
-#ignore sqlite
+# Scribe-Data SQLite files
 *.sqlite
