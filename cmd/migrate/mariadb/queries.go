@@ -7,7 +7,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/scribe-org/scribe-server/cmd/migrate/queries"
+	"github.com/scribe-org/scribe-server/cmd/migrate/schema"
 	"github.com/scribe-org/scribe-server/cmd/migrate/types"
 )
 
@@ -26,19 +26,79 @@ func MigrateTable(sqlite *sql.DB, mariaDB *sql.DB, langCode, tableName string) e
 	log.Printf("Migrating table %s for language %s", tableName, langCode)
 
 	// Get table schema
-	schema, err := queries.GetTableSchema(sqlite, tableName)
+	tableSchema, err := schema.GetTableSchema(sqlite, tableName)
 	if err != nil {
 		return fmt.Errorf("failed to get schema: %v", err)
 	}
 
-	// Create table in MariaDB
+	// Generate table names
 	mariaTableName := fmt.Sprintf("%s_%s", langCode, strings.TrimPrefix(tableName, "sqlite_"))
-	createSQL := queries.GenerateCreateTableSQL(mariaTableName, schema)
+	backupTableName := mariaTableName + "_old"
+
+	// Check if table exists and rename it to backup
+	exists, err := tableExists(mariaDB, mariaTableName)
+	if err != nil {
+		return fmt.Errorf("failed to check table existence: %v", err)
+	}
+
+	if exists {
+		// Drop old backup table if it exists
+		_, _ = mariaDB.Exec(fmt.Sprintf("DROP TABLE IF EXISTS `%s`", backupTableName))
+
+		// Rename existing table to backup
+		if _, err := mariaDB.Exec(fmt.Sprintf("RENAME TABLE `%s` TO `%s`", mariaTableName, backupTableName)); err != nil {
+			return fmt.Errorf("failed to rename existing table: %v", err)
+		}
+		log.Printf("Existing table renamed to %s", backupTableName)
+	}
+
+	// Create new table
+	createSQL := schema.GenerateCreateTableSQL(mariaTableName, tableSchema)
 	if _, err := mariaDB.Exec(createSQL); err != nil {
+		// If creation fails and we had a backup, restore it
+		if exists {
+			if _, restoreErr := mariaDB.Exec(fmt.Sprintf("RENAME TABLE `%s` TO `%s`", backupTableName, mariaTableName)); restoreErr != nil {
+				return fmt.Errorf("failed to create table and restore backup: original error: %v, restore error: %v", err, restoreErr)
+			}
+		}
 		return fmt.Errorf("failed to create table: %v", err)
 	}
 
-	return performDataMigration(sqlite, mariaDB, schema, tableName, mariaTableName)
+	// Perform the data migration
+	if err := performDataMigration(sqlite, mariaDB, tableSchema, tableName, mariaTableName); err != nil {
+		// If migration fails and we had a backup, restore it
+		if exists {
+			// Clean up the failed new table
+			_, _ = mariaDB.Exec(fmt.Sprintf("DROP TABLE IF EXISTS `%s`", mariaTableName))
+
+			if _, restoreErr := mariaDB.Exec(fmt.Sprintf("RENAME TABLE `%s` TO `%s`", backupTableName, mariaTableName)); restoreErr != nil {
+				return fmt.Errorf("failed to migrate data and restore backup: original error: %v, restore error: %v", err, restoreErr)
+			}
+		}
+		return fmt.Errorf("failed to migrate data: %v", err)
+	}
+
+	// If everything succeeded, drop the backup table
+	if exists {
+		if _, err := mariaDB.Exec(fmt.Sprintf("DROP TABLE IF EXISTS `%s`", backupTableName)); err != nil {
+			log.Printf("Warning: Failed to drop backup table %s: %v", backupTableName, err)
+		} else {
+			log.Printf("Backup table %s dropped successfully", backupTableName)
+		}
+	}
+
+	return nil
+}
+
+// tableExists checks if a table exists in the MariaDB database
+func tableExists(db *sql.DB, tableName string) (bool, error) {
+	var exists int
+	query := "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?"
+	err := db.QueryRow(query, tableName).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists > 0, nil
 }
 
 // performDataMigration handles the actual data transfer between databases
@@ -62,7 +122,7 @@ func performDataMigration(sqlite *sql.DB, mariaDB *sql.DB, schema *types.TableSc
 
 	placeholders := strings.Repeat("?,", len(schema.ColumnNames))
 	placeholders = placeholders[:len(placeholders)-1]
-	stmt, err := tx.Prepare(fmt.Sprintf("INSERT IGNORE INTO `%s` (%s) VALUES (%s)", 
+	stmt, err := tx.Prepare(fmt.Sprintf("INSERT IGNORE INTO `%s` (%s) VALUES (%s)",
 		destTable, columns, placeholders))
 	if err != nil {
 		return fmt.Errorf("failed to prepare statement: %v", err)
@@ -95,7 +155,7 @@ func processBatches(rows *sql.Rows, stmt *sql.Stmt, columnNames []string, tableN
 		}
 
 		batch = append(batch, values)
-		
+
 		// Execute batch insert when batch is full
 		if len(batch) >= batchSize {
 			if err := ExecuteBatch(stmt, batch); err != nil {
@@ -121,4 +181,4 @@ func processBatches(rows *sql.Rows, stmt *sql.Stmt, columnNames []string, tableN
 
 	log.Printf("Completed migration of %d rows for table %s", count, tableName)
 	return nil
-} 
+}

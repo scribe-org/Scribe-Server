@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-package queries
+package schema
 
 import (
 	"database/sql"
@@ -75,4 +75,4 @@ func GenerateCreateTableSQL(tableName string, schema *types.TableSchema) string 
 		"CREATE TABLE IF NOT EXISTS `%s` (\n    %s\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
 		tableName, strings.Join(columns, ",\n    "),
 	)
-} 
+}
