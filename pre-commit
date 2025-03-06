@@ -1,0 +1,21 @@
+#!/bin/bash
+
+echo "Trim trimming whitespace.....Failed"
+
+# Run gofmt on all .go files
+echo "Running gofmt..."
+GOFMT_FILES=$(gofmt -l .)
+if [ -n "${GOFMT_FILES}" ]; then
+    echo "The following files need to be formatted:"
+    echo "${GOFMT_FILES}"
+    echo "Running gofmt -w ."
+    gofmt -w .
+    echo -e "\nSome files were not properly formatted. Changes have been made."
+    echo -e "\nPlease review the changes and run 'git add' on the formatted files:"
+    echo "${GOFMT_FILES}"
+    echo -e "\nThen try to commit again."
+    exit 1
+fi
+
+echo "All files are properly formatted."
+exit 0 

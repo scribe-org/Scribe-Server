@@ -1,4 +1,4 @@
-.PHONY: clean build test run fmt tidy install-tools generate generate-api generate-db execute-binary dev
+ .PHONY: clean build test run fmt tidy install-tools generate generate-api generate-db execute-binary dev
 
 BINARY_NAME=./bin/scribe-server
 
@@ -33,6 +33,7 @@ install-tools:
 	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 	go install ariga.io/atlas/cmd/atlas@latest
 	go install github.com/air-verse/air@latest
+	@$(MAKE) install-hooks
 
 # Create or update the generated source code.
 generate:
@@ -56,3 +57,9 @@ execute-binary:
 # Run the project with hot reload.
 dev:
 	$(shell go env GOPATH)/bin/air
+
+# Install git hooks
+install-hooks:
+	@mkdir -p .git/hooks
+	@cp pre-commit .git/hooks/pre-commit
+	@chmod +x .git/hooks/pre-commit
