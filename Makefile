@@ -1,4 +1,4 @@
- .PHONY: clean build test run fmt tidy install-tools generate generate-api generate-db execute-binary dev
+.PHONY: clean build test run fmt tidy install-tools generate generate-api generate-db execute-binary dev
 
 BINARY_NAME=./bin/scribe-server
 
@@ -58,7 +58,7 @@ execute-binary:
 dev:
 	$(shell go env GOPATH)/bin/air
 
-# Install git hooks
+# Install git hooks.
 install-hooks:
 	@mkdir -p .git/hooks
 	@cp pre-commit .git/hooks/pre-commit

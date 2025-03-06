@@ -1,13 +1,10 @@
 #!/bin/bash
 
-echo "Trim trimming whitespace.....Failed"
-
-# Run gofmt on all .go files
+# Run gofmt on all .go files.
 echo "Running gofmt..."
 GOFMT_FILES=$(gofmt -l .)
 if [ -n "${GOFMT_FILES}" ]; then
-    echo "The following files need to be formatted:"
-    echo "${GOFMT_FILES}"
+    echo "There are files need to be formatted."
     echo "Running gofmt -w ."
     gofmt -w .
     echo -e "\nSome files were not properly formatted. Changes have been made."
@@ -18,4 +15,4 @@ if [ -n "${GOFMT_FILES}" ]; then
 fi
 
 echo "All files are properly formatted."
-exit 0 
+exit 0
