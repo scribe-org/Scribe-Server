@@ -1,2 +1,8 @@
 hostPort: # 8080
 fileSystem: # "./some-directory"
+database:
+  user: #root
+  password: #"1234"
+  host: #localhost
+  port: #"3306"
+  name: #scribe_server_v1
