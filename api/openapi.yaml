@@ -107,6 +107,43 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /data-contracts:
+    get:
+      operationId: listDataContracts
+      responses:
+        "200":
+          description: List of available data contracts.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "500":
+          description: Internal server error occured
+
+ 
+  /data-contracts/{iso}:
+    get:
+      operationId: getDataContract
+      parameters: 
+        - name: iso
+          in: path
+          description: ISO 639 code for the language.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully retrieved the data contract.
+          content:
+            application/json:
+              schema:
+                type: object
+        "404":
+          description: Data contract not found.
+        "500":
+          description: Internal server error occured.
 components:
   schemas:
     Error:

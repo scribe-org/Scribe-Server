@@ -7,9 +7,11 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"strings"
 
@@ -32,6 +34,12 @@ type ServerInterface interface {
 
 	// (GET /latest)
 	GetLatestUpdateTime(w http.ResponseWriter, r *http.Request)
+
+	// (Get /data-contracts)
+	GetDataContracts(w http.ResponseWriter, r *http.Request)
+
+	// (Get /data-contracts/{lang})
+	GetDataContract(w http.ResponseWriter, r *http.Request, iso string)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -57,6 +65,46 @@ func (_ Unimplemented) GetLanguageDataCount(w http.ResponseWriter, r *http.Reque
 func (_ Unimplemented) GetLatestUpdateTime(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
+
+// (Get /data-contracts)
+func (_ Unimplemented) GetDataContracts(w http.ResponseWriter, r *http.Request) {
+	files, err := os.ReadDir("data_contracts")
+	if err != nil {
+		http.Error(w, "Unable to read data contracts", http.StatusInternalServerError)
+		return
+	}
+
+	var contracts []string
+	for _, file := range files {
+		if !file.IsDir() && strings.HasSuffix(file.Name(), ".json") {
+			contracts = append(contracts, file.Name())
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(contracts)
+}
+
+// (Get /data-contracts/{lang})
+func (_ Unimplemented) GetDataContract(w http.ResponseWriter, r *http.Request, iso string) {
+	filePath := path.Join("data_contracts", iso+".json")
+
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			http.Error(w, "Data contract not found", http.StatusNotFound)
+		} else {
+			http.Error(w, "unable to read data contract", http.StatusInternalServerError)
+		}
+		return
+		}
+
+		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s.json", iso))
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
+		w.Write(data)
+	}
+
 
 // ServerInterfaceWrapper converts contexts to parameters.
 type ServerInterfaceWrapper struct {
@@ -140,6 +188,45 @@ func (siw *ServerInterfaceWrapper) GetLatestUpdateTime(w http.ResponseWriter, r 
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetLatestUpdateTime(w, r)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+func (siw *ServerInterfaceWrapper) GetDataContracts(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetDataContracts(w, r)
+	}))
+
+	for i := len(siw.HandlerMiddlewares) -1; i >= 0; i-- {
+		handler = siw.HandlerMiddlewares[i](handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+func (siw *ServerInterfaceWrapper) GetDataContract(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	var iso string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "iso", chi.URLParam(r, "iso"),
+&iso, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err!= nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "iso", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetDataContract(w, r, iso)
 	}))
 
 	for i := len(siw.HandlerMiddlewares) - 1; i >= 0; i-- {
@@ -274,6 +361,13 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/latest", wrapper.GetLatestUpdateTime)
 	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/data-contracts", wrapper.GetDataContracts)
+	})
+	r.Group(func(r chi.Router) {
+        r.Get(options.BaseURL+"/data-contracts/{iso}", wrapper.GetDataContract)
+    })
+
 
 	return r
 }
