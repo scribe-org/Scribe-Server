@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	api "github.com/scribe-org/scribe-server/api/gen"
 	"github.com/spf13/viper"
 )
 
@@ -29,6 +30,10 @@ func HandleRequests() {
 	}
 
 	http.Handle("/packs/", http.StripPrefix("/packs/", http.FileServer(http.Dir(fileSystem))))
+
+	// Setup API routes
+	apiHandler := api.Handler(api.Unimplemented{})
+	http.Handle("/api/", http.StripPrefix("/api", apiHandler))
 
 	// Start serving requests.
 	hostPort := fmt.Sprintf(":%s", viper.GetString("hostPort"))
