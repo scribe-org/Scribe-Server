@@ -38,7 +38,7 @@ type ServerInterface interface {
 	// (Get /data-contracts)
 	GetDataContracts(w http.ResponseWriter, r *http.Request)
 
-	// (Get /data-contracts/{lang})
+	// (Get /data-contracts/{iso})
 	GetDataContract(w http.ResponseWriter, r *http.Request, iso string)
 }
 
