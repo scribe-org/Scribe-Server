@@ -36,6 +36,7 @@ install-tools:
 	go install github.com/air-verse/air@latest
 	go get github.com/go-sql-driver/mysql
 	go get github.com/mattn/go-sqlite3
+	@$(MAKE) install-hooks
 
 # Create or update the generated source code.
 generate:
@@ -60,10 +61,16 @@ execute-binary:
 dev:
 	$(shell go env GOPATH)/bin/air
 
-# Build the migration tool
+# Build the migration tool.
 build-migrate:
 	go build -o ${MIGRATE_BINARY} ./cmd/migrate
 
-# Run the migration tool
+# Run the migration tool.
 migrate: build-migrate
 	${MIGRATE_BINARY}
+
+# Install git hooks.
+install-hooks:
+	@mkdir -p .git/hooks
+	@cp pre-commit .git/hooks/pre-commit
+	@chmod +x .git/hooks/pre-commit
