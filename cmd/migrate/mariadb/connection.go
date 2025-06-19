@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
+	_ "github.com/glebarez/sqlite"
 	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/scribe-org/scribe-server/cmd/migrate/types"
 )
 

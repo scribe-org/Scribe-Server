@@ -4,8 +4,6 @@ package main
 import (
 	"log"
 
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/mattn/go-sqlite3"
 	mariaDB "github.com/scribe-org/scribe-server/cmd/migrate/mariadb"
 	"github.com/scribe-org/scribe-server/cmd/migrate/sqlite"
 )

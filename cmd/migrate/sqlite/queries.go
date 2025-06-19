@@ -59,7 +59,7 @@ func processSQLiteFile(filePath string, mariaDB *sql.DB) error {
 		langCode = strings.Split(base, "_")[0]
 	}
 
-	sqlite, err := sql.Open("sqlite3", filePath)
+	sqlite, err := sql.Open("sqlite", filePath)
 	if err != nil {
 		return fmt.Errorf("failed to open SQLite file: %v", err)
 	}

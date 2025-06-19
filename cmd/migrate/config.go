@@ -4,8 +4,6 @@ package main
 import (
 	"fmt"
 
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/scribe-org/scribe-server/cmd/migrate/types"
 	"github.com/spf13/viper"
 )

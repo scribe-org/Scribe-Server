@@ -13,7 +13,7 @@ type TableSchema struct {
 type DBConnections struct {
 	MariaDB *sql.DB
 	SQLite  *sql.DB
-} 
+}
 
 // Config represents the overall configuration structure.
 type Config struct {
