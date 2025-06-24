@@ -13,7 +13,7 @@ import (
 	"github.com/scribe-org/scribe-server/cmd/migrate/schema"
 )
 
-// ProcessSQLiteFiles processes all SQLite files in the specified directory
+// ProcessSQLiteFiles processes all SQLite files in the specified directory.
 func ProcessSQLiteFiles(mariaDB *sql.DB) error {
 	sqliteDir := "./packs/sqlite"
 	files, err := filepath.Glob(filepath.Join(sqliteDir, "*.sqlite"))
@@ -48,11 +48,11 @@ func ProcessSQLiteFiles(mariaDB *sql.DB) error {
 	return nil
 }
 
-// processSQLiteFile handles processing of a single SQLite file
+// processSQLiteFile handles processing of a single SQLite file.
 func processSQLiteFile(filePath string, mariaDB *sql.DB) error {
 	log.Printf("Processing file: %s", filePath)
 
-	// Extract language code
+	// Extract language code.
 	base := filepath.Base(filePath)
 	langCode := strings.TrimSuffix(strings.TrimPrefix(base, "TranslationData.sqlite_"), ".sqlite")
 	if langCode == "" {

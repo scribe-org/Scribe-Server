@@ -9,7 +9,7 @@ type TableSchema struct {
 	ColumnTypes []string
 }
 
-// DBConnections holds database connections
+// DBConnections holds database connections.
 type DBConnections struct {
 	MariaDB *sql.DB
 	SQLite  *sql.DB

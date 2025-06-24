@@ -21,12 +21,12 @@ func MapSQLiteTypeToMariaDB(sqliteType string) string {
 	}
 }
 
-// MapColumnTypeToMariaDB converts SQLite types to MariaDB types, with special handling for known columns
+// MapColumnTypeToMariaDB converts SQLite types to MariaDB types, with special handling for known columns.
 func MapColumnTypeToMariaDB(columnName, sqliteType string) string {
-	// Special handling for known timestamp columns
+	// Special handling for known timestamp columns.
 	if strings.EqualFold(columnName, "Lastmodified") {
 		return "TIMESTAMP"
 	}
-	// Default type mapping
+	// Default type mapping.
 	return MapSQLiteTypeToMariaDB(sqliteType)
 }

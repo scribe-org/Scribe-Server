@@ -10,10 +10,10 @@ import (
 	"github.com/scribe-org/scribe-server/cmd/migrate/utils"
 )
 
-// GetTables returns all tables from SQLite database
+// GetTables returns all tables from SQLite database.
 func GetTables(db *sql.DB) ([]string, error) {
 	rows, err := db.Query(`
-        SELECT name FROM sqlite_master 
+        SELECT name FROM sqlite_master
         WHERE type='table' AND name NOT LIKE 'sqlite_%'
     `)
 	if err != nil {
@@ -32,7 +32,7 @@ func GetTables(db *sql.DB) ([]string, error) {
 	return tables, nil
 }
 
-// GetTableSchema retrieves the schema of a SQLite table
+// GetTableSchema retrieves the schema of a SQLite table.
 func GetTableSchema(db *sql.DB, tableName string) (*types.TableSchema, error) {
 	rows, err := db.Query(fmt.Sprintf("PRAGMA table_info(`%s`)", tableName))
 	if err != nil {
@@ -64,7 +64,7 @@ func GetTableSchema(db *sql.DB, tableName string) (*types.TableSchema, error) {
 	return schema, nil
 }
 
-// GenerateCreateTableSQL generates CREATE TABLE SQL for MariaDB
+// GenerateCreateTableSQL generates CREATE TABLE SQL for MariaDB.
 func GenerateCreateTableSQL(tableName string, schema *types.TableSchema) string {
 	columns := make([]string, len(schema.ColumnNames))
 	for i := range schema.ColumnNames {

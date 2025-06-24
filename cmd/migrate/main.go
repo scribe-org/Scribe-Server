@@ -9,20 +9,20 @@ import (
 )
 
 func main() {
-	// Load configuration
+	// Load configuration.
 	config, err := LoadConfig("config.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// MariaDB connection setup with config
+	// MariaDB connection setup with config.
 	mariaDB, err := mariaDB.SetupMariaDB(config.Database)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer mariaDB.Close()
 
-	// Process SQLite files
+	// Process SQLite files.
 	if err := sqlite.ProcessSQLiteFiles(mariaDB); err != nil {
 		log.Fatal(err)
 	}
