@@ -114,9 +114,14 @@ func performDataMigration(sqlite *sql.DB, mariaDB *sql.DB, schema *types.TableSc
 	if err != nil {
 		return fmt.Errorf("failed to start transaction: %v", err)
 	}
+
+	// Set up defer to rollback on error, but we'll commit explicitly on success
+	var committed bool
 	defer func() {
-		if err := tx.Rollback(); err != nil {
-			log.Printf("Error rolling back transaction: %v", err)
+		if !committed {
+			if err := tx.Rollback(); err != nil {
+				log.Printf("Error rolling back transaction: %v", err)
+			}
 		}
 	}()
 
@@ -129,7 +134,17 @@ func performDataMigration(sqlite *sql.DB, mariaDB *sql.DB, schema *types.TableSc
 	}
 	defer stmt.Close()
 
-	return processBatches(rows, stmt, schema.ColumnNames, destTable)
+	if err := processBatches(rows, stmt, schema.ColumnNames, destTable); err != nil {
+		return err
+	}
+
+	// Commit the transaction
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %v", err)
+	}
+	committed = true
+
+	return nil
 }
 
 // processBatches handles processing rows in batches
