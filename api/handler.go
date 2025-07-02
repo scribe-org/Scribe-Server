@@ -7,32 +7,34 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 )
 
-func hello(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, I'm Scribe!")
+func hello(c *gin.Context) {
+	c.String(http.StatusOK, "Hello, I'm Scribe!")
 }
 
 // HandleRequests handles incoming HTTP requests.
 func HandleRequests() {
+	r := gin.Default()
 
-	// Setup root handler.
-	http.HandleFunc("/", hello)
+	r.GET("/", hello)
 
-	// Setup /packs handler.
+	// Setup /packs handler for static files
 	fileSystem := viper.GetString("fileSystem")
 	log.Printf("Serving files from: %s", fileSystem)
 
-	// Check if the directory exists.
+	// Check if the directory exists
 	if _, err := os.Stat(fileSystem); os.IsNotExist(err) {
 		log.Fatalf("Directory %s does not exist", fileSystem)
 	}
 
-	http.Handle("/packs/", http.StripPrefix("/packs/", http.FileServer(http.Dir(fileSystem))))
+	// Serve static files from the /packs route
+	r.Static("/packs", fileSystem)
 
-	// Start serving requests.
+	// Start the server
 	hostPort := fmt.Sprintf(":%s", viper.GetString("hostPort"))
 	log.Printf("Listening on port %s", hostPort)
-	log.Fatal(http.ListenAndServe(hostPort, nil))
+	log.Fatal(r.Run(hostPort))
 }
