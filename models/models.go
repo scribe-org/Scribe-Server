@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+
 package models
 
 // LanguageDataResponse represents the response for GET /data/:lang
