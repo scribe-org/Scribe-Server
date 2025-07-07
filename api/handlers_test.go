@@ -90,9 +90,8 @@ func TestGetLanguageVersion(t *testing.T) {
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		assert.NoError(t, err)
 		assert.Equal(t, "en", response.Language)
-		assert.NotEmpty(t, response.NounsLastModified)
-		assert.NotEmpty(t, response.VerbsLastModified)
-		assert.NotEmpty(t, response.PrepositionsLastModified)
+		
+
 	})
 
 	t.Run("Invalid language code", func(t *testing.T) {

@@ -8,10 +8,14 @@ import "github.com/gin-gonic/gin"
 func SetupRoutes(r *gin.Engine) {
 	r.GET("/", hello)
 
-	// API v1 routes
-	v1 := r.Group("/v1")
+	api := r.Group("/api")
 	{
-		v1.GET("/data/:lang", getLanguageData)
-		v1.GET("/data-version/:lang", getLanguageVersion)
+		// API v1 routes
+		v1 := api.Group("/v1")
+		{
+			v1.GET("/data/:lang", getLanguageData)
+			v1.GET("/data-version/:lang", getLanguageVersion)
+			v1.GET("/languages", getAvailableLanguages)
+		}
 	}
 }

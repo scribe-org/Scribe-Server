@@ -2,29 +2,47 @@
 
 package models
 
-// LanguageDataResponse represents the response for GET /data/:lang
-type LanguageDataResponse struct {
-	Language string                 `json:"language"`
-	Contract Contract              `json:"contract"`
-	Data     map[string]interface{} `json:"data"`
+import "time"
+
+// ErrorResponse represents an error response
+type ErrorResponse struct {
+	Error string `json:"error"`
 }
 
-// Contract represents the schema contract for language data
+// Contract represents the data schema contract
 type Contract struct {
 	Version   string                       `json:"version"`
 	UpdatedAt string                       `json:"updated_at"`
 	Fields    map[string]map[string]string `json:"fields"`
 }
 
-// [WIP] LanguageVersionResponse represents the response for GET /data-version/:lang
-type LanguageVersionResponse struct {
-	Language                 string `json:"language"`
-	NounsLastModified       string `json:"nouns_last_modified"`
-	VerbsLastModified       string `json:"verbs_last_modified"`
-	PrepositionsLastModified string `json:"prepositions_last_modified"`
+// LanguageDataResponse represents the full language data response
+type LanguageDataResponse struct {
+	Language string                 `json:"language"`
+	Contract Contract               `json:"contract"`
+	Data     map[string]interface{} `json:"data"`
 }
 
-// ErrorResponse represents API error responses
-type ErrorResponse struct {
-	Error string `json:"error"`
+// LanguageVersionResponse represents version information for a language
+type LanguageVersionResponse struct {
+	Language string            `json:"language"`
+	Versions map[string]string `json:"versions"`
+}
+
+// LanguageDataVersion represents a row in the language_data_versions table
+type LanguageDataVersion struct {
+	LanguageISO string    `json:"language_iso"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+// LanguageInfo represents basic language information
+type LanguageInfo struct {
+	Code      string   `json:"code"`
+	DataTypes []string `json:"data_types"`
+}
+
+// AvailableLanguagesResponse represents the response for available languages
+type AvailableLanguagesResponse struct {
+	Languages []LanguageInfo `json:"languages"`
 }
