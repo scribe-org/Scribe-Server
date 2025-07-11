@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// isValidLanguageCode validates ISO 639-1 language codes and we support it
+// IsValidLanguageCode validates ISO 639-1 language codes and we support it
 // that is, we know that data exists in our db
 // for now, we know that EN(English) and FR(French) exists
 func IsValidLanguageCode(lang string) bool {
