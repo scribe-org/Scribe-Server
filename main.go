@@ -5,12 +5,10 @@ import (
 	"fmt"
 
 	"github.com/scribe-org/scribe-server/api"
-
 	"github.com/spf13/viper"
 )
 
 func main() {
-
 	// Read in the config file.
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
@@ -29,7 +27,6 @@ func main() {
 				panic(fmt.Errorf("fatal error config environment: %w", err))
 			}
 		} else {
-
 			// Config file was found, but another error was produced.
 			panic(fmt.Errorf("fatal error config file: %w", err))
 		}
