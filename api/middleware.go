@@ -4,7 +4,7 @@ package api
 
 import "github.com/gin-gonic/gin"
 
-// SetupCORS adds CORS middleware for API access
+// SetupCORS adds CORS middleware for API access.
 func SetupCORS() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")

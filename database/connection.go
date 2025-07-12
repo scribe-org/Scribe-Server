@@ -13,7 +13,7 @@ import (
 
 var DB *sql.DB
 
-// InitDatabase initializes the database connection
+// InitDatabase initializes the database connection.
 func InitDatabase() error {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		viper.GetString("database.user"),

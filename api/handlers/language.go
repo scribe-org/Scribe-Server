@@ -14,7 +14,7 @@ import (
 	"github.com/scribe-org/scribe-server/models"
 )
 
-// GetAvailableLanguages handles GET /languages
+// GetAvailableLanguages handles GET /languages.
 func GetAvailableLanguages(c *gin.Context) {
 	languages, err := database_queries.GetAvailableLanguages()
 	if err != nil {
@@ -42,17 +42,17 @@ func GetAvailableLanguages(c *gin.Context) {
 	})
 }
 
-// GetLanguageData handles GET /data/:lang
+// GetLanguageData handles GET /data/:lang.
 func GetLanguageData(c *gin.Context) {
 	lang := c.Param("lang")
 
-	// Validate language code
+	// Validate language code.
 	if !validators.IsValidLanguageCode(lang) {
 		HandleError(c, http.StatusBadRequest, constants.InvalidLanguageCodeError)
 		return
 	}
 
-	// Check if language exists in database
+	// Check if language exists in database.
 	availableLanguages, err := database_queries.GetAvailableLanguages()
 	if err != nil {
 		log.Printf("Error checking available languages: %v", err)
@@ -65,7 +65,7 @@ func GetLanguageData(c *gin.Context) {
 		return
 	}
 
-	// Get data types for the language
+	// Get data types for the language.
 	dataTypes, err := database_queries.GetLanguageDataTypes(lang)
 	if err != nil {
 		log.Printf("Error fetching data types for %s: %v", lang, err)
@@ -73,7 +73,7 @@ func GetLanguageData(c *gin.Context) {
 		return
 	}
 
-	// Build the response
+	// Build the response.
 	response := models.LanguageDataResponse{
 		Language: lang,
 		Contract: models.Contract{
@@ -84,9 +84,9 @@ func GetLanguageData(c *gin.Context) {
 		Data: make(map[string]interface{}),
 	}
 
-	// For each data type, get schema and data
+	// For each data type, get schema and data.
 	for _, dataType := range dataTypes {
-		// Sanitize inputs before constructing table name
+		// Sanitize inputs before constructing table name.
 		sanitizedLang := validators.SanitizeLanguageCode(lang)
 		if sanitizedLang == "" {
 			log.Printf("Failed to sanitize language code: %s", lang)
@@ -99,7 +99,7 @@ func GetLanguageData(c *gin.Context) {
 			continue
 		}
 
-		// Add to response
+		// Add to response.
 		if schema, ok := tableData["schema"].(map[string]string); ok {
 			response.Contract.Fields[dataType] = schema
 		}
@@ -111,17 +111,17 @@ func GetLanguageData(c *gin.Context) {
 	HandleSuccess(c, response)
 }
 
-// GetLanguageVersion handles GET /data-version/:lang
+// GetLanguageVersion handles GET /data-version/:lang.
 func GetLanguageVersion(c *gin.Context) {
 	lang := c.Param("lang")
 
-	// Validate language code
+	// Validate language code.
 	if !validators.IsValidLanguageCode(lang) {
 		HandleError(c, http.StatusBadRequest, constants.InvalidLanguageCodeError)
 		return
 	}
 
-	// Check if language exists in database
+	// Check if language exists in database.
 	availableLanguages, err := database_queries.GetAvailableLanguages()
 	if err != nil {
 		log.Printf("Error checking available languages: %v", err)
@@ -134,7 +134,7 @@ func GetLanguageVersion(c *gin.Context) {
 		return
 	}
 
-	// Get version information
+	// Get version information.
 	versions, err := database_queries.GetLanguageVersions(lang)
 	if err != nil {
 		log.Printf("Error fetching versions for %s: %v", lang, err)
