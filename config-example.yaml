@@ -1,10 +1,10 @@
-hostPort: # 8080
-fileSystem: # "./some-directory"
-database:
-  user: #root
-  password: #"1234"
-  host: #localhost
-  port: #"3306"
-  name: #scribe_server_v1
+# hostPort: 8080
+# fileSystem: "./"
+# database:
+#   user: root
+#   password: "password"
+#   host: localhost
+#   port: "3306"
+#   name: scribe_server_v1
 
 GIN_MODE: debug

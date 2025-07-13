@@ -78,9 +78,9 @@ func startServer(r *gin.Engine) {
 
 	log.Printf("👀 Listening on port %s", hostPort)
 	log.Printf("🚀 API endpoints available:")
-	log.Printf("  ✅ GET /v1/data/:lang - Versioned API")
-	log.Printf("  ✅ GET /v1/data-version/:lang - Version check API")
-	log.Printf("  ✅ GET /v1/languages - List available languages")
+	log.Printf("  ✅ GET /api/v1/data/:language_iso - Versioned API")
+	log.Printf("  ✅ GET /api/v1/data-version/:language_iso - Version check API")
+	log.Printf("  ✅ GET /api/v1/languages - List available languages")
 	log.Printf("📊 Available languages: %v", availableLanguages)
 
 	log.Fatal(r.Run(hostPort))

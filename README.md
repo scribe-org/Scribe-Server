@@ -117,10 +117,28 @@ git remote add upstream https://github.com/scribe-org/Scribe-Server.git
 
    - Reference the [`config-example.yaml`](./config-example.yaml) to get started
 
-5. Start a local Scribe-Server:
+5. Install [MariaDB](https://mariadb.com/) locally via its [installation guide](https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/installing-mariadb/binary-packages).
+
+   - Create a database using the `database.name` value from your `config.yaml` with the following commands (using Homebrew, for example):
+
+   ```bash
+   brew services start mariadb
+   mariadb -u root  # you may need to sudo this command
+
+   # To stop the server:
+   brew services stop mariadb
+   ```
+
+   - You can now run the commands found in [CREATE_SCRIBE_SERVER_DB.md](./CREATE_SCRIBE_SERVER_DB.md) to make the needed MariaDB database.
+
+6. Start a local Scribe-Server:
 
    ```bash
    # Run the following target from the 'Makefile'.
+   # Migrate SQLite files from Scribe-Data to MariaDB for use in Scribe-Server:
+   make build
+   make migrate
+   # Start Scribe-Server on your local host:
    make run
    ```
 
