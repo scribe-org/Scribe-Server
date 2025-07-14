@@ -22,7 +22,12 @@ run:
 
 # Format the project source code.
 fmt:
-	go fmt
+	go fmt ./...
+
+# Lint the project source code.
+lint:
+	@command -v revive >/dev/null 2>&1 || { echo "revive is not installed. Please run 'go install github.com/mgechev/revive@latest' first."; exit 1; }
+	revive -config revive.toml ./...
 
 # Sync the 'go.mod' file with dependencies in source code.
 tidy:

@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+// GetTableSchema returns the column names and types for a specific table
+// in the connected MySQL/MariaDB database.
 func GetTableSchema(tableName string) (map[string]string, error) {
 	if !isValidTableName(tableName) {
 		return nil, fmt.Errorf("invalid table name")
@@ -38,6 +40,8 @@ func GetTableSchema(tableName string) (map[string]string, error) {
 	return schema, nil
 }
 
+// GetTableData retrieves all rows and columns from a given table.
+// The result is a slice of maps, where each map represents a row with column-value pairs.
 func GetTableData(tableName string) ([]map[string]interface{}, error) {
 	if !isValidTableName(tableName) {
 		return nil, fmt.Errorf("invalid table name")

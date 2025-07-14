@@ -1,0 +1,49 @@
+# Revive configuration for Scribe-Server
+# See https://github.com/mgechev/revive for more details
+
+ignoreGeneratedHeader = false
+severity = "warning"
+confidence = 0.8
+errorCode = 0
+warningCode = 0
+
+# Enable specific rules
+[rule.blank-imports]
+[rule.context-as-argument]
+[rule.context-keys-type]
+[rule.dot-imports]
+[rule.error-return]
+[rule.error-strings]
+[rule.error-naming]
+[rule.exported]
+[rule.increment-decrement]
+[rule.var-naming]
+[rule.var-declaration]
+[rule.package-comments]
+[rule.range]
+[rule.receiver-naming]
+[rule.time-naming]
+[rule.unexported-return]
+[rule.indent-error-flow]
+[rule.errorf]
+[rule.empty-block]
+[rule.superfluous-else]
+[rule.unused-parameter]
+[rule.unreachable-code]
+[rule.redefines-builtin-id]
+
+# Configure specific rules
+[rule.line-length-limit]
+  arguments = [180]
+
+[rule.function-length]
+  arguments = [50, 0]
+
+[rule.cyclomatic]
+  arguments = [20]
+
+[rule.argument-limit]
+  arguments = [5]
+
+[rule.cognitive-complexity]
+  arguments = [20]

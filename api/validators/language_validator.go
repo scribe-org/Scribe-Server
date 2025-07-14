@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+
+// Package validators provides shared, reusable validators across the application.
 package validators
 
 import (

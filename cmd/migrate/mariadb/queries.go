@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+
+// Package mariadb provides logic for executing SQL queries and migrating tables from SQLite.
 package mariadb
 
 import (

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+// Package models defines data structures used across the Scribe Server.
 package models
 
 import "time"

@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// GetAvailableLanguages gets all available languages in the database.
 func GetAvailableLanguages() ([]string, error) {
 	query := `
 		SELECT DISTINCT SUBSTRING(TABLE_NAME, 1, 2) as language_code
@@ -36,6 +37,7 @@ func GetAvailableLanguages() ([]string, error) {
 	return languages, nil
 }
 
+// GetLanguageDataTypes gets all available data types in a sample language table.
 func GetLanguageDataTypes(lang string) ([]string, error) {
 	if len(lang) != 2 {
 		return nil, fmt.Errorf("invalid language code")

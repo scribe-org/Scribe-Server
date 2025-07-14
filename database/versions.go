@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+// CreateLanguageDataVersionsTable creates the `language_data_versions` table if it does not already exist.
+// This table tracks the last updated time for each language's dataset.
 func CreateLanguageDataVersionsTable() error {
 	query := `
 		CREATE TABLE IF NOT EXISTS language_data_versions (
@@ -26,6 +28,8 @@ func CreateLanguageDataVersionsTable() error {
 	return nil
 }
 
+// UpdateLanguageVersion updates the `updated_at` timestamp for a specific language in the `language_data_versions` table.
+// If the language does not exist, it inserts a new row.
 func UpdateLanguageVersion(lang string) error {
 	query := `
 		INSERT INTO language_data_versions (language_iso, updated_at) 
@@ -41,6 +45,8 @@ func UpdateLanguageVersion(lang string) error {
 	return nil
 }
 
+// GetLanguageVersions returns a map of data types to their last modified date for the given language.
+// Currently, it uses the current date as a placeholder until version tracking is implemented per data type.
 func GetLanguageVersions(lang string) (map[string]string, error) {
 	dataTypes, err := GetLanguageDataTypes(lang)
 	if err != nil {
