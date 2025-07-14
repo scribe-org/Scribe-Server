@@ -63,6 +63,7 @@ func setupStaticFiles(r *gin.Engine) {
 			r.Static("/packs", fileSystem)
 		}
 	}
+	r.StaticFile("/favicon.ico", "./static/favicon.ico")
 }
 
 // startServer starts the HTTP server.
