@@ -7,7 +7,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	// Import MySQL and SQLite drivers for side effects (required by `database/sql`)
+	// Import MySQL and SQLite drivers for side effects (required by `database/sql`).
 	_ "github.com/glebarez/sqlite"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/scribe-org/scribe-server/cmd/migrate/types"

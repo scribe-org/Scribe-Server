@@ -7,7 +7,7 @@ Thank you for your pull request! 🚀
 <!-- Please replace the empty checkboxes [] below with checked ones [x] accordingly. -->
 
 - [] This pull request is on a [separate branch](https://docs.github.com/en/get-started/quickstart/github-flow) and not the main branch
-- [] I have run `./pre-commit` and `make lint` and fixed all reported issues before submitting this PR
+- [] I have ran the `./pre-commit` executable as well as `make lint` and have fixed all reported issues
 
 ---
 
