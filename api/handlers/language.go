@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+
+// Package handlers contains HTTP handlers for various API endpoints.
 package handlers
 
 import (
@@ -8,7 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/scribe-org/scribe-server/api/database_queries"
+	"github.com/scribe-org/scribe-server/api/dbqueries"
 	"github.com/scribe-org/scribe-server/api/validators"
 	"github.com/scribe-org/scribe-server/internal/constants"
 	"github.com/scribe-org/scribe-server/models"
@@ -16,7 +18,7 @@ import (
 
 // GetAvailableLanguages handles GET /languages.
 func GetAvailableLanguages(c *gin.Context) {
-	languages, err := database_queries.GetAvailableLanguages()
+	languages, err := dbqueries.GetAvailableLanguages()
 	if err != nil {
 		log.Printf("Error fetching available languages: %v", err)
 		HandleError(c, http.StatusInternalServerError, constants.ErrorFetchingLanguages)
@@ -25,7 +27,7 @@ func GetAvailableLanguages(c *gin.Context) {
 
 	var languageInfos []models.LanguageInfo
 	for _, lang := range languages {
-		dataTypes, err := database_queries.GetLanguageDataTypes(lang)
+		dataTypes, err := dbqueries.GetLanguageDataTypes(lang)
 		if err != nil {
 			log.Printf("Error fetching data types for %s: %v", lang, err)
 			continue
@@ -53,7 +55,7 @@ func GetLanguageData(c *gin.Context) {
 	}
 
 	// Check if language exists in database.
-	availableLanguages, err := database_queries.GetAvailableLanguages()
+	availableLanguages, err := dbqueries.GetAvailableLanguages()
 	if err != nil {
 		log.Printf("Error checking available languages: %v", err)
 		HandleError(c, http.StatusInternalServerError, "Failed to check language availability")
@@ -66,7 +68,7 @@ func GetLanguageData(c *gin.Context) {
 	}
 
 	// Get data types for the language.
-	dataTypes, err := database_queries.GetLanguageDataTypes(lang)
+	dataTypes, err := dbqueries.GetLanguageDataTypes(lang)
 	if err != nil {
 		log.Printf("Error fetching data types for %s: %v", lang, err)
 		HandleError(c, http.StatusInternalServerError, "Failed to fetch language data types")
@@ -93,7 +95,7 @@ func GetLanguageData(c *gin.Context) {
 			continue
 		}
 
-		tableData, err := database_queries.GetLanguageTableData(lang, dataType)
+		tableData, err := dbqueries.GetLanguageTableData(lang, dataType)
 		if err != nil {
 			log.Printf("Error fetching table data for %s/%s: %v", lang, dataType, err)
 			continue
@@ -122,7 +124,7 @@ func GetLanguageVersion(c *gin.Context) {
 	}
 
 	// Check if language exists in database.
-	availableLanguages, err := database_queries.GetAvailableLanguages()
+	availableLanguages, err := dbqueries.GetAvailableLanguages()
 	if err != nil {
 		log.Printf("Error checking available languages: %v", err)
 		HandleError(c, http.StatusInternalServerError, "Failed to check language availability")
@@ -135,7 +137,7 @@ func GetLanguageVersion(c *gin.Context) {
 	}
 
 	// Get version information.
-	versions, err := database_queries.GetLanguageVersions(lang)
+	versions, err := dbqueries.GetLanguageVersions(lang)
 	if err != nil {
 		log.Printf("Error fetching versions for %s: %v", lang, err)
 		HandleError(c, http.StatusInternalServerError, constants.ErrorFetchingLanguageVersions)

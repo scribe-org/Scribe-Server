@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-package database_queries
+
+// Package dbqueries provides helper functions that fetch and transform language-specific
+// data from the underlying database.
+package dbqueries
 
 import (
 	"fmt"

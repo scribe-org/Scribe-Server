@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+
+// Package handlers contains HTTP handlers for various API endpoints.
 package handlers
 
 import (

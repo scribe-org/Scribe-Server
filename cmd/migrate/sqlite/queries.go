@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+
+// Package sqlite handles the reading and migration of SQLite language data into MariaDB.
 package sqlite
 
 import (

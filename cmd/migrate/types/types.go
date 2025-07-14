@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-package types
+
+// Package types defines the core data structures used throughout the migration process,
+// including database schema representation, connection holders, and configuration settings.
+package types //revive:disable-line
 
 import "database/sql"
 

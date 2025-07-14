@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+// Package database manages MySQL database connection and access functions.
 package database
 
 import (
@@ -7,10 +8,13 @@ import (
 	"fmt"
 	"log"
 
+	// Import MySQL driver for side effects (driver registration).
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/spf13/viper"
 )
 
+// DB is the global database connection used across the application.
+// It should be initialized via InitDatabase before use.
 var DB *sql.DB
 
 // InitDatabase initializes the database connection.

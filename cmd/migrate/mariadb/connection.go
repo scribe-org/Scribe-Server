@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+
+// Package mariadb handles connecting to and interacting with the MariaDB database during migration.
 package mariadb
 
 import (
 	"database/sql"
 	"fmt"
 
+	// Import MySQL and SQLite drivers for side effects (required by `database/sql`).
 	_ "github.com/glebarez/sqlite"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/scribe-org/scribe-server/cmd/migrate/types"

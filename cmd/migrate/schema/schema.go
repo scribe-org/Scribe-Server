@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+
+// Package schema provides utilities for extracting and converting database schemas during migration.
 package schema
 
 import (

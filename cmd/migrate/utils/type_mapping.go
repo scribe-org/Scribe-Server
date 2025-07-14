@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-package utils
+
+// Package utils contains helper functions for type conversions and general-purpose utilities.
+package utils //revive:disable-line
 
 import "strings"
 
