@@ -11,6 +11,9 @@ PACKS_DIR="./packs/sqlite"
 VENV_DIR="./.venv"
 LOG_FILE="/tmp/scribe-data-update.log"
 
+# Save project root
+PROJECT_ROOT=$(pwd)
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -41,7 +44,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Create and enter temp working dir
+# Step 0: Create and enter temp working dir
 mkdir -p "$TEMP_DIR"
 cd "$TEMP_DIR"
 
@@ -53,7 +56,10 @@ log "Log file: $LOG_FILE"
 log "📦 Setting up Scribe-Data repository..."
 if [ ! -d "$SCRIBE_DATA_DIR" ]; then
     log "Cloning Scribe-Data repository..."
-    git clone https://github.com/scribe-org/Scribe-Data.git "$SCRIBE_DATA_DIR"
+    git clone --depth=1 https://github.com/scribe-org/Scribe-Data.git "$SCRIBE_DATA_DIR" || {
+        error "Failed to clone Scribe-Data repo"
+        exit 1
+    }
     success "Repository cloned successfully"
 else
     log "Repository exists, updating..."
@@ -115,10 +121,9 @@ pip install -e . || {
 }
 success "Dependencies installed successfully"
 
-# Step 5: Generate language data
-log "⚡ Generating language data..."
-log "  📝 Running: scribe-data get -a -wdp"
-scribe-data get -a -wdp || {
+# Step 5: Generate language data (auto-confirming prompt)
+log "⚡ Generating language data (auto-confirm)..."
+yes y | scribe-data get -a -wdp || {
     error "Failed to generate language data"
     exit 1
 }
@@ -126,7 +131,6 @@ success "Language data generated successfully"
 
 # Step 6: Convert to SQLite
 log "🗄️  Converting to SQLite format..."
-log "  📝 Running: scribe-data convert -a -ot sqlite"
 scribe-data convert -a -ot sqlite || {
     error "Failed to convert to SQLite format"
     exit 1
@@ -147,10 +151,9 @@ if [ "$SQLITE_FILES" -eq 0 ]; then
 fi
 log "Found $SQLITE_FILES SQLite files to copy"
 
-# Step 8: Copy files back to server directory
-cd - > /dev/null
+# Step 8: Copy SQLite files to packs
+cd "$PROJECT_ROOT"
 mkdir -p "$PACKS_DIR"
-
 log "📁 Copying SQLite files to server..."
 cp -f "$TEMP_DIR/$SCRIBE_DATA_DIR/scribe_data_sqlite_export"/*.sqlite "$PACKS_DIR/" || {
     error "Failed to copy SQLite files to $PACKS_DIR"
@@ -163,7 +166,7 @@ ls -la "$PACKS_DIR"/*.sqlite | while read -r line; do
 done
 success "SQLite files copied successfully"
 
-# Step 9: Run migration
+# Step 9: Run migration from server root
 log "🔄 Running database migration..."
 make migrate || {
     error "Migration failed"
@@ -195,5 +198,5 @@ success "🎉 Scribe-Data has been updated and migrated to MariaDB!"
 echo
 log "Next steps:"
 log "  • Restart your server if needed"
-log "  • Test the /data/:lang endpoints"
+log "  • Test the /data-version/:language_iso endpoints"
 log "  • Check the log file for detailed information: $LOG_FILE"
