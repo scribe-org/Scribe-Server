@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/scribe-org/scribe-server/api/validators"
 	"github.com/scribe-org/scribe-server/database"
 	"github.com/spf13/viper"
 )
@@ -76,6 +77,9 @@ func startServer(r *gin.Engine) {
 		log.Printf("Warning: Could not fetch available languages: %v", err)
 		availableLanguages = []string{"unknown"}
 	}
+
+	// Initialize cached language validation map.
+	validators.InitLanguageValidator(availableLanguages)
 
 	log.Printf("👀 Listening on port %s", hostPort)
 	log.Printf("🚀 API endpoints available:")

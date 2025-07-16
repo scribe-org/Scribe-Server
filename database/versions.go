@@ -57,7 +57,7 @@ func GetLanguageVersions(lang string) (map[string]string, error) {
 
 	for _, dataType := range dataTypes {
 		tableName := fmt.Sprintf("%sLanguageData_%s", langPrefix, dataType)
-		
+
 		// Query to get the maximum lastModified date from the table
 		query := fmt.Sprintf(`
 			SELECT COALESCE(MAX(lastModified), '1970-01-01') as max_last_modified

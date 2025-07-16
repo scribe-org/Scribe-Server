@@ -5,21 +5,37 @@ package validators
 
 import (
 	"strings"
+	"sync"
 )
 
-// IsValidLanguageCode validates ISO 639-1 language codes and that we support the code.
-func IsValidLanguageCode(lang string) bool {
-	allowedLanguages := map[string]bool{
-		"en": true,
-		"fr": true,
-	}
+var (
+	supportedLanguagesMap = map[string]bool{}
+	mu                    sync.RWMutex
+)
 
-	// Basic validation: exactly 2 lowercase letters.
-	if len(lang) != 2 {
+// InitLanguageValidator initializes the list of supported languages.
+// This should be called once during server startup.
+func InitLanguageValidator(langs []string) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	supportedLanguagesMap = make(map[string]bool)
+	for _, lang := range langs {
+		supportedLanguagesMap[lang] = true
+	}
+}
+
+// IsValidLanguageCode checks if the language code is a valid ISO 639-1 code
+// and that it is among the supported languages.
+func IsValidLanguageCode(lang string) bool {
+	if len(lang) != 2 || lang != strings.ToLower(lang) {
 		return false
 	}
 
-	return allowedLanguages[lang]
+	mu.RLock()
+	defer mu.RUnlock()
+
+	return supportedLanguagesMap[lang]
 }
 
 // SanitizeLanguageCode ensures language code is safe for table name construction.
