@@ -5,7 +5,7 @@ package database
 import (
 	"fmt"
 	"log"
-	"time"
+	"strings"
 )
 
 // CreateLanguageDataVersionsTable creates the `language_data_versions` table if it does not already exist.
@@ -46,7 +46,6 @@ func UpdateLanguageVersion(lang string) error {
 }
 
 // GetLanguageVersions returns a map of data types to their last modified date for the given language.
-// Currently, it uses the current date as a placeholder until version tracking is implemented per data type.
 func GetLanguageVersions(lang string) (map[string]string, error) {
 	dataTypes, err := GetLanguageDataTypes(lang)
 	if err != nil {
@@ -54,10 +53,26 @@ func GetLanguageVersions(lang string) (map[string]string, error) {
 	}
 
 	versions := make(map[string]string)
-	currentDate := time.Now().Format("2006-01-02")
+	langPrefix := strings.ToUpper(lang)
 
 	for _, dataType := range dataTypes {
-		versions[dataType+"_last_modified"] = currentDate
+		tableName := fmt.Sprintf("%sLanguageData_%s", langPrefix, dataType)
+		
+		// Query to get the maximum lastModified date from the table
+		query := fmt.Sprintf(`
+			SELECT COALESCE(MAX(lastModified), '1970-01-01') as max_last_modified
+			FROM %s
+		`, tableName)
+
+		var lastModified string
+		err := DB.QueryRow(query).Scan(&lastModified)
+		if err != nil {
+			// If there's an error (e.g., table doesn't exist or no lastModified column),
+			// we'll use a default date
+			lastModified = "1970-01-01"
+		}
+
+		versions[dataType+"_last_modified"] = lastModified
 	}
 
 	return versions, nil
