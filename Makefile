@@ -74,6 +74,11 @@ build-migrate:
 migrate: build-migrate
 	${MIGRATE_BINARY}
 
+# Get data from Scribe-Data.
+update-data:
+	@chmod +x ./update_data.sh
+	@./update_data.sh
+
 # Install git hooks.
 install-hooks:
 	@mkdir -p .git/hooks
