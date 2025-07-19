@@ -32,8 +32,8 @@ func CreateLanguageDataVersionsTable() error {
 // If the language does not exist, it inserts a new row.
 func UpdateLanguageVersion(lang string) error {
 	query := `
-		INSERT INTO language_data_versions (language_iso, updated_at) 
-		VALUES (?, NOW()) 
+		INSERT INTO language_data_versions (language_iso, updated_at)
+		VALUES (?, NOW())
 		ON DUPLICATE KEY UPDATE updated_at = NOW()
 	`
 
@@ -58,7 +58,7 @@ func GetLanguageVersions(lang string) (map[string]string, error) {
 	for _, dataType := range dataTypes {
 		tableName := fmt.Sprintf("%sLanguageData_%s", langPrefix, dataType)
 
-		// Query to get the maximum lastModified date from the table
+		// Query to get the maximum lastModified date from the table.
 		query := fmt.Sprintf(`
 			SELECT COALESCE(MAX(lastModified), '1970-01-01') as max_last_modified
 			FROM %s
@@ -67,8 +67,7 @@ func GetLanguageVersions(lang string) (map[string]string, error) {
 		var lastModified string
 		err := DB.QueryRow(query).Scan(&lastModified)
 		if err != nil {
-			// If there's an error (e.g., table doesn't exist or no lastModified column),
-			// we'll use a default date
+			// If there's an error (e.g., no table or lastModified column), we'll use a default date.
 			lastModified = "1970-01-01"
 		}
 

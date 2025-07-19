@@ -1,27 +1,27 @@
 #!/bin/bash
 # update_data.sh - Automated Scribe-Data update script for Scribe-Server
-# Pipeline: clone our repo -> create venv -> install dependencies -> generate json file -> convert to sqlite -> copy to ./packs/sqlite -> run make migrate
 
-set -e  # Exit immediately on error
+set -e  # exit immediately on error
 
-# Configuration
+# MARK: Config
+
 SCRIBE_DATA_DIR="Scribe-Data"
 TEMP_DIR="/tmp/scribe-data-update"
 PACKS_DIR="./packs/sqlite"
 VENV_DIR="./.venv"
 LOG_FILE="/tmp/scribe-data-update.log"
 
-# Save project root
+# Save project root.
 PROJECT_ROOT=$(pwd)
 
-# Colors for output
+# Colors for output.
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m' # no color
 
-# Logging functions
+# Logging functions.
 log() {
     echo -e "${BLUE}[$(date '+%Y-%m-%d %H:%M:%S')]${NC} $1" | tee -a "$LOG_FILE"
 }
@@ -35,7 +35,7 @@ warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1" | tee -a "$LOG_FILE"
 }
 
-# Cleanup for temp directory
+# Cleanup for temp directory.
 cleanup() {
     if [ -d "$TEMP_DIR" ]; then
         log "Cleaning up temporary directory: $TEMP_DIR"
@@ -44,7 +44,8 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Step 0: Create and enter temp working dir
+# MARK: Enter TMP Dir
+
 mkdir -p "$TEMP_DIR"
 cd "$TEMP_DIR"
 
@@ -52,7 +53,8 @@ log "🚀 Starting Scribe-Data update process..."
 log "Working directory: $(pwd)"
 log "Log file: $LOG_FILE"
 
-# Step 1: Clone or update Scribe-Data
+# MARK: Get Scribe-Data
+
 log "📦 Setting up Scribe-Data repository..."
 if [ ! -d "$SCRIBE_DATA_DIR" ]; then
     log "Cloning Scribe-Data repository..."
@@ -70,7 +72,8 @@ fi
 
 cd "$SCRIBE_DATA_DIR"
 
-# Step 2: Ensure Python and pip are available
+# MARK: Python / Pip
+
 log "🐍 Checking Python environment..."
 if ! command -v python3 &> /dev/null; then
     error "Python3 is not installed. Please install Python3 first."
@@ -93,7 +96,8 @@ if ! command -v pip &> /dev/null && ! command -v pip3 &> /dev/null; then
     success "pip installed successfully"
 fi
 
-# Step 3: Create or reuse virtual environment
+# MARK: Make Venv
+
 log "🧪 Setting up virtual environment..."
 if [ ! -d "$VENV_DIR" ]; then
     python3 -m venv "$VENV_DIR" || {
@@ -112,7 +116,8 @@ source "$VENV_DIR/bin/activate" || {
 }
 success "Virtual environment activated"
 
-# Step 4: Install dependencies
+# MARK: Dependencies
+
 log "📚 Installing Scribe-Data dependencies..."
 pip install --upgrade pip
 pip install -e . || {
@@ -121,7 +126,8 @@ pip install -e . || {
 }
 success "Dependencies installed successfully"
 
-# Step 5: Generate language data (auto-confirming prompt)
+# MARK: Gen Data
+
 log "⚡ Generating language data (auto-confirm)..."
 yes y | scribe-data get -a -wdp || {
     error "Failed to generate language data"
@@ -129,7 +135,8 @@ yes y | scribe-data get -a -wdp || {
 }
 success "Language data generated successfully"
 
-# Step 6: Convert to SQLite
+# MARK: To SQLite
+
 log "🗄️  Converting to SQLite format..."
 scribe-data convert -a -ot sqlite || {
     error "Failed to convert to SQLite format"
@@ -137,7 +144,8 @@ scribe-data convert -a -ot sqlite || {
 }
 success "Data converted to SQLite successfully"
 
-# Step 7: Check SQLite output
+# MARK: Check SQLite
+
 SQLITE_EXPORT_DIR="./scribe_data_sqlite_export"
 if [ ! -d "$SQLITE_EXPORT_DIR" ]; then
     error "SQLite export directory not found: $SQLITE_EXPORT_DIR"
@@ -151,7 +159,8 @@ if [ "$SQLITE_FILES" -eq 0 ]; then
 fi
 log "Found $SQLITE_FILES SQLite files to copy"
 
-# Step 8: Copy SQLite files to packs
+# MARK: To Packs
+
 cd "$PROJECT_ROOT"
 mkdir -p "$PACKS_DIR"
 log "📁 Copying SQLite files to server..."
@@ -166,7 +175,8 @@ ls -la "$PACKS_DIR"/*.sqlite | while read -r line; do
 done
 success "SQLite files copied successfully"
 
-# Step 9: Run migration from server root
+# MARK: Migration
+
 log "🔄 Running database migration..."
 make migrate || {
     error "Migration failed"
@@ -174,12 +184,12 @@ make migrate || {
 }
 success "Database migration completed successfully"
 
-# Step 10: Deactivate virtual environment
+# MARK: Finish
+
 log "🧹 Deactivating virtual environment..."
 deactivate
 success "Virtual environment deactivated"
 
-# Step 11: Done
 END_TIME=$(date '+%Y-%m-%d %H:%M:%S')
 success "✨ Scribe-Data update process completed successfully at $END_TIME"
 
