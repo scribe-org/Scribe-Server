@@ -17,6 +17,14 @@ import (
 )
 
 // GetAvailableLanguages handles GET /languages.
+// @Summary Get available languages.
+// @Description Returns a list of all supported languages with their available data types.
+// @Tags languages
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.AvailableLanguagesResponse "List of supported languages".
+// @Failure 500 {object} models.ErrorResponse "Internal server error".
+// @Router /api/v1/languages [get]
 func GetAvailableLanguages(c *gin.Context) {
 	languages, err := dbqueries.GetAvailableLanguages()
 	if err != nil {
@@ -45,6 +53,17 @@ func GetAvailableLanguages(c *gin.Context) {
 }
 
 // GetLanguageData handles GET /data/:lang.
+// @Summary Get language data.
+// @Description Returns all available language data and schema contract for a specific language.
+// @Tags language-data
+// @Accept json
+// @Produce json
+// @Param lang path string true "Language code (ISO 639-1)" example(en).
+// @Success 200 {object} models.LanguageDataResponse "Complete language data with schema".
+// @Failure 400 {object} models.ErrorResponse "Invalid language code".
+// @Failure 404 {object} models.ErrorResponse "Language not supported".
+// @Failure 500 {object} models.ErrorResponse "Internal server error".
+// @Router /api/v1/data/{lang} [get]
 func GetLanguageData(c *gin.Context) {
 	lang := c.Param("lang")
 
@@ -114,6 +133,17 @@ func GetLanguageData(c *gin.Context) {
 }
 
 // GetLanguageVersion handles GET /data-version/:lang.
+// @Summary Get language data versions.
+// @Description Returns last modified dates for each data type of a specific language.
+// @Tags language-data
+// @Accept json
+// @Produce json
+// @Param lang path string true "Language code (ISO 639-1)" example(en).
+// @Success 200 {object} models.LanguageVersionResponse "Language version information".
+// @Failure 400 {object} models.ErrorResponse "Invalid language code"
+// @Failure 404 {object} models.ErrorResponse "Language not supported"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /api/v1/data-version/{lang} [get]
 func GetLanguageVersion(c *gin.Context) {
 	lang := c.Param("lang")
 

@@ -1,4 +1,4 @@
-.PHONY: clean build test run fmt tidy install-tools generate generate-api generate-db execute-binary dev
+.PHONY: clean build test run fmt tidy install-tools generate generate-api generate-db execute-binary dev docs docs-serve migrate build-migrate update-data install-hooks
 
 BINARY_NAME=./bin/scribe-server
 MIGRATE_BINARY=./bin/migrate-scribe-data
@@ -39,14 +39,18 @@ install-tools:
 	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 	go install ariga.io/atlas/cmd/atlas@latest
 	go install github.com/air-verse/air@latest
+	go install github.com/swaggo/swag/cmd/swag@latest
 	go get github.com/go-sql-driver/mysql
 	go get github.com/glebarez/sqlite
+	go get github.com/swaggo/gin-swagger
+	go get github.com/swaggo/files
 	@$(MAKE) install-hooks
 
 # Create or update the generated source code.
 generate:
 	@$(MAKE) generate-api
 	@$(MAKE) generate-db
+	@$(MAKE) docs
 
 # Create or update the generated source code for the 'api' package.
 generate-api:
@@ -57,6 +61,18 @@ generate-api:
 generate-db:
 	go generate -x ./db/...
 	@$(MAKE) tidy
+
+# Generate API documentation from code annotations.
+docs:
+	@echo "Generating API documentation..."
+	@command -v swag >/dev/null 2>&1 || { echo "swag is not installed. Please run 'make install-tools' first."; exit 1; }
+	swag init --generalInfo main.go --output docs/
+	@echo "Documentation generated at docs/"
+
+# Serve docs locally (runs server with docs available).
+docs-serve: docs
+	@echo "Starting server with documentation..."
+	@$(MAKE) run
 
 # Execute the binary for the project.
 execute-binary:
