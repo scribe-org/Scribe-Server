@@ -141,6 +141,12 @@ git remote add upstream https://github.com/scribe-org/Scribe-Server.git
    - NOTE: This `make` target simply runs `go run .` on the project
    - Scribe-Server should now be running locally!
 
+7. To generate the documentation for Scribe-Server, please run the following:
+
+   ```bash
+   make docs
+   ```
+
 > [!NOTE]
 > Feel free to contact the team in the [Data room on Matrix](https://matrix.to/#/#ScribeData:matrix.org) if you're having problems getting your environment setup!
 
