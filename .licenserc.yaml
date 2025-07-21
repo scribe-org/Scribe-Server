@@ -6,5 +6,6 @@ header:
   paths-ignore:
     - '**/*.md'
     - '**/.git/**'
+    - 'docs/docs.go'
   comment: on-failure
   license-location-threshold: 10
