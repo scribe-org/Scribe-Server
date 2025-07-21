@@ -1,4 +1,4 @@
-.PHONY: clean build test run fmt tidy install-tools generate generate-api generate-db execute-binary dev docs docs-serve migrate build-migrate update-data install-hooks
+.PHONY: clean build test run fmt tidy install-tools generate generate-api generate-db execute-binary dev docs docs-serve migrate build-migrate update-data install-hooks lint
 
 BINARY_NAME=./bin/scribe-server
 MIGRATE_BINARY=./bin/migrate-scribe-data
@@ -45,6 +45,16 @@ install-tools:
 	go get github.com/swaggo/gin-swagger
 	go get github.com/swaggo/files
 	@$(MAKE) install-hooks
+	@echo ""
+	@echo "------------------------------------------------------------"
+	@echo "Go tools installed. For best results and to use these tools"
+	@echo "directly from your terminal, please ensure '$(go env GOPATH)/bin'"
+	@echo "is in your system's PATH. You might need to add:"
+	@echo '  export PATH=$(go env GOPATH)/bin:$$PATH'
+	@echo "to your shell configuration file (e.g., ~/.bashrc or ~/.zshrc)"
+	@echo "and then 'source' it or open a new terminal."
+	@echo "------------------------------------------------------------"
+	@echo ""
 
 # Create or update the generated source code.
 generate:
@@ -65,8 +75,8 @@ generate-db:
 # Generate API documentation from code annotations.
 docs:
 	@echo "Generating API documentation..."
-	@command -v swag >/dev/null 2>&1 || { echo "swag is not installed. Please run 'make install-tools' first."; exit 1; }
-	swag init --generalInfo main.go --output docs/
+	@command -v swag >/dev/null 2>&1 || { echo "WARNING: 'swag' is not in your shell's PATH. Attempting to use absolute path. For general use, consider adding '$(go env GOPATH)/bin' to your PATH as instructed by 'make install-tools'."; }
+	$(shell go env GOPATH)/bin/swag init --generalInfo main.go --output docs/
 	@echo "Documentation generated at docs/"
 
 # Serve docs locally (runs server with docs available).

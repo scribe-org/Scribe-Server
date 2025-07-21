@@ -117,6 +117,18 @@ git remote add upstream https://github.com/scribe-org/Scribe-Server.git
 
    - Reference the [`config-example.yaml`](./config-example.yaml) to get started
 
+## Important Note on PATH Configuration for Go Tools
+
+> After installing `Go`, it's highly recommended to add your `Go` binary directory (`$(go env GOPATH)/bin`) to your system's `PATH`. This ensures that tools installed via `go install` (like `swag`, `oapi-codegen`, etc.) are directly accessible from your terminal.
+
+You can typically do this by adding the following line to your shell configuration file (e.g., `~/.bashrc`, `~/.zshrc`, or `~/.profile`):
+
+```bash
+export PATH=$(go env GOPATH)/bin:$PATH
+```
+
+After adding this line, remember to apply the changes by sourcing the file (e.g., `source ~/.bashrc`) or by opening a new terminal session.
+
 5. Install [MariaDB](https://mariadb.com/) locally via its [installation guide](https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/installing-mariadb/binary-packages).
 
    - Create a database using the `database.name` value from your `config.yaml` with the following commands (using Homebrew, for example):
