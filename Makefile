@@ -36,7 +36,6 @@ tidy:
 # Install the tools for local development.
 install-tools:
 	go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
-	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 	go install ariga.io/atlas/cmd/atlas@latest
 	go install github.com/air-verse/air@latest
 	go install github.com/swaggo/swag/cmd/swag@latest
@@ -48,9 +47,9 @@ install-tools:
 	@echo ""
 	@echo "------------------------------------------------------------"
 	@echo "Go tools installed. For best results and to use these tools"
-	@echo "directly from your terminal, please ensure '$(go env GOPATH)/bin'"
+	@echo "directly from your terminal, please ensure '$(shell go env GOPATH)/bin'"
 	@echo "is in your system's PATH. You might need to add:"
-	@echo '  export PATH=$(go env GOPATH)/bin:$$PATH'
+	@echo '  export PATH=$$(go env GOPATH)/bin:$$PATH'
 	@echo "to your shell configuration file (e.g., ~/.bashrc or ~/.zshrc)"
 	@echo "and then 'source' it or open a new terminal."
 	@echo "------------------------------------------------------------"
@@ -75,13 +74,21 @@ generate-db:
 # Generate API documentation from code annotations.
 docs:
 	@echo "Generating API documentation..."
-	@command -v swag >/dev/null 2>&1 || { echo "WARNING: 'swag' is not in your shell's PATH. Attempting to use absolute path. For general use, consider adding '$(go env GOPATH)/bin' to your PATH as instructed by 'make install-tools'."; }
+	@command -v swag >/dev/null 2>&1 || { echo "WARNING: 'swag' is not in your shell's PATH. Attempting to use absolute path. For general use, consider adding '$(shell go env GOPATH)/bin' to your PATH as instructed by 'make install-tools'."; }
 	$(shell go env GOPATH)/bin/swag init --generalInfo main.go --output docs/
 	@echo "Documentation generated at docs/"
+	@echo ""
+	@echo "After running 'make run' or 'make dev', access the documentation at:"
+	@echo "  - Swagger UI: http://localhost:8080/swagger/index.html"
+	@echo "  - Alternative docs: http://localhost:8080/docs/index.html"
+	@echo ""
 
 # Serve docs locally (runs server with docs available).
 docs-serve: docs
 	@echo "Starting server with documentation..."
+	@echo "Once the server is running, you can access the API documentation at:"
+	@echo "  - Swagger UI: http://localhost:8080/swagger/index.html"
+	@echo "  - Alternative docs: http://localhost:8080/docs/index.html"
 	@$(MAKE) run
 
 # Execute the binary for the project.
