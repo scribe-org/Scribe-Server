@@ -161,8 +161,8 @@ After adding this line, remember to apply the changes by sourcing the file (e.g.
 
    Once the server is running (via `make run` or `make dev`), you can access the API documentation at:
 
-   Swagger UI: http://localhost:8080/swagger/index.html</br>
-   Alternative docs: http://localhost:8080/docs/index.html
+   - Swagger UI: http://localhost:8080/swagger/index.html</br>
+   - Alternative docs: http://localhost:8080/docs/index.html
 
 > [!NOTE]
 > Feel free to contact the team in the [Data room on Matrix](https://matrix.to/#/#ScribeData:matrix.org) if you're having problems getting your environment setup!
