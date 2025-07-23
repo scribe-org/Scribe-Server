@@ -1,0 +1,241 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Scribe-Server is a backend service that provides the API by which data is available for download within Scribe apps.",
+        "title": "Scribe Server API",
+        "termsOfService": "https://github.com/scribe-org/Scribe-Server/blob/main/.github/CODE_OF_CONDUCT.md",
+        "contact": {
+            "name": "Scribe Team",
+            "url": "https://scri.be/",
+            "email": "team@scri.be"
+        },
+        "license": {
+            "name": "GPL-3.0 license",
+            "url": "https://github.com/scribe-org/Scribe-Server/blob/main/LICENSE.txt"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/api/v1/data-version/{lang}": {
+            "get": {
+                "description": "Returns last modified dates for each data type of a specific language.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "language-data"
+                ],
+                "summary": "Get language data versions.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "en",
+                        "description": "Language code (ISO 639-1)",
+                        "name": "lang",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Language version information\".",
+                        "schema": {
+                            "$ref": "#/definitions/models.LanguageVersionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid language code",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Language not supported",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/data/{lang}": {
+            "get": {
+                "description": "Returns all available language data and schema contract for a specific language.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "language-data"
+                ],
+                "summary": "Get language data.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "en",
+                        "description": "Language code (ISO 639-1)",
+                        "name": "lang",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Complete language data with schema\".",
+                        "schema": {
+                            "$ref": "#/definitions/models.LanguageDataResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid language code\".",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Language not supported\".",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error\".",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/languages": {
+            "get": {
+                "description": "Returns a list of all supported languages with their available data types.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "languages"
+                ],
+                "summary": "Get available languages.",
+                "responses": {
+                    "200": {
+                        "description": "List of supported languages\".",
+                        "schema": {
+                            "$ref": "#/definitions/models.AvailableLanguagesResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error\".",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.AvailableLanguagesResponse": {
+            "type": "object",
+            "properties": {
+                "languages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.LanguageInfo"
+                    }
+                }
+            }
+        },
+        "models.Contract": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.LanguageDataResponse": {
+            "type": "object",
+            "properties": {
+                "contract": {
+                    "$ref": "#/definitions/models.Contract"
+                },
+                "data": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "language": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.LanguageInfo": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data_types": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "models.LanguageVersionResponse": {
+            "type": "object",
+            "properties": {
+                "language": {
+                    "type": "string"
+                },
+                "versions": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "externalDocs": {
+        "description": "GitHub Repository",
+        "url": "https://github.com/scribe-org/Scribe-Server"
+    }
+}

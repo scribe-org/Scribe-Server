@@ -1,0 +1,163 @@
+basePath: /
+definitions:
+  models.AvailableLanguagesResponse:
+    properties:
+      languages:
+        items:
+          $ref: '#/definitions/models.LanguageInfo'
+        type: array
+    type: object
+  models.Contract:
+    properties:
+      fields:
+        additionalProperties:
+          additionalProperties:
+            type: string
+          type: object
+        type: object
+      updated_at:
+        type: string
+      version:
+        type: string
+    type: object
+  models.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  models.LanguageDataResponse:
+    properties:
+      contract:
+        $ref: '#/definitions/models.Contract'
+      data:
+        additionalProperties: true
+        type: object
+      language:
+        type: string
+    type: object
+  models.LanguageInfo:
+    properties:
+      code:
+        type: string
+      data_types:
+        items:
+          type: string
+        type: array
+    type: object
+  models.LanguageVersionResponse:
+    properties:
+      language:
+        type: string
+      versions:
+        additionalProperties:
+          type: string
+        type: object
+    type: object
+externalDocs:
+  description: GitHub Repository
+  url: https://github.com/scribe-org/Scribe-Server
+host: localhost:8080
+info:
+  contact:
+    email: team@scri.be
+    name: Scribe Team
+    url: https://scri.be/
+  description: Scribe-Server is a backend service that provides the API by which data
+    is available for download within Scribe apps.
+  license:
+    name: GPL-3.0 license
+    url: https://github.com/scribe-org/Scribe-Server/blob/main/LICENSE.txt
+  termsOfService: https://github.com/scribe-org/Scribe-Server/blob/main/.github/CODE_OF_CONDUCT.md
+  title: Scribe Server API
+  version: "1.0"
+paths:
+  /api/v1/data-version/{lang}:
+    get:
+      consumes:
+      - application/json
+      description: Returns last modified dates for each data type of a specific language.
+      parameters:
+      - description: Language code (ISO 639-1)
+        example: en
+        in: path
+        name: lang
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Language version information".
+          schema:
+            $ref: '#/definitions/models.LanguageVersionResponse'
+        "400":
+          description: Invalid language code
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Language not supported
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get language data versions.
+      tags:
+      - language-data
+  /api/v1/data/{lang}:
+    get:
+      consumes:
+      - application/json
+      description: Returns all available language data and schema contract for a specific
+        language.
+      parameters:
+      - description: Language code (ISO 639-1)
+        example: en
+        in: path
+        name: lang
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Complete language data with schema".
+          schema:
+            $ref: '#/definitions/models.LanguageDataResponse'
+        "400":
+          description: Invalid language code".
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Language not supported".
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal server error".
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get language data.
+      tags:
+      - language-data
+  /api/v1/languages:
+    get:
+      consumes:
+      - application/json
+      description: Returns a list of all supported languages with their available
+        data types.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of supported languages".
+          schema:
+            $ref: '#/definitions/models.AvailableLanguagesResponse'
+        "500":
+          description: Internal server error".
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get available languages.
+      tags:
+      - languages
+swagger: "2.0"

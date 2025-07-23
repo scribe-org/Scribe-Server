@@ -11,6 +11,9 @@ import (
 	"github.com/scribe-org/scribe-server/api/validators"
 	"github.com/scribe-org/scribe-server/database"
 	"github.com/spf13/viper"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // HandleRequests sets up and starts the server.
@@ -44,11 +47,22 @@ func HandleRequests() {
 	// Setup API routes.
 	SetupRoutes(r)
 
+	// Setup Swagger documentation route.
+	setupSwagger(r)
+
 	// Setup static file serving for existing functionality.
 	setupStaticFiles(r)
 
 	// Start the server.
 	startServer(r)
+}
+
+// setupSwagger configures the Swagger documentation endpoint.
+func setupSwagger(r *gin.Engine) {
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	log.Printf("📖 API Documentation available at: /swagger/index.html")
+
 }
 
 // setupStaticFiles configures static file serving.
