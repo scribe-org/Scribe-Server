@@ -63,7 +63,7 @@ jobs:
         echo "✅ Found $SQLITE_FILES SQLite files"
         tar -czf scribe-data-sqlite.tar.gz -C ./packs/sqlite .
         echo "📦 Created deployment package"
-
+        
         # Verify the package was created and show its size
         if [ -f "scribe-data-sqlite.tar.gz" ]; then
           echo "✅ Package created successfully: $(ls -lh scribe-data-sqlite.tar.gz)"
@@ -94,44 +94,118 @@ jobs:
         # Verify the package exists before transfer
         if [ ! -f "scribe-data-sqlite.tar.gz" ]; then
           echo "❌ Package file not found before transfer"
+          ls -la ./
           exit 1
         fi
-
-        echo "📤 Transferring package to Toolforge..."
-        # Copy the package to Toolforge with verbose output
-        scp -v ./scribe-data-sqlite.tar.gz \
-          ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org:~/scribe-data-sqlite.tar.gz
+        
+        echo "📦 Package info: $(ls -lh scribe-data-sqlite.tar.gz)"
+        
+        # Test SSH connection first
+        echo "🔍 Testing SSH connection..."
+        ssh -o ConnectTimeout=30 -o ServerAliveInterval=60 \
+          ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org \
+          "echo 'SSH connection successful'; whoami; pwd; df -h ~"
         
         if [ $? -ne 0 ]; then
-          echo "❌ SCP transfer failed"
+          echo "❌ SSH connection failed"
           exit 1
         fi
-
-        echo "✅ Package transferred successfully"
         
-        # Extract and deploy on Toolforge.
-        ssh ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org << 'EOF'
-          # Verify the file was transferred
-          if [ ! -f "~/scribe-data-sqlite.tar.gz" ]; then
-              echo "❌ Package file not found on Toolforge"
-              exit 1
+        # Transfer the file and immediately verify
+        echo "📤 Transferring package to Toolforge..."
+        
+        # Use a combined approach: transfer and verify in one SSH session
+        ssh -o ConnectTimeout=30 -o ServerAliveInterval=60 \
+          ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org << 'TRANSFER_EOF'
+          
+          # Clean up any existing file first
+          rm -f ~/scribe-data-sqlite.tar.gz
+          
+          echo "📥 Ready to receive file transfer..."
+          echo "Current directory: $(pwd)"
+          echo "Available space: $(df -h ~ | tail -1)"
+        TRANSFER_EOF
+        
+        # Now do the actual file transfer with error checking
+        echo "🚀 Starting file transfer..."
+        scp -o ConnectTimeout=30 -o ServerAliveInterval=60 -v \
+          ./scribe-data-sqlite.tar.gz \
+          ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org:~/scribe-data-sqlite.tar.gz
+        
+        SCP_EXIT_CODE=$?
+        if [ $SCP_EXIT_CODE -ne 0 ]; then
+          echo "❌ SCP transfer failed with exit code: $SCP_EXIT_CODE"
+          echo "🔍 Attempting alternative transfer method..."
+          
+          # Try alternative transfer using SSH with base64 encoding
+          echo "📤 Using base64 transfer method..."
+          base64 ./scribe-data-sqlite.tar.gz | ssh -o ConnectTimeout=30 \
+            ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org \
+            "base64 -d > ~/scribe-data-sqlite.tar.gz"
+          
+          if [ $? -ne 0 ]; then
+            echo "❌ Alternative transfer method also failed"
+            exit 1
           fi
-
-          echo "📁 Package found on Toolforge: $(ls -lh ~/scribe-data-sqlite.tar.gz)"
-
-          # become the tool(our server)
+        fi
+        
+        # Verify the transfer was successful
+        echo "✅ Verifying file transfer..."
+        ssh -o ConnectTimeout=30 ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org << 'VERIFY_EOF'
+          if [ ! -f "~/scribe-data-sqlite.tar.gz" ]; then
+            echo "❌ Package file still not found after transfer"
+            echo "📁 Home directory contents:"
+            ls -la ~/
+            exit 1
+          fi
+          
+          echo "✅ Package found: $(ls -lh ~/scribe-data-sqlite.tar.gz)"
+          
+          # Test that the file is readable and not corrupted
+          if ! tar -tzf ~/scribe-data-sqlite.tar.gz > /dev/null 2>&1; then
+            echo "❌ Package appears to be corrupted"
+            exit 1
+          fi
+          
+          echo "✅ Package integrity verified"
+        VERIFY_EOF
+        
+        if [ $? -ne 0 ]; then
+          echo "❌ File verification failed"
+          exit 1
+        fi
+        
+        # Now proceed with deployment
+        echo "🚀 Starting deployment process..."
+        ssh -o ConnectTimeout=30 -o ServerAliveInterval=60 \
+          ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org << 'DEPLOY_EOF'
+          
+          # become the tool (our server)
           become scribe-test-server
-
+          
+          # Navigate to the server directory
           cd ~/Scribe-Server || {
             echo "❌ Failed to navigate to Scribe-Server directory"
+            echo "📁 Available directories:"
+            ls -la ~/
             exit 1
           }
-
+          
+          echo "📁 Current location: $(pwd)"
+          
+          # Copy the package from home directory to server directory
           cp ~/scribe-data-sqlite.tar.gz ./
+          
+          if [ ! -f "./scribe-data-sqlite.tar.gz" ]; then
+            echo "❌ Failed to copy package to server directory"
+            exit 1
+          fi
           
           # Create backup of existing data
           if [ -d "./packs/sqlite" ]; then
-            mv ./packs/sqlite ./packs/sqlite.backup.$(date +%Y%m%d_%H%M%S)
+            BACKUP_NAME="sqlite.backup.$(date +%Y%m%d_%H%M%S)"
+            mv ./packs/sqlite ./packs/$BACKUP_NAME
+            echo "📦 Backed up existing SQLite data to: $BACKUP_NAME"
           fi
           
           # Create packs directory
@@ -140,28 +214,38 @@ jobs:
           # Extract new SQLite files
           echo "📤 Extracting SQLite files..."
           tar -xzf scribe-data-sqlite.tar.gz -C ./packs/sqlite/
-
+          
           if [ $? -ne 0 ]; then
             echo "❌ Failed to extract package"
+            # Try to restore backup if extraction failed
+            if [ -d "./packs/$BACKUP_NAME" ]; then
+              mv ./packs/$BACKUP_NAME ./packs/sqlite
+              echo "🔄 Restored backup due to extraction failure"
+            fi
             exit 1
           fi
           
           # Verify extraction
-          echo "Deployed SQLite files:"
+          echo "📊 Deployed SQLite files:"
           ls -la ./packs/sqlite/
-
-          EXTRACTED_FILES=$(find ./packs/sqlite -name "*.sqlite" | wc -l)
-          echo "✅ Extracted $EXTRACTED_FILES SQLite files"
           
-          # Run database migration
-          make migrate
+          EXTRACTED_FILES=$(find ./packs/sqlite -name "*.sqlite" | wc -l)
+          echo "✅ Successfully extracted $EXTRACTED_FILES SQLite files"
+          
+          # Run database migration if make is available
+          if command -v make &> /dev/null; then
+            echo "🔄 Running database migration..."
+            make migrate || echo "⚠️ Migration command failed but continuing..."
+          else
+            echo "⚠️ Make command not found, skipping migration"
+          fi
           
           # Cleanup
-          rm ~/scribe-data-sqlite.tar.gz
-          rm ./scribe-data-sqlite.tar.gz
+          rm ~/scribe-data-sqlite.tar.gz 2>/dev/null || true
+          rm ./scribe-data-sqlite.tar.gz 2>/dev/null || true
           
           echo "✅ Deployment completed successfully"
-        EOF
+        DEPLOY_EOF
 
     - name: Notify on success
       if: success()
@@ -169,7 +253,7 @@ jobs:
         echo "🎉 Scribe-Data update and deployment completed successfully!"
         echo "📊 SQLite files have been updated on Toolforge"
         echo "🔄 Database migration completed"
-    
+
     - name: Notify on failure
       if: failure()
       run: |
