@@ -3,7 +3,7 @@ name: Update Scribe Data and Deploy to Toolforge
 on:
   # Trigger on push to main branch.
   push:
-    branches: [main, test/toolforge]
+    branches: [main]
 
   # Trigger: When there is a GitHub Release.
   release:
