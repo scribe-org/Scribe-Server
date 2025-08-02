@@ -180,8 +180,42 @@ jobs:
         ssh -o ConnectTimeout=30 -o ServerAliveInterval=60 \
           ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org << 'DEPLOY_EOF'
           
+          # First, copy the file to a shared location accessible by both users
+          # Use /tmp with a predictable name
+          TEMP_FILE="/tmp/scribe-data-sqlite-deployment.tar.gz"
+          cp ~/scribe-data-sqlite.tar.gz "$TEMP_FILE"
+          chmod 644 "$TEMP_FILE"  # Make sure it's readable by the tool user
+          
+          if [ ! -f "$TEMP_FILE" ]; then
+            echo "❌ Failed to copy package to temporary location"
+            exit 1
+          fi
+          
+          echo "📁 Package staged at: $TEMP_FILE"
+          echo "📊 File info: $(ls -la $TEMP_FILE)"
+          
+          # Clean up the original file in home directory
+          rm ~/scribe-data-sqlite.tar.gz
+        DEPLOY_EOF
+        
+        # Now run a separate SSH session as the tool user
+        echo "🔄 Switching to tool user for deployment..."
+        ssh -o ConnectTimeout=30 -o ServerAliveInterval=60 \
+          ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org << 'TOOL_DEPLOY_EOF'
+          
           # become the tool (our server)
           become scribe-test-server
+          
+          # Check if the temp file exists and is accessible
+          TEMP_FILE="/tmp/scribe-data-sqlite-deployment.tar.gz"
+          if [ ! -f "$TEMP_FILE" ]; then
+            echo "❌ Package file not accessible from tool user context"
+            echo "📁 /tmp contents:"
+            ls -la /tmp/scribe-data-*
+            exit 1
+          fi
+          
+          echo "✅ Package accessible: $(ls -la $TEMP_FILE)"
           
           # Navigate to the server directory
           cd ~/Scribe-Server || {
@@ -193,8 +227,8 @@ jobs:
           
           echo "📁 Current location: $(pwd)"
           
-          # Copy the package from home directory to server directory
-          cp ~/scribe-data-sqlite.tar.gz ./
+          # Copy the package from temp location to server directory
+          cp "$TEMP_FILE" ./scribe-data-sqlite.tar.gz
           
           if [ ! -f "./scribe-data-sqlite.tar.gz" ]; then
             echo "❌ Failed to copy package to server directory"
@@ -241,11 +275,11 @@ jobs:
           fi
           
           # Cleanup
-          rm ~/scribe-data-sqlite.tar.gz 2>/dev/null || true
+          rm "$TEMP_FILE" 2>/dev/null || true
           rm ./scribe-data-sqlite.tar.gz 2>/dev/null || true
           
           echo "✅ Deployment completed successfully"
-        DEPLOY_EOF
+        TOOL_DEPLOY_EOF
 
     - name: Notify on success
       if: success()
