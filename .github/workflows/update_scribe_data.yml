@@ -91,10 +91,10 @@ jobs:
         # 1. Add Toolforge to known hosts
         ssh-keyscan -H login.toolforge.org >> ~/.ssh/known_hosts
 
-        # 2. Transfer the package to the login user's home directory
+        # 2. Transfer the package directly to the tool's project directory
         echo "📤 Transferring package to Toolforge..."
         scp -o ConnectTimeout=60 ./scribe-data-sqlite.tar.gz \
-          ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org:~/scribe-data-sqlite.tar.gz
+          ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org:/data/project/scribe-test-server/scribe-data-sqlite.tar.gz
         
         if [ $? -ne 0 ]; then
           echo "❌ SCP file transfer failed."
@@ -107,57 +107,51 @@ jobs:
         ssh -o ConnectTimeout=60 \
           ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org << 'DEPLOY_SCRIPT_EOF'
 
-          # This entire block runs on the Toolforge server
-          
-          # --- Running as the login user (e.g., delemike) ---
-          # Current Directory: /home/delemike
-          
-          # Verify the package exists in the home directory (no quotes around ~)
-          if [ ! -f ~/scribe-data-sqlite.tar.gz ]; then
-            echo "❌ Package not found in home directory after transfer."
-            exit 1
-          fi
-          echo "✅ Package verified in home directory."
-          
-          # Move the package to the tool's directory BEFORE switching user
-          mv ~/scribe-data-sqlite.tar.gz /data/project/scribe-test-server/Scribe-Server/
-          if [ $? -ne 0 ]; then
-            echo "❌ Failed to move package to tool directory. Check permissions."
-            exit 1
-          fi
-          echo "✅ Package moved to destination."
-
           # --- Switch to the tool user ---
           become scribe-test-server
-          
+
           # --- Running as the tool user (e.g., scribe-test-server) ---
           # Current Directory: /data/project/scribe-test-server
-          
-          # Navigate into the Scribe-Server directory where the file now is
-          cd ~/Scribe-Server || { echo "❌ Failed to navigate to Scribe-Server."; exit 1; }
-          
+
+          # Move the package into the Scribe-Server directory
+          if [ ! -f "./scribe-data-sqlite.tar.gz" ]; then
+            echo "❌ Package not found in project directory."
+            exit 1
+          fi
+          echo "✅ Package verified in project directory."
+
+          mv ./scribe-data-sqlite.tar.gz ./Scribe-Server/
+          if [ $? -ne 0 ]; then
+            echo "❌ Failed to move package into Scribe-Server."
+            exit 1
+          fi
+
+          # Navigate into the Scribe-Server directory
+          cd ./Scribe-Server || { echo "❌ Failed to navigate to Scribe-Server."; exit 1; }
+
           # Create a backup of existing data
           if [ -d "./packs/sqlite" ]; then
             BACKUP_NAME="sqlite.backup.$(date +%Y%m%d_%H%M%S)"
             mv ./packs/sqlite ./packs/$BACKUP_NAME
             echo "📦 Backed up existing data to $BACKUP_NAME"
           fi
-          
+
           # Create packs directory and extract the new data
           mkdir -p ./packs/sqlite
           echo "📤 Extracting new data..."
           tar -xzf scribe-data-sqlite.tar.gz -C ./packs/sqlite/
-          
+
           # Run database migration
           echo "🔄 Running database migration..."
           make migrate
-          
+
           # Clean up the deployment package
           rm ./scribe-data-sqlite.tar.gz
-          
+
           echo "🎉 Deployment completed successfully!"
-        
+
         DEPLOY_SCRIPT_EOF
+
 
     - name: Notify on success
       if: success()
