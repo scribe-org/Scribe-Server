@@ -3,7 +3,7 @@ name: Update Scribe Data and Deploy to Toolforge
 on:
   # Trigger on push to main branch.
   push:
-    branches: [main]
+    branches: [main, test/toolforge]
 
   # Trigger: When there is a GitHub Release.
   release:
@@ -64,6 +64,14 @@ jobs:
         tar -czf scribe-data-sqlite.tar.gz -C ./packs/sqlite .
         echo "📦 Created deployment package"
 
+        # Verify the package was created and show its size
+        if [ -f "scribe-data-sqlite.tar.gz" ]; then
+          echo "✅ Package created successfully: $(ls -lh scribe-data-sqlite.tar.gz)"
+        else
+          echo "❌ Package creation failed"
+          exit 1
+        fi
+
     - name: Upload SQLite files as artifact
       uses: actions/upload-artifact@v4
       with:
@@ -83,15 +91,43 @@ jobs:
         # Add Toolforge to known hosts.
         ssh-keyscan -H login.toolforge.org >> ~/.ssh/known_hosts
 
-        # Copy the package to Toolforge.
-        scp ./scribe-data-sqlite.tar.gz \
-          ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org:~
+        # Verify the package exists before transfer
+        if [ ! -f "scribe-data-sqlite.tar.gz" ]; then
+          echo "❌ Package file not found before transfer"
+          exit 1
+        fi
+
+        echo "📤 Transferring package to Toolforge..."
+        # Copy the package to Toolforge with verbose output
+        scp -v ./scribe-data-sqlite.tar.gz \
+          ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org:~/scribe-data-sqlite.tar.gz
+        
+        if [ $? -ne 0 ]; then
+          echo "❌ SCP transfer failed"
+          exit 1
+        fi
+
+        echo "✅ Package transferred successfully"
         
         # Extract and deploy on Toolforge.
         ssh ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org << 'EOF'
+          # Verify the file was transferred
+          if [ ! -f "~/scribe-data-sqlite.tar.gz" ]; then
+              echo "❌ Package file not found on Toolforge"
+              exit 1
+          fi
+
+          echo "📁 Package found on Toolforge: $(ls -lh ~/scribe-data-sqlite.tar.gz)"
+
           # become the tool(our server)
           become scribe-test-server
-          cd ~/Scribe-Server
+
+          cd ~/Scribe-Server || {
+            echo "❌ Failed to navigate to Scribe-Server directory"
+            exit 1
+          }
+
+          cp ~/scribe-data-sqlite.tar.gz ./
           
           # Create backup of existing data
           if [ -d "./packs/sqlite" ]; then
@@ -102,17 +138,27 @@ jobs:
           mkdir -p ./packs/sqlite
           
           # Extract new SQLite files
+          echo "📤 Extracting SQLite files..."
           tar -xzf scribe-data-sqlite.tar.gz -C ./packs/sqlite/
+
+          if [ $? -ne 0 ]; then
+            echo "❌ Failed to extract package"
+            exit 1
+          fi
           
           # Verify extraction
           echo "Deployed SQLite files:"
           ls -la ./packs/sqlite/
+
+          EXTRACTED_FILES=$(find ./packs/sqlite -name "*.sqlite" | wc -l)
+          echo "✅ Extracted $EXTRACTED_FILES SQLite files"
           
           # Run database migration
           make migrate
           
           # Cleanup
-          rm scribe-data-sqlite.tar.gz
+          rm ~/scribe-data-sqlite.tar.gz
+          rm ./scribe-data-sqlite.tar.gz
           
           echo "✅ Deployment completed successfully"
         EOF
@@ -123,3 +169,13 @@ jobs:
         echo "🎉 Scribe-Data update and deployment completed successfully!"
         echo "📊 SQLite files have been updated on Toolforge"
         echo "🔄 Database migration completed"
+    
+    - name: Notify on failure
+      if: failure()
+      run: |
+        echo "❌ Deployment failed. Check the logs above for details."
+        echo "🔍 Common issues:"
+        echo "  - SSH key authentication"
+        echo "  - Network connectivity to Toolforge"
+        echo "  - File transfer permissions"
+        echo "  - Package extraction issues"
