@@ -45,7 +45,7 @@ jobs:
       run: chmod +x ./update_data.sh
     
     - name: Run update script
-      run: ./update_data.sh
+      run: ./update_data.sh true
 
     - name: Create deployment package
       run: |
