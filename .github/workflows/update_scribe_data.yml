@@ -81,7 +81,7 @@ jobs:
       if: success()
       run: |
         # Add Toolforge to known hosts.
-        ssh-keyscan -H tools-login.wmflabs.org >> ~/.ssh/known_hosts
+        ssh-keyscan -H login.toolforge.org >> ~/.ssh/known_hosts
 
         # Copy the package to Toolforge.
         scp ./scribe-data-sqlite.tar.gz \
