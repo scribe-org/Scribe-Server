@@ -142,8 +142,11 @@ jobs:
           tar -xzf scribe-data-sqlite.tar.gz -C ./packs/sqlite/
 
           # Run database migration
-          echo "🔄 Running database migration..."
-          make migrate
+          echo "🔄 Building migration tool..."
+          go build -o ./bin/migrate-scribe-data ./cmd/migrate
+
+          echo "🔄 Running migration tool..."
+          ./bin/migrate-scribe-data
 
           # Clean up the deployment package
           rm ./scribe-data-sqlite.tar.gz
