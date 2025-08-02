@@ -1,0 +1,125 @@
+name: Update Scribe Data and Deploy to Toolforge
+
+on:
+  # Trigger on push to main branch.
+  push:
+    branches: [main]
+
+  # Trigger: When there is a GitHub Release.
+  release:
+    types: [published]
+
+  # Manual trigger.
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: 'Force data update even if no release'
+        required: false
+        default: 'false'
+        type: boolean
+
+  # Monthly schedule run.
+  schedule:
+    - cron: '0 0 1 * *' # Run on the 1st of every month at midnight UTC
+  
+jobs:
+  update-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180  # 3 hours timeout for large data processing
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y curl git sqlite3 make
+
+    - name: Make script executable
+      run: chmod +x ./update_data.sh
+    
+    - name: Run update script
+      run: ./update_data.sh
+
+    - name: Create deployment package
+      run: |
+        if [ ! -d "./packs/sqlite" ]; then
+          echo "❌ SQLite packs directory not found"
+          exit 1
+        fi
+
+        SQLITE_FILES=$(find ./packs/sqlite -name "*.sqlite" | wc -l)
+        if [ "$SQLITE_FILES" -eq 0 ]; then
+          echo "❌ No SQLite files found"
+          exit 1
+        fi
+        
+        echo "✅ Found $SQLITE_FILES SQLite files"
+        tar -czf scribe-data-sqlite.tar.gz -C ./packs/sqlite .
+        echo "📦 Created deployment package"
+
+    - name: Upload SQLite files as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: scribe-data-sqlite-${{ github.run_number }}
+        path: ./scribe-data-sqlite.tar.gz
+        retention-days: 30
+
+    - name: Setup SSH for Toolforge deployment
+      if: success()
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ secrets.TOOLFORGE_SSH_KEY }}
+
+    - name: Deploy to Toolforge
+      if: success()
+      run: |
+        # Add Toolforge to known hosts.
+        ssh-keyscan -H tools-login.wmflabs.org >> ~/.ssh/known_hosts
+
+        # Copy the package to Toolforge.
+        scp ./scribe-data-sqlite.tar.gz \
+          ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org:~
+        
+        # Extract and deploy on Toolforge.
+        ssh ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org << 'EOF'
+          # become the tool(our server)
+          become scribe-test-server
+          cd ~/Scribe-Server
+          
+          # Create backup of existing data
+          if [ -d "./packs/sqlite" ]; then
+            mv ./packs/sqlite ./packs/sqlite.backup.$(date +%Y%m%d_%H%M%S)
+          fi
+          
+          # Create packs directory
+          mkdir -p ./packs/sqlite
+          
+          # Extract new SQLite files
+          tar -xzf scribe-data-sqlite.tar.gz -C ./packs/sqlite/
+          
+          # Verify extraction
+          echo "Deployed SQLite files:"
+          ls -la ./packs/sqlite/
+          
+          # Run database migration
+          make migrate
+          
+          # Cleanup
+          rm scribe-data-sqlite.tar.gz
+          
+          echo "✅ Deployment completed successfully"
+        EOF
+
+    - name: Notify on success
+      if: success()
+      run: |
+        echo "🎉 Scribe-Data update and deployment completed successfully!"
+        echo "📊 SQLite files have been updated on Toolforge"
+        echo "🔄 Database migration completed"
