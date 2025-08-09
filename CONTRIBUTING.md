@@ -21,6 +21,7 @@ If you have questions or would like to communicate with the team, please [join u
 - [Pull requests](#pull-requests)
 - [Data edits](#data-edits)
 - [Documentation](#documentation)
+- [Deployment testing](#deployment-testing)
 
 <a id="first-steps"></a>
 
@@ -271,3 +272,60 @@ Scribe does not accept direct edits to the grammar JSON files as they are source
 # Documentation [`⇧`](#contents)
 
 Documentation is an invaluable way to contribute to coding projects as it allows others to more easily understand the project structure and contribute. Issues related to documentation are marked with the [`documentation`](https://github.com/scribe-org/Scribe-Server/labels/documentation) label.
+
+<a id="deployment-testing"></a>
+
+# Deployment testing
+
+This guide explains how to test the GitHub Actions workflow that updates data and deploys to Toolforge via GitHub Actions.
+
+### 1. Generate a New SSH Key (One-Time)
+
+Create a new key pair (without passphrase) specifically for GitHub Actions and Toolforge use:
+
+```bash
+ssh-keygen -t ed25519 -C "github-actions-scribe-data" -f ~/.ssh/scribe_toolforge_deploy
+```
+
+- Press **Enter** when asked for a passphrase (leave it empty).
+
+### 2. Add Your Public Key to Toolforge
+
+Copy the public key content:
+
+```bash
+cat ~/.ssh/scribe_toolforge_deploy.pub
+```
+
+Then log into Toolforge and add it:
+
+```bash
+ssh your-username@login.toolforge.org
+become &lt;your-tool-name&gt;
+echo "paste-your-public-key-here" &gt;&gt; ~/.ssh/authorized_keys
+```
+
+### 3. Add GitHub Secrets
+
+Copy your private key content:
+
+```bash
+cat ~/.ssh/scribe_toolforge_deploy
+```
+
+In your GitHub repository → **Settings → Secrets and variables → Actions**, add the following:
+
+| Secret Name       |                                               Value |
+| :---------------- | --------------------------------------------------: |
+| TOOLFORGE_SSH_KEY |            Paste the full output of the private key |
+| TOOLFORGE_USER    | Your Toolforge username (e.g. <code>johndoe</code>) |
+
+#### REQUIRED: Also copy public key to Toolforge (for manual SSH if needed), If not the login process will not work!
+
+**🔑 Visit your Toolforge account and add your public SSH key at:** [https://toolsadmin.wikimedia.org/profile/settings/ssh-keys/](https://toolsadmin.wikimedia.org/profile/settings/ssh-keys/)
+
+### 4. Run the Workflow
+
+- Go to **GitHub → Actions → "Update Scribe Data and Deploy to Toolforge"**
+- Click **"Run workflow"** → Choose branch if needed → **Run workflow**
+- Check logs for status and output

@@ -10,6 +10,7 @@ TEMP_DIR="/tmp/scribe-data-update"
 PACKS_DIR="./packs/sqlite"
 VENV_DIR="./.venv"
 LOG_FILE="/tmp/scribe-data-update.log"
+SKIP_MIGRATION=${1:-false}
 
 # Save project root.
 PROJECT_ROOT=$(pwd)
@@ -177,11 +178,15 @@ success "SQLite files copied successfully"
 
 # MARK: Migration
 
-log "🔄 Running database migration..."
-make migrate || {
-    error "Migration failed"
-    exit 1
-}
+if [ "$SKIP_MIGRATION" != "true" ]; then
+    log "🔄 Running database migration..."
+    make migrate || {
+        error "Migration failed"
+        exit 1
+    }
+else
+    log "⏭️ Skipping migration (running in CI/CD)"
+fi
 success "Database migration completed successfully"
 
 # MARK: Finish
