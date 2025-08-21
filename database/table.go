@@ -8,6 +8,24 @@ import (
 	"github.com/spf13/viper"
 )
 
+// TableExists checks if a table exists in the database.
+func TableExists(tableName string) (bool, error) {
+	query := `
+		SELECT COUNT(*) 
+		FROM information_schema.TABLES 
+		WHERE TABLE_SCHEMA = ? 
+		AND TABLE_NAME = ?
+	`
+
+	var count int
+	err := DB.QueryRow(query, viper.GetString("database.name"), tableName).Scan(&count)
+	if err != nil {
+		return false, fmt.Errorf("error checking table existence: %w", err)
+	}
+
+	return count > 0, nil
+}
+
 // GetTableSchema returns the column names and types for a specific table
 // in the connected MySQL/MariaDB database.
 func GetTableSchema(tableName string) (map[string]string, error) {
@@ -87,4 +105,9 @@ func GetTableData(tableName string) ([]map[string]interface{}, error) {
 	}
 
 	return results, nil
+}
+
+// isAlphaNumeric checks if character is alphanumeric.
+func isAlphaNumeric(char rune) bool {
+	return (char >= 'A' && char <= 'Z') || (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9')
 }

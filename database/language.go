@@ -4,6 +4,7 @@ package database
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -15,7 +16,7 @@ func GetAvailableLanguages() ([]string, error) {
 		SELECT DISTINCT SUBSTRING(TABLE_NAME, 1, 2) as language_code
 		FROM information_schema.TABLES 
 		WHERE TABLE_SCHEMA = ? 
-		AND TABLE_NAME LIKE '%LanguageData_%'
+		AND TABLE_NAME LIKE '%LanguageData%Scribe'
 		ORDER BY language_code
 	`
 
@@ -53,21 +54,25 @@ func GetLanguageDataTypes(lang string) ([]string, error) {
 		ORDER BY TABLE_NAME
 	`
 
-	rows, err := DB.Query(query, viper.GetString("database.name"), langPrefix+"LanguageData_%")
+	rows, err := DB.Query(query, viper.GetString("database.name"), langPrefix+"LanguageData%Scribe")
 	if err != nil {
 		return nil, fmt.Errorf("error querying data types: %w", err)
 	}
 	defer rows.Close()
 
 	var dataTypes []string
+	// Regex to extract data type from table name like ENLanguageDataNounsScribe
+	re := regexp.MustCompile(`^[A-Z]{2}LanguageData([A-Za-z]+)Scribe$`)
+
 	for rows.Next() {
 		var tableName string
 		if err := rows.Scan(&tableName); err != nil {
 			return nil, fmt.Errorf("error scanning table name: %w", err)
 		}
-		parts := strings.Split(tableName, "_")
-		if len(parts) >= 2 {
-			dataType := strings.Join(parts[1:], "_")
+
+		matches := re.FindStringSubmatch(tableName)
+		if len(matches) > 1 {
+			dataType := strings.ToLower(matches[1]) // Convert to lowercase (nouns, verbs)
 			dataTypes = append(dataTypes, dataType)
 		}
 	}

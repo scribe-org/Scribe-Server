@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 // CreateLanguageDataVersionsTable creates the `language_data_versions` table if it does not already exist.
@@ -56,18 +58,36 @@ func GetLanguageVersions(lang string) (map[string]string, error) {
 	langPrefix := strings.ToUpper(lang)
 
 	for _, dataType := range dataTypes {
-		tableName := fmt.Sprintf("%sLanguageData_%s", langPrefix, dataType)
+		// Construct the actual table name format: ENLanguageDataNounsScribe
+		tableName := fmt.Sprintf("%sLanguageData%sScribe", langPrefix, strings.Title(dataType))
 
-		// Query to get the maximum lastModified date from the table.
+		// Check if table exists and has lastModified column
+		schemaQuery := `
+			SELECT COUNT(*) 
+			FROM information_schema.COLUMNS 
+			WHERE TABLE_SCHEMA = ? 
+			AND TABLE_NAME = ? 
+			AND COLUMN_NAME = 'lastModified'
+		`
+
+		var columnExists int
+		err := DB.QueryRow(schemaQuery, viper.GetString("database.name"), tableName).Scan(&columnExists)
+		if err != nil || columnExists == 0 {
+			// If lastModified column doesn't exist, use a default date
+			versions[dataType+"_last_modified"] = "1970-01-01"
+			continue
+		}
+
+		// Query to get the maximum lastModified date from the table
 		query := fmt.Sprintf(`
 			SELECT COALESCE(MAX(lastModified), '1970-01-01') as max_last_modified
 			FROM %s
 		`, tableName)
 
 		var lastModified string
-		err := DB.QueryRow(query).Scan(&lastModified)
+		err = DB.QueryRow(query).Scan(&lastModified)
 		if err != nil {
-			// If there's an error (e.g., no table or lastModified column), we'll use a default date.
+			// If there's an error, use a default date
 			lastModified = "1970-01-01"
 		}
 
