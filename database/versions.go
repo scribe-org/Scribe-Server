@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // CreateLanguageDataVersionsTable creates the `language_data_versions` table if it does not already exist.
@@ -59,7 +61,8 @@ func GetLanguageVersions(lang string) (map[string]string, error) {
 
 	for _, dataType := range dataTypes {
 		// Construct the actual table name format: ENLanguageDataNounsScribe
-		tableName := fmt.Sprintf("%sLanguageData%sScribe", langPrefix, strings.Title(dataType))
+		c := cases.Title(language.Und)
+		tableName := fmt.Sprintf("%sLanguageData%sScribe", langPrefix, c.String(dataType))
 
 		// Check if table exists and has lastModified column
 		schemaQuery := `

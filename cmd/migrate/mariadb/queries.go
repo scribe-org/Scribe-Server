@@ -33,7 +33,6 @@ func generateMariaTableName(langCode, tableName string) string {
 	// Clean up table name - replace underscores and capitalize properly
 	cleanTableName = strings.ReplaceAll(cleanTableName, "_", "")
 
-	// Use the proper cases package instead of deprecated strings.Title
 	caser := cases.Title(language.English)
 	cleanTableName = caser.String(cleanTableName)
 
