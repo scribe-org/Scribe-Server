@@ -22,7 +22,7 @@ TARGET_LANGUAGES=("english" "french" "german" "italian" "spanish" "portuguese" "
 # TARGET_LANGUAGES=("english" "french")
 
 
-DATA_TYPES=("adjectives" "adverbs" "conjunctions" "emoji-keywords" "nouns" "personal-pronouns" "postpositions" "prepositions" "pronouns" "proper-nouns" "verbs")
+DATA_TYPES=("adjectives" "adverbs" "conjunctions" "nouns" "personal_pronouns" "postpositions" "prepositions" "pronouns" "proper_nouns" "verbs")
 
 # FOR TESTING PURPOSES
 # DATA_TYPES=("nouns" "verbs")
