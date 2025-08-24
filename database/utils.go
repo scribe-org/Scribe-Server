@@ -2,10 +2,14 @@
 
 package database
 
-import "regexp"
+import (
+	"regexp"
 
-// isValidTableName validates table names to prevent SQL injection.
-func isValidTableName(tableName string) bool {
+	"github.com/scribe-org/scribe-server/internal/constants"
+)
+
+// IsValidTableName validates table names to prevent SQL injection.
+func IsValidTableName(tableName string) bool {
 	// Pattern to match the new table structure: ENLanguageDataNounsScribe
 	pattern := `^[A-Z]{2}LanguageData[A-Za-z]+Scribe$`
 	matched, err := regexp.MatchString(pattern, tableName)
@@ -20,7 +24,7 @@ func isValidTableName(tableName string) bool {
 
 	// Check for only alphanumeric characters (no special chars that could be used for injection)
 	for _, char := range tableName {
-		if !isAlphaNumeric(char) {
+		if constants.IsAlphaNumeric(char) {
 			return false
 		}
 	}
