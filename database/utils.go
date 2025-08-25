@@ -24,7 +24,7 @@ func IsValidTableName(tableName string) bool {
 
 	// Check for only alphanumeric characters (no special chars that could be used for injection)
 	for _, char := range tableName {
-		if constants.IsAlphaNumeric(char) {
+		if !constants.IsAlphaNumeric(char) {
 			return false
 		}
 	}
