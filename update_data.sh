@@ -17,17 +17,8 @@ PROJECT_ROOT=$(pwd)
 
 # Define target languages and data types
 TARGET_LANGUAGES=("english" "french" "german" "italian" "spanish" "portuguese" "russian" "swedish")
+DATA_TYPES=("nouns" "verbs")
 
-# FOR TESTING PURPOSES
-# TARGET_LANGUAGES=("english" "french")
-
-
-DATA_TYPES=("adjectives" "adverbs" "conjunctions" "nouns" "personal_pronouns" "postpositions" "prepositions" "pronouns" "proper_nouns" "verbs")
-
-# FOR TESTING PURPOSES
-# DATA_TYPES=("nouns" "verbs")
-
-# Colors for output.
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
