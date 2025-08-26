@@ -209,7 +209,7 @@ fi
 
 # MARK: Filter Data
 
-CONTRACTS_DIR="./scribe_data_contracts"
+CONTRACTS_DIR="$PROJECT_ROOT/contracts"
 log "🔍 Filtering JSON data using contracts..."
 
 if [ ! -d "$CONTRACTS_DIR" ]; then

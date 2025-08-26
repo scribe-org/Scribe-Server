@@ -4,9 +4,13 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +19,7 @@ import (
 	"github.com/scribe-org/scribe-server/database"
 	"github.com/scribe-org/scribe-server/internal/constants"
 	"github.com/scribe-org/scribe-server/models"
+	"github.com/spf13/viper"
 )
 
 // GetAvailableLanguages handles GET /languages.
@@ -181,4 +186,98 @@ func GetLanguageVersion(c *gin.Context) {
 	}
 
 	HandleSuccess(c, response)
+}
+
+// GetContracts handles GET /contracts.
+// @Summary Get contracts.
+// @Description Returns schema contracts for all languages or a specific language if 'lang' query parameter is provided.
+// @Tags contracts
+// @Accept json
+// @Produce json
+// @Param lang query string false "Language code (ISO 639-1)" example(en).
+// @Success 200 {object} models.ContractsResponse "Schema contracts".
+// @Failure 400 {object} models.ErrorResponse "Invalid language code".
+// @Failure 404 {object} models.ErrorResponse "Language not supported".
+// @Failure 500 {object} models.ErrorResponse "Internal server error".
+// @Router /api/v1/contracts [get]
+func GetContracts(c *gin.Context) {
+	lang := c.Query("lang")
+
+	// Validate if lang is provided
+	if lang != "" && !validators.IsValidLanguageCode(lang) {
+		HandleError(c, http.StatusBadRequest, constants.InvalidLanguageCodeError)
+		return
+	}
+
+	// Check available languages in DB
+	availableLanguages, err := database.GetAvailableLanguages()
+	if err != nil {
+		log.Printf("Error checking available languages: %v", err)
+		HandleError(c, http.StatusInternalServerError, "Failed to check language availability")
+		return
+	}
+
+	// If lang provided, verify it's supported
+	if lang != "" && !validators.IsLanguageSupported(lang, availableLanguages) {
+		HandleError(c, http.StatusNotFound, fmt.Sprintf("Language '%s' not supported", lang))
+		return
+	}
+
+	// Load contracts directory from config
+	contractsDir := viper.GetString("contractsDir")
+
+	var contracts = make(map[string]interface{})
+
+	if lang != "" {
+		// Load single language contract
+		filePath := fmt.Sprintf("%s/%s.json", contractsDir, lang)
+		data, err := os.ReadFile(filePath)
+		if err != nil {
+			log.Printf("Error reading contract file for %s: %v", lang, err)
+			HandleError(c, http.StatusInternalServerError, "Failed to load contract")
+			return
+		}
+
+		var contract interface{}
+		if err := json.Unmarshal(data, &contract); err != nil {
+			log.Printf("Error unmarshalling contract for %s: %v", lang, err)
+			HandleError(c, http.StatusInternalServerError, "Invalid contract file format")
+			return
+		}
+
+		contracts[lang] = contract
+	} else {
+		// Load all contracts
+		files, err := os.ReadDir(contractsDir)
+		if err != nil {
+			log.Printf("Error reading contracts directory: %v", err)
+			HandleError(c, http.StatusInternalServerError, "Failed to load contracts")
+			return
+		}
+
+		for _, file := range files {
+			if file.IsDir() || filepath.Ext(file.Name()) != ".json" {
+				continue
+			}
+
+			langCode := strings.TrimSuffix(file.Name(), ".json")
+			data, err := os.ReadFile(filepath.Join(contractsDir, file.Name()))
+			if err != nil {
+				log.Printf("Error reading contract file %s: %v", file.Name(), err)
+				continue
+			}
+
+			var contract interface{}
+			if err := json.Unmarshal(data, &contract); err != nil {
+				log.Printf("Error unmarshalling contract file %s: %v", file.Name(), err)
+				continue
+			}
+
+			contracts[langCode] = contract
+		}
+	}
+
+	HandleSuccess(c, models.ContractsResponse{
+		Contracts: contracts,
+	})
 }
