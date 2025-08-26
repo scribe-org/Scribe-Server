@@ -202,82 +202,97 @@ func GetLanguageVersion(c *gin.Context) {
 // @Router /api/v1/contracts [get]
 func GetContracts(c *gin.Context) {
 	lang := c.Query("lang")
-
-	// Validate if lang is provided
-	if lang != "" && !validators.IsValidLanguageCode(lang) {
-		HandleError(c, http.StatusBadRequest, constants.InvalidLanguageCodeError)
-		return
-	}
-
-	// Check available languages in DB
-	availableLanguages, err := database.GetAvailableLanguages()
-	if err != nil {
-		log.Printf("Error checking available languages: %v", err)
-		HandleError(c, http.StatusInternalServerError, "Failed to check language availability")
-		return
-	}
-
-	// If lang provided, verify it's supported
-	if lang != "" && !validators.IsLanguageSupported(lang, availableLanguages) {
-		HandleError(c, http.StatusNotFound, fmt.Sprintf("Language '%s' not supported", lang))
-		return
-	}
-
-	// Load contracts directory from config
 	contractsDir := viper.GetString("contractsDir")
 
-	var contracts = make(map[string]interface{})
+	if lang != "" {
+		if !validators.IsValidLanguageCode(lang) {
+			HandleError(c, http.StatusBadRequest, constants.InvalidLanguageCodeError)
+			return
+		}
+
+		availableLanguages, err := database.GetAvailableLanguages()
+		if err != nil {
+			log.Printf("Error checking available languages: %v", err)
+			HandleError(c, http.StatusInternalServerError, "Failed to check language availability")
+			return
+		}
+
+		if !validators.IsLanguageSupported(lang, availableLanguages) {
+			HandleError(c, http.StatusNotFound, fmt.Sprintf("Language '%s' not supported", lang))
+			return
+		}
+	}
+
+	var contracts map[string]interface{}
+	var err error
 
 	if lang != "" {
-		// Load single language contract
-		filePath := fmt.Sprintf("%s/%s.json", contractsDir, lang)
-		data, err := os.ReadFile(filePath)
-		if err != nil {
-			log.Printf("Error reading contract file for %s: %v", lang, err)
-			HandleError(c, http.StatusInternalServerError, "Failed to load contract")
-			return
-		}
-
-		var contract interface{}
-		if err := json.Unmarshal(data, &contract); err != nil {
-			log.Printf("Error unmarshalling contract for %s: %v", lang, err)
-			HandleError(c, http.StatusInternalServerError, "Invalid contract file format")
-			return
-		}
-
-		contracts[lang] = contract
+		// Load a single language
+		contracts, err = loadSingleContract(contractsDir, lang)
 	} else {
-		// Load all contracts
-		files, err := os.ReadDir(contractsDir)
-		if err != nil {
-			log.Printf("Error reading contracts directory: %v", err)
-			HandleError(c, http.StatusInternalServerError, "Failed to load contracts")
-			return
-		}
+		// Load all languages
+		contracts, err = loadAllContracts(contractsDir)
+	}
 
-		for _, file := range files {
-			if file.IsDir() || filepath.Ext(file.Name()) != ".json" {
-				continue
-			}
-
-			langCode := strings.TrimSuffix(file.Name(), ".json")
-			data, err := os.ReadFile(filepath.Join(contractsDir, file.Name()))
-			if err != nil {
-				log.Printf("Error reading contract file %s: %v", file.Name(), err)
-				continue
-			}
-
-			var contract interface{}
-			if err := json.Unmarshal(data, &contract); err != nil {
-				log.Printf("Error unmarshalling contract file %s: %v", file.Name(), err)
-				continue
-			}
-
-			contracts[langCode] = contract
-		}
+	if err != nil {
+		log.Printf("Error loading contracts: %v", err)
+		HandleError(c, http.StatusInternalServerError, "Failed to load contracts")
+		return
 	}
 
 	HandleSuccess(c, models.ContractsResponse{
 		Contracts: contracts,
 	})
+}
+
+// loadSingleContract reads and unmarshals a single contract file.
+func loadSingleContract(contractsDir, lang string) (map[string]interface{}, error) {
+	filePath := filepath.Join(contractsDir, lang+".json")
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("could not read contract file for %s: %w", lang, err)
+	}
+
+	var contract interface{}
+	if err := json.Unmarshal(data, &contract); err != nil {
+		return nil, fmt.Errorf("could not unmarshal contract for %s: %w", lang, err)
+	}
+
+	return map[string]interface{}{lang: contract}, nil
+}
+
+// loadAllContracts reads and unmarshals all .json files in a directory.
+func loadAllContracts(contractsDir string) (map[string]interface{}, error) {
+	contracts := make(map[string]interface{})
+
+	files, err := os.ReadDir(contractsDir)
+	if err != nil {
+		return nil, fmt.Errorf("could not read contracts directory: %w", err)
+	}
+
+	for _, file := range files {
+		// Skip directories and non-json files
+		if file.IsDir() || filepath.Ext(file.Name()) != ".json" {
+			continue
+		}
+
+		langCode := strings.TrimSuffix(file.Name(), ".json")
+		filePath := filepath.Join(contractsDir, file.Name())
+
+		data, err := os.ReadFile(filePath)
+		if err != nil {
+			log.Printf("Warning: could not read contract file %s: %v", file.Name(), err)
+			continue
+		}
+
+		var contract interface{}
+		if err := json.Unmarshal(data, &contract); err != nil {
+			log.Printf("Warning: could not unmarshal contract file %s: %v", file.Name(), err)
+			continue
+		}
+
+		contracts[langCode] = contract
+	}
+
+	return contracts, nil
 }
