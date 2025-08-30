@@ -16,9 +16,16 @@ build:
 test:
 	go test ./... -v
 
-# Run the project.
-run:
-	go run .
+# Run the project (defaults to dev).
+run: run-dev
+
+# Run the project in development mode.
+run-dev:
+	ENV=dev go run .
+
+# Run the project in production mode.
+run-prod:
+	ENV=prod GIN_MODE=release go run .
 
 # Format the project source code.
 fmt:
@@ -95,9 +102,13 @@ docs-serve: docs
 execute-binary:
 	${BINARY_NAME}
 
-# Run the project with hot reload.
+# Run the project with hot reload(dev mode).
 dev:
-	$(shell go env GOPATH)/bin/air
+	ENV=dev $(shell go env GOPATH)/bin/air
+
+# Run the project with hot reload (prod mode).
+dev-prod:
+	ENV=prod GIN_MODE=release $(shell go env GOPATH)/bin/air
 
 # Build the migration tool.
 build-migrate:
