@@ -108,7 +108,7 @@ func GetLanguageData(c *gin.Context) {
 			UpdatedAt: time.Now().Format(constants.DateFormat),
 			Fields:    make(map[string]map[string]string),
 		},
-		Data: make(map[string]interface{}),
+		Data: make(map[string]any),
 	}
 
 	// For each data type, get schema and data.
@@ -223,7 +223,7 @@ func GetContracts(c *gin.Context) {
 		}
 	}
 
-	var contracts map[string]interface{}
+	var contracts map[string]any
 	var err error
 
 	if lang != "" {
@@ -246,24 +246,24 @@ func GetContracts(c *gin.Context) {
 }
 
 // loadSingleContract reads and unmarshals a single contract file.
-func loadSingleContract(contractsDir, lang string) (map[string]interface{}, error) {
+func loadSingleContract(contractsDir, lang string) (map[string]any, error) {
 	filePath := filepath.Join(contractsDir, lang+".json")
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("could not read contract file for %s: %w", lang, err)
 	}
 
-	var contract interface{}
+	var contract any
 	if err := json.Unmarshal(data, &contract); err != nil {
 		return nil, fmt.Errorf("could not unmarshal contract for %s: %w", lang, err)
 	}
 
-	return map[string]interface{}{lang: contract}, nil
+	return map[string]any{lang: contract}, nil
 }
 
 // loadAllContracts reads and unmarshals all .json files in a directory.
-func loadAllContracts(contractsDir string) (map[string]interface{}, error) {
-	contracts := make(map[string]interface{})
+func loadAllContracts(contractsDir string) (map[string]any, error) {
+	contracts := make(map[string]any)
 
 	files, err := os.ReadDir(contractsDir)
 	if err != nil {
@@ -285,7 +285,7 @@ func loadAllContracts(contractsDir string) (map[string]interface{}, error) {
 			continue
 		}
 
-		var contract interface{}
+		var contract any
 		if err := json.Unmarshal(data, &contract); err != nil {
 			log.Printf("Warning: could not unmarshal contract file %s: %v", file.Name(), err)
 			continue

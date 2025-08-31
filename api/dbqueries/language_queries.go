@@ -14,7 +14,7 @@ import (
 )
 
 // GetLanguageTableData fetches data for a specific language table.
-func GetLanguageTableData(lang, dataType string) (map[string]interface{}, error) {
+func GetLanguageTableData(lang, dataType string) (map[string]any, error) {
 	// Construct table name with the new format: ENLanguageDataNounsScribe
 
 	caser := cases.Title(language.English)
@@ -50,7 +50,7 @@ func GetLanguageTableData(lang, dataType string) (map[string]interface{}, error)
 		return nil, fmt.Errorf("error fetching data for %s: %w", tableName, err)
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"schema": schema,
 		"data":   data,
 	}, nil

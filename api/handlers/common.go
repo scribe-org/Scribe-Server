@@ -18,7 +18,7 @@ func HandleError(c *gin.Context, statusCode int, message string) {
 }
 
 // HandleSuccess sends a standardized success response.
-func HandleSuccess(c *gin.Context, data interface{}) {
+func HandleSuccess(c *gin.Context, data any) {
 	c.JSON(http.StatusOK, data)
 }
 

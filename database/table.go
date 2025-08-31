@@ -60,7 +60,7 @@ func GetTableSchema(tableName string) (map[string]string, error) {
 
 // GetTableData retrieves all rows and columns from a given table.
 // The result is a slice of maps, where each map represents a row with column-value pairs.
-func GetTableData(tableName string) ([]map[string]interface{}, error) {
+func GetTableData(tableName string) ([]map[string]any, error) {
 	if !IsValidTableName(tableName) {
 		return nil, fmt.Errorf("invalid table name")
 	}
@@ -78,11 +78,11 @@ func GetTableData(tableName string) ([]map[string]interface{}, error) {
 		return nil, fmt.Errorf("error getting columns: %w", err)
 	}
 
-	var results []map[string]interface{}
+	var results []map[string]any
 
 	for rows.Next() {
-		values := make([]interface{}, len(columns))
-		valuePtrs := make([]interface{}, len(columns))
+		values := make([]any, len(columns))
+		valuePtrs := make([]any, len(columns))
 		for i := range columns {
 			valuePtrs[i] = &values[i]
 		}
@@ -90,7 +90,7 @@ func GetTableData(tableName string) ([]map[string]interface{}, error) {
 			return nil, fmt.Errorf("error scanning row: %w", err)
 		}
 
-		rowMap := make(map[string]interface{})
+		rowMap := make(map[string]any)
 		for i, col := range columns {
 			val := values[i]
 			if val == nil {
