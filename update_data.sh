@@ -15,7 +15,10 @@ SKIP_MIGRATION=${1:-false}
 # Save project root.
 PROJECT_ROOT=$(pwd)
 
-# Colors for output.
+# Define target languages and data types.
+TARGET_LANGUAGES=("english" "french" "german" "italian" "spanish" "portuguese" "russian" "swedish")
+DATA_TYPES=("nouns" "verbs")
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -127,23 +130,118 @@ pip install -e . || {
 }
 success "Dependencies installed successfully"
 
-# MARK: Gen Data
+# MARK: Download Wikidata Dump First
 
-log "⚡ Generating language data (auto-confirm)..."
-yes y | scribe-data get -a -wdp || {
-    error "Failed to generate language data"
-    exit 1
-}
+DUMP_DIR="./scribe_data_wikidata_dumps_export"
+DUMP_FILE="$DUMP_DIR/latest-lexemes.json.bz2"
+
+if [ ! -f "$DUMP_FILE" ]; then
+    log "📥 Downloading Wikidata lexeme dump..."
+    # Auto-confirm the download prompt with "y" for the initial confirmation.
+    echo "y" | scribe-data download -wdv 20250730 || {
+        error "Failed to download Wikidata dump"
+        exit 1
+    }
+    success "Wikidata dump downloaded successfully"
+else
+    log "✅ Wikidata dump already exists: $DUMP_FILE"
+fi
+
+# MARK: Generate Language Data
+
+log "⚡ Generating language data for target languages (auto-confirm)..."
+
+# Convert arrays to space-separated strings (no quotes around the expansion).
+LANG_STRING="${TARGET_LANGUAGES[*]}"
+DATA_TYPES_STRING="${DATA_TYPES[*]}"
+
+log "Languages: $LANG_STRING"
+log "Data types: $DATA_TYPES_STRING"
+
+# Calculate total number of combinations for the responses.
+NUM_LANGUAGES=${#TARGET_LANGUAGES[@]}
+NUM_DATA_TYPES=${#DATA_TYPES[@]}
+TOTAL_COMBINATIONS=$((NUM_LANGUAGES * NUM_DATA_TYPES))
+
+log "Total combinations to process: $TOTAL_COMBINATIONS"
+log "Each combination will prompt to 'Use existing latest dump'"
+log "Running: scribe-data get -l $LANG_STRING -dt $DATA_TYPES_STRING -wdp $DUMP_DIR"
+
+# Send Down Arrow twice + Enter for each combination.
+# This selects the 3rd option "Use existing latest dump".
+{
+    for ((i=1; i<=TOTAL_COMBINATIONS; i++)); do
+        printf "\033[B\033[B\n"  # Down arrow, Down arrow, Enter
+    done
+} | scribe-data get -l $LANG_STRING -dt $DATA_TYPES_STRING -wdp "$DUMP_DIR"
+
 success "Language data generated successfully"
 
-# MARK: To SQLite
+# Sanity Check: Verify generated files.
+log "🔍 Checking generated data in scribe_data_json_export..."
+if [ -d "scribe_data_json_export" ]; then
+    # List all generated JSON files organized by language.
+    for lang in "${TARGET_LANGUAGES[@]}"; do
+        if [ -d "scribe_data_json_export/$lang" ]; then
+            log "📁 $lang:"
+            find "scribe_data_json_export/$lang" -name "*.json" | sort | while read -r file; do
+                filename=$(basename "$file")
+                log "  ✅ $filename"
+            done
+        else
+            log "⚠️  Missing directory: scribe_data_json_export/$lang"
+        fi
+    done
 
-log "🗄️  Converting to SQLite format..."
-scribe-data convert -a -ot sqlite || {
-    error "Failed to convert to SQLite format"
+    # Count total files.
+    total_files=$(find scribe_data_json_export -name "*.json" | wc -l)
+    expected_files=$TOTAL_COMBINATIONS
+    log "📊 Generated $total_files/$expected_files JSON files"
+
+    if [ "$total_files" -lt "$expected_files" ]; then
+        error "⚠️  Expected $expected_files files but only found $total_files"
+        error "Some data may not have been generated successfully"
+    fi
+else
+    error "scribe_data_json_export directory not found"
     exit 1
-}
-success "Data converted to SQLite successfully"
+fi
+
+# MARK: Filter Data
+
+CONTRACTS_DIR="$PROJECT_ROOT/contracts"
+log "🔍 Filtering JSON data using contracts..."
+
+if [ ! -d "$CONTRACTS_DIR" ]; then
+    warning "Contracts directory not found: $CONTRACTS_DIR"
+    warning "Skipping filtering step - proceeding with unfiltered data"
+    FILTERED_EXPORT_DIR="./scribe_data_json_export"  # use original data
+else
+    FILTERED_EXPORT_DIR="./scribe_data_json_filtered"
+    mkdir -p "$FILTERED_EXPORT_DIR"
+
+    log "Running: scribe-data fd -cd $CONTRACTS_DIR -id scribe_data_json_export -od $FILTERED_EXPORT_DIR"
+    scribe-data fd -cd "$CONTRACTS_DIR" -id scribe_data_json_export -od "$FILTERED_EXPORT_DIR" || {
+        error "Failed to filter JSON data"
+        exit 1
+    }
+    success "JSON data filtered successfully"
+
+    # Debug: Check filtered files.
+    if [ -d "$FILTERED_EXPORT_DIR" ]; then
+        filtered_files=$(find "$FILTERED_EXPORT_DIR" -name "*.json" | wc -l)
+        log "📊 Generated $filtered_files filtered JSON files"
+    fi
+
+    # MARK: Convert Filtered Data to SQLite
+
+    log "🗄️  Converting filtered data to SQLite format..."
+    scribe-data convert -if "$FILTERED_EXPORT_DIR" -lang $LANG_STRING -dt $DATA_TYPES_STRING  -ot sqlite || {
+        error "Failed to convert filtered data to SQLite format"
+        exit 1
+    }
+    success "Filtered data converted to SQLite successfully"
+fi
 
 # MARK: Check SQLite
 
@@ -184,10 +282,10 @@ if [ "$SKIP_MIGRATION" != "true" ]; then
         error "Migration failed"
         exit 1
     }
+    success "Database migration completed successfully"
 else
     log "⏭️ Skipping migration (running in CI/CD)"
 fi
-success "Database migration completed successfully"
 
 # MARK: Finish
 
@@ -202,6 +300,9 @@ log "📊 Update Summary:"
 log "  • Repository: Updated/Cloned"
 log "  • Virtual Environment: Reused or created at $VENV_DIR"
 log "  • Dependencies: Installed"
+log "  • Languages processed: ${#TARGET_LANGUAGES[@]} (${TARGET_LANGUAGES[*]})"
+log "  • Data types processed: ${#DATA_TYPES[@]}"
+log "  • Total combinations: $TOTAL_COMBINATIONS"
 log "  • Data Generation: Completed"
 log "  • SQLite Conversion: Completed"
 log "  • Files Copied: $SQLITE_FILES files"

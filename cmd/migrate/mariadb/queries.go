@@ -11,6 +11,8 @@ import (
 
 	"github.com/scribe-org/scribe-server/cmd/migrate/schema"
 	"github.com/scribe-org/scribe-server/cmd/migrate/types"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // ExecuteBatch executes a batch of SQL statements.
@@ -21,6 +23,29 @@ func ExecuteBatch(stmt *sql.Stmt, batch [][]interface{}) error {
 		}
 	}
 	return nil
+}
+
+// generateMariaTableName creates the MariaDB table name with proper capitalization and suffixes.
+func generateMariaTableName(langCode, tableName string) string {
+	// Remove sqlite_ prefix if present.
+	cleanTableName := strings.TrimPrefix(tableName, "sqlite_")
+
+	// Clean up table name - replace underscores and capitalize properly.
+	cleanTableName = strings.ReplaceAll(cleanTableName, "_", "")
+
+	caser := cases.Title(language.English)
+	cleanTableName = caser.String(cleanTableName)
+
+	// Special handling for TranslationData tables.
+	if strings.HasPrefix(langCode, "TranslationData") {
+		// For TranslationData, just use TranslationData + Language:
+		// TranslationData + english -> TranslationDataEnglish
+		return "TranslationData" + cleanTableName
+	}
+
+	// For language data tables, capitalize table name and add Scribe suffix:
+	// ENLanguageData + nouns -> ENLanguageDataNounsScribe
+	return langCode + cleanTableName + "Scribe"
 }
 
 // MigrateTable migrates a single table from SQLite to MariaDB.
@@ -34,8 +59,8 @@ func MigrateTable(sqlite *sql.DB, mariaDB *sql.DB, langCode, tableName string) e
 	}
 
 	// Generate table names.
-	mariaTableName := fmt.Sprintf("%s_%s", langCode, strings.TrimPrefix(tableName, "sqlite_"))
-	backupTableName := mariaTableName + "_old"
+	mariaTableName := generateMariaTableName(langCode, tableName)
+	backupTableName := mariaTableName + "Old"
 
 	// Check if table exists and rename it to backup.
 	exists, err := tableExists(mariaDB, mariaTableName)

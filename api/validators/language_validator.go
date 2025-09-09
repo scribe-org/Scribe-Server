@@ -4,6 +4,7 @@
 package validators
 
 import (
+	"slices"
 	"strings"
 	"sync"
 )
@@ -49,10 +50,5 @@ func SanitizeLanguageCode(lang string) string {
 
 // IsLanguageSupported checks if a language exists in the provided list.
 func IsLanguageSupported(lang string, availableLanguages []string) bool {
-	for _, availableLang := range availableLanguages {
-		if availableLang == lang {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(availableLanguages, lang)
 }

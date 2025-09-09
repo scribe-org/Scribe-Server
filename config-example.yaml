@@ -1,5 +1,6 @@
 # hostPort: 8080
 # fileSystem: "./"
+# contractsDir: "./contracts"
 # database:
 #   user: root
 #   password: "password"

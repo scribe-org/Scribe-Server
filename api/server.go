@@ -23,11 +23,6 @@ func HandleRequests() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 
-	// Create language_data_versions table if it doesn't exist.
-	if err := database.CreateLanguageDataVersionsTable(); err != nil {
-		log.Printf("Warning: Failed to create language_data_versions table: %v", err)
-	}
-
 	// Set Gin mode based on environment.
 	switch viper.GetString("GIN_MODE") {
 	case "release":
@@ -40,6 +35,27 @@ func HandleRequests() {
 
 	// Create Gin router with default middleware (logger and recovery).
 	r := gin.Default()
+
+	// Proxies trust security warning.
+	trustedProxies := []string{} // Default empty (trusts nothing)
+	if os.Getenv("ENV") == "prod" {
+		// Trust RFC 1918 private network ranges commonly used by cloud providers and load balancers.
+		trustedProxies = []string{
+			"10.0.0.0/8", // Class A private range (10.0.0.0 - 10.255.255.255)
+			// Note: Used by AWS VPC, Google Cloud, Kubernetes clusters, most cloud providers.
+			"172.16.0.0/12", // Class B private range (172.16.0.0 - 172.31.255.255)
+			// Note: Used by Docker default bridge networks, some enterprise networks.
+			"192.168.0.0/16", // Class C private range (192.168.0.0 - 192.168.255.255)
+			// Note: Used by Home routers, small office networks, some internal services.
+		}
+		log.Printf("🔒 Production mode: trusting proxy networks")
+	} else {
+		log.Printf("🔒 Development mode: trusting no proxies")
+	}
+
+	if err := r.SetTrustedProxies(trustedProxies); err != nil {
+		log.Fatal(err)
+	}
 
 	// Add custom middleware.
 	r.Use(SetupCORS())
@@ -96,10 +112,11 @@ func startServer(r *gin.Engine) {
 	validators.InitLanguageValidator(availableLanguages)
 
 	log.Printf("👀 Listening on port %s", hostPort)
-	log.Printf("🚀 API endpoints available:")
-	log.Printf("  ✅ GET /api/v1/data/:language_iso - Versioned API")
-	log.Printf("  ✅ GET /api/v1/data-version/:language_iso - Version check API")
-	log.Printf("  ✅ GET /api/v1/languages - List available languages")
+	log.Println("🚀 API Endpoints:")
+	log.Println("  ✅ GET /api/v1/languages                		- List available languages")
+	log.Println("  ✅ GET /api/v1/contracts[?lang_iso=xx]      	- Get contracts (optional language filter)")
+	log.Println("  ✅ GET /api/v1/data/:lang_iso       		- Get full language data with schema")
+	log.Println("  ✅ GET /api/v1/data-version/:lang_iso 		- Get version info for a language")
 	log.Printf("📊 Available languages: %v", availableLanguages)
 
 	log.Fatal(r.Run(hostPort))

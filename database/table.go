@@ -8,10 +8,28 @@ import (
 	"github.com/spf13/viper"
 )
 
+// TableExists checks if a table exists in the database.
+func TableExists(tableName string) (bool, error) {
+	query := `
+		SELECT COUNT(*) 
+		FROM information_schema.TABLES 
+		WHERE TABLE_SCHEMA = ? 
+		AND TABLE_NAME = ?
+	`
+
+	var count int
+	err := DB.QueryRow(query, viper.GetString("database.name"), tableName).Scan(&count)
+	if err != nil {
+		return false, fmt.Errorf("error checking table existence: %w", err)
+	}
+
+	return count > 0, nil
+}
+
 // GetTableSchema returns the column names and types for a specific table
 // in the connected MySQL/MariaDB database.
 func GetTableSchema(tableName string) (map[string]string, error) {
-	if !isValidTableName(tableName) {
+	if !IsValidTableName(tableName) {
 		return nil, fmt.Errorf("invalid table name")
 	}
 
@@ -42,8 +60,8 @@ func GetTableSchema(tableName string) (map[string]string, error) {
 
 // GetTableData retrieves all rows and columns from a given table.
 // The result is a slice of maps, where each map represents a row with column-value pairs.
-func GetTableData(tableName string) ([]map[string]interface{}, error) {
-	if !isValidTableName(tableName) {
+func GetTableData(tableName string) ([]map[string]any, error) {
+	if !IsValidTableName(tableName) {
 		return nil, fmt.Errorf("invalid table name")
 	}
 
@@ -60,11 +78,11 @@ func GetTableData(tableName string) ([]map[string]interface{}, error) {
 		return nil, fmt.Errorf("error getting columns: %w", err)
 	}
 
-	var results []map[string]interface{}
+	var results []map[string]any
 
 	for rows.Next() {
-		values := make([]interface{}, len(columns))
-		valuePtrs := make([]interface{}, len(columns))
+		values := make([]any, len(columns))
+		valuePtrs := make([]any, len(columns))
 		for i := range columns {
 			valuePtrs[i] = &values[i]
 		}
@@ -72,7 +90,7 @@ func GetTableData(tableName string) ([]map[string]interface{}, error) {
 			return nil, fmt.Errorf("error scanning row: %w", err)
 		}
 
-		rowMap := make(map[string]interface{})
+		rowMap := make(map[string]any)
 		for i, col := range columns {
 			val := values[i]
 			if val == nil {

@@ -19,9 +19,9 @@ type Contract struct {
 
 // LanguageDataResponse represents the full language data response.
 type LanguageDataResponse struct {
-	Language string                 `json:"language"`
-	Contract Contract               `json:"contract"`
-	Data     map[string]interface{} `json:"data"`
+	Language string         `json:"language"`
+	Contract Contract       `json:"contract"`
+	Data     map[string]any `json:"data"`
 }
 
 // LanguageVersionResponse represents version information for a language.
@@ -46,4 +46,9 @@ type LanguageInfo struct {
 // AvailableLanguagesResponse represents the response for available languages.
 type AvailableLanguagesResponse struct {
 	Languages []LanguageInfo `json:"languages"`
+}
+
+// ContractsResponse represents the response for contracts available for languages.
+type ContractsResponse struct {
+	Contracts map[string]any `json:"contracts"`
 }

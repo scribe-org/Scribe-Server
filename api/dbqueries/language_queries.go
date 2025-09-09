@@ -9,27 +9,34 @@ import (
 	"strings"
 
 	"github.com/scribe-org/scribe-server/database"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
-// GetAvailableLanguages fetches all available languages from the database.
-func GetAvailableLanguages() ([]string, error) {
-	return database.GetAvailableLanguages()
-}
-
-// GetLanguageDataTypes fetches available data types for a specific language.
-func GetLanguageDataTypes(lang string) ([]string, error) {
-	return database.GetLanguageDataTypes(lang)
-}
-
-// GetLanguageVersions fetches version information for a specific language.
-func GetLanguageVersions(lang string) (map[string]string, error) {
-	return database.GetLanguageVersions(lang)
-}
-
 // GetLanguageTableData fetches data for a specific language table.
-func GetLanguageTableData(lang, dataType string) (map[string]interface{}, error) {
-	// Construct table name.
-	tableName := fmt.Sprintf("%sLanguageData_%s", strings.ToUpper(lang), dataType)
+func GetLanguageTableData(lang, dataType string) (map[string]any, error) {
+	// Construct table name with the new format: ENLanguageDataNounsScribe.
+
+	caser := cases.Title(language.English)
+
+	tableName := fmt.Sprintf("%sLanguageData%sScribe",
+		strings.ToUpper(lang),
+		caser.String(dataType),
+	)
+
+	// Validate table name format and existence.
+	if !database.IsValidTableName(tableName) {
+		return nil, fmt.Errorf("invalid table name format: %s", tableName)
+	}
+
+	// Check if table exists.
+	exists, err := database.TableExists(tableName)
+	if err != nil {
+		return nil, fmt.Errorf("error checking table existence for %s: %w", tableName, err)
+	}
+	if !exists {
+		return nil, fmt.Errorf("table %s does not exist", tableName)
+	}
 
 	// Get table schema.
 	schema, err := database.GetTableSchema(tableName)
@@ -43,7 +50,7 @@ func GetLanguageTableData(lang, dataType string) (map[string]interface{}, error)
 		return nil, fmt.Errorf("error fetching data for %s: %w", tableName, err)
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"schema": schema,
 		"data":   data,
 	}, nil
