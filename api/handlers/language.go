@@ -227,10 +227,10 @@ func GetContracts(c *gin.Context) {
 	var err error
 
 	if lang != "" {
-		// Load a single language
+		// Load a single language.
 		contracts, err = loadSingleContract(contractsDir, lang)
 	} else {
-		// Load all languages
+		// Load all languages.
 		contracts, err = loadAllContracts(contractsDir)
 	}
 
@@ -271,7 +271,7 @@ func loadAllContracts(contractsDir string) (map[string]any, error) {
 	}
 
 	for _, file := range files {
-		// Skip directories and non-json files
+		// Skip directories and non-json files.
 		if file.IsDir() || filepath.Ext(file.Name()) != ".json" {
 			continue
 		}

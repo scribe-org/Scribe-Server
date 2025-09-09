@@ -48,7 +48,7 @@ type AvailableLanguagesResponse struct {
 	Languages []LanguageInfo `json:"languages"`
 }
 
-// ContractsResponse represents the response for contracts available for languages
+// ContractsResponse represents the response for contracts available for languages.
 type ContractsResponse struct {
 	Contracts map[string]any `json:"contracts"`
 }

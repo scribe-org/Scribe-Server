@@ -27,23 +27,23 @@ func ExecuteBatch(stmt *sql.Stmt, batch [][]interface{}) error {
 
 // generateMariaTableName creates the MariaDB table name with proper capitalization and suffixes.
 func generateMariaTableName(langCode, tableName string) string {
-	// Remove sqlite_ prefix if present
+	// Remove sqlite_ prefix if present.
 	cleanTableName := strings.TrimPrefix(tableName, "sqlite_")
 
-	// Clean up table name - replace underscores and capitalize properly
+	// Clean up table name - replace underscores and capitalize properly.
 	cleanTableName = strings.ReplaceAll(cleanTableName, "_", "")
 
 	caser := cases.Title(language.English)
 	cleanTableName = caser.String(cleanTableName)
 
-	// Special handling for TranslationData tables
+	// Special handling for TranslationData tables.
 	if strings.HasPrefix(langCode, "TranslationData") {
-		// For TranslationData, just use TranslationData + Language
+		// For TranslationData, just use TranslationData + Language:
 		// TranslationData + english -> TranslationDataEnglish
 		return "TranslationData" + cleanTableName
 	}
 
-	// For language data tables, capitalize table name and add Scribe suffix
+	// For language data tables, capitalize table name and add Scribe suffix:
 	// ENLanguageData + nouns -> ENLanguageDataNounsScribe
 	return langCode + cleanTableName + "Scribe"
 }

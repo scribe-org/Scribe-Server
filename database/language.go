@@ -14,8 +14,8 @@ import (
 func GetAvailableLanguages() ([]string, error) {
 	query := `
 		SELECT DISTINCT SUBSTRING(TABLE_NAME, 1, 2) as language_code
-		FROM information_schema.TABLES 
-		WHERE TABLE_SCHEMA = ? 
+		FROM information_schema.TABLES
+		WHERE TABLE_SCHEMA = ?
 		AND TABLE_NAME LIKE '%LanguageData%Scribe'
 		ORDER BY language_code
 	`
@@ -48,8 +48,8 @@ func GetLanguageDataTypes(lang string) ([]string, error) {
 
 	query := `
 		SELECT TABLE_NAME
-		FROM information_schema.TABLES 
-		WHERE TABLE_SCHEMA = ? 
+		FROM information_schema.TABLES
+		WHERE TABLE_SCHEMA = ?
 		AND TABLE_NAME LIKE ?
 		ORDER BY TABLE_NAME
 	`
@@ -61,7 +61,7 @@ func GetLanguageDataTypes(lang string) ([]string, error) {
 	defer rows.Close()
 
 	var dataTypes []string
-	// Regex to extract data type from table name like ENLanguageDataNounsScribe
+	// Regex to extract data type from table name like ENLanguageDataNounsScribe.
 	re := regexp.MustCompile(`^[A-Z]{2}LanguageData([A-Za-z]+)Scribe$`)
 
 	for rows.Next() {
@@ -72,7 +72,7 @@ func GetLanguageDataTypes(lang string) ([]string, error) {
 
 		matches := re.FindStringSubmatch(tableName)
 		if len(matches) > 1 {
-			dataType := strings.ToLower(matches[1]) // Convert to lowercase (nouns, verbs)
+			dataType := strings.ToLower(matches[1]) // convert to lowercase (nouns, verbs)
 			dataTypes = append(dataTypes, dataType)
 		}
 	}

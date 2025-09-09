@@ -15,7 +15,7 @@ SKIP_MIGRATION=${1:-false}
 # Save project root.
 PROJECT_ROOT=$(pwd)
 
-# Define target languages and data types
+# Define target languages and data types.
 TARGET_LANGUAGES=("english" "french" "german" "italian" "spanish" "portuguese" "russian" "swedish")
 DATA_TYPES=("nouns" "verbs")
 
@@ -137,7 +137,7 @@ DUMP_FILE="$DUMP_DIR/latest-lexemes.json.bz2"
 
 if [ ! -f "$DUMP_FILE" ]; then
     log "📥 Downloading Wikidata lexeme dump..."
-    # Auto-confirm the download prompt with "y" for the initial confirmation
+    # Auto-confirm the download prompt with "y" for the initial confirmation.
     echo "y" | scribe-data download -wdv 20250730 || {
         error "Failed to download Wikidata dump"
         exit 1
@@ -151,14 +151,14 @@ fi
 
 log "⚡ Generating language data for target languages (auto-confirm)..."
 
-# Convert arrays to space-separated strings (no quotes around the expansion)
+# Convert arrays to space-separated strings (no quotes around the expansion).
 LANG_STRING="${TARGET_LANGUAGES[*]}"
 DATA_TYPES_STRING="${DATA_TYPES[*]}"
 
 log "Languages: $LANG_STRING"
 log "Data types: $DATA_TYPES_STRING"
 
-# Calculate total number of combinations for the responses
+# Calculate total number of combinations for the responses.
 NUM_LANGUAGES=${#TARGET_LANGUAGES[@]}
 NUM_DATA_TYPES=${#DATA_TYPES[@]}
 TOTAL_COMBINATIONS=$((NUM_LANGUAGES * NUM_DATA_TYPES))
@@ -167,8 +167,8 @@ log "Total combinations to process: $TOTAL_COMBINATIONS"
 log "Each combination will prompt to 'Use existing latest dump'"
 log "Running: scribe-data get -l $LANG_STRING -dt $DATA_TYPES_STRING -wdp $DUMP_DIR"
 
-# Send Down Arrow twice + Enter for each combination
-# This selects the 3rd option "Use existing latest dump"
+# Send Down Arrow twice + Enter for each combination.
+# This selects the 3rd option "Use existing latest dump".
 {
     for ((i=1; i<=TOTAL_COMBINATIONS; i++)); do
         printf "\033[B\033[B\n"  # Down arrow, Down arrow, Enter
@@ -177,10 +177,10 @@ log "Running: scribe-data get -l $LANG_STRING -dt $DATA_TYPES_STRING -wdp $DUMP_
 
 success "Language data generated successfully"
 
-# Sanity Check: Verify generated files
+# Sanity Check: Verify generated files.
 log "🔍 Checking generated data in scribe_data_json_export..."
 if [ -d "scribe_data_json_export" ]; then
-    # List all generated JSON files organized by language
+    # List all generated JSON files organized by language.
     for lang in "${TARGET_LANGUAGES[@]}"; do
         if [ -d "scribe_data_json_export/$lang" ]; then
             log "📁 $lang:"
@@ -192,12 +192,12 @@ if [ -d "scribe_data_json_export" ]; then
             log "⚠️  Missing directory: scribe_data_json_export/$lang"
         fi
     done
-    
-    # Count total files
+
+    # Count total files.
     total_files=$(find scribe_data_json_export -name "*.json" | wc -l)
     expected_files=$TOTAL_COMBINATIONS
     log "📊 Generated $total_files/$expected_files JSON files"
-    
+
     if [ "$total_files" -lt "$expected_files" ]; then
         error "⚠️  Expected $expected_files files but only found $total_files"
         error "Some data may not have been generated successfully"
@@ -215,7 +215,7 @@ log "🔍 Filtering JSON data using contracts..."
 if [ ! -d "$CONTRACTS_DIR" ]; then
     warning "Contracts directory not found: $CONTRACTS_DIR"
     warning "Skipping filtering step - proceeding with unfiltered data"
-    FILTERED_EXPORT_DIR="./scribe_data_json_export"  # Use original data
+    FILTERED_EXPORT_DIR="./scribe_data_json_export"  # use original data
 else
     FILTERED_EXPORT_DIR="./scribe_data_json_filtered"
     mkdir -p "$FILTERED_EXPORT_DIR"
@@ -227,7 +227,7 @@ else
     }
     success "JSON data filtered successfully"
 
-    # Debug: Check filtered files
+    # Debug: Check filtered files.
     if [ -d "$FILTERED_EXPORT_DIR" ]; then
         filtered_files=$(find "$FILTERED_EXPORT_DIR" -name "*.json" | wc -l)
         log "📊 Generated $filtered_files filtered JSON files"
