@@ -20,6 +20,12 @@ definitions:
       version:
         type: string
     type: object
+  models.ContractsResponse:
+    properties:
+      contracts:
+        additionalProperties: {}
+        type: object
+    type: object
   models.ErrorResponse:
     properties:
       error:
@@ -30,7 +36,7 @@ definitions:
       contract:
         $ref: '#/definitions/models.Contract'
       data:
-        additionalProperties: true
+        additionalProperties: {}
         type: object
       language:
         type: string
@@ -44,6 +50,17 @@ definitions:
           type: string
         type: array
     type: object
+  models.LanguageStatisticsReponse:
+    properties:
+      code:
+        type: string
+      language_name:
+        type: string
+      nouns:
+        type: integer
+      verbs:
+        type: integer
+    type: object
   models.LanguageVersionResponse:
     properties:
       language:
@@ -56,7 +73,7 @@ definitions:
 externalDocs:
   description: GitHub Repository
   url: https://github.com/scribe-org/Scribe-Server
-host: localhost:8080
+host: scribe-server.toolforge.org
 info:
   contact:
     email: team@scri.be
@@ -71,6 +88,40 @@ info:
   title: Scribe Server API
   version: "1.0"
 paths:
+  /api/v1/contracts:
+    get:
+      consumes:
+      - application/json
+      description: Returns schema contracts for all languages or a specific language
+        if 'lang' query parameter is provided.
+      parameters:
+      - description: Language code (ISO 639-1)
+        example: en
+        in: query
+        name: lang
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Schema contracts".
+          schema:
+            $ref: '#/definitions/models.ContractsResponse'
+        "400":
+          description: Invalid language code".
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Language not supported".
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal server error".
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get contracts.
+      tags:
+      - contracts
   /api/v1/data-version/{lang}:
     get:
       consumes:
@@ -140,6 +191,41 @@ paths:
       summary: Get language data.
       tags:
       - language-data
+  /api/v1/language-stats:
+    get:
+      consumes:
+      - application/json
+      description: Returns the number of nouns and verbs for the specified language
+        codes.
+      parameters:
+      - description: Comma-separated list of language codes to filter (e.g., 'fr,de,es')
+        in: query
+        name: codes
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of language statistics
+          schema:
+            items:
+              $ref: '#/definitions/models.LanguageStatisticsReponse'
+            type: array
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Language not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get statistics for one or multiple languages
+      tags:
+      - statistics
   /api/v1/languages:
     get:
       consumes:

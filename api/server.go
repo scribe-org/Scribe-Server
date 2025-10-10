@@ -18,6 +18,8 @@ import (
 
 // HandleRequests sets up and starts the server.
 func HandleRequests() {
+	viper.AutomaticEnv();
+	
 	// Initialize database connection.
 	if err := database.InitDatabase(); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
@@ -117,6 +119,7 @@ func startServer(r *gin.Engine) {
 	log.Println("  ✅ GET /api/v1/contracts[?lang_iso=xx]      	- Get contracts (optional language filter)")
 	log.Println("  ✅ GET /api/v1/data/:lang_iso       		- Get full language data with schema")
 	log.Println("  ✅ GET /api/v1/data-version/:lang_iso 		- Get version info for a language")
+	log.Println("  ✅ GET /api/v1/language-stats?codes=fr,de         - Get statistics for all or selected languages")
 	log.Printf("📊 Available languages: %v", availableLanguages)
 
 	log.Fatal(r.Run(hostPort))

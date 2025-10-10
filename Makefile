@@ -3,14 +3,18 @@
 BINARY_NAME=./bin/scribe-server
 MIGRATE_BINARY=./bin/migrate-scribe-data
 
+# Default values
+ENV ?= dev
+GIN_MODE ?= debug
+
 # Clean any build artifacts.
 clean:
 	go clean
-	rm ${BINARY_NAME}
+	rm -f ${BINARY_NAME}
 
 # Build a binary for the project.
 build:
-	go build -o ${BINARY_NAME} *.go
+	ENV=${ENV} GIN_MODE=${GIN_MODE} go build -o ${BINARY_NAME} *.go
 
 # Run tests for the project.
 test:
@@ -21,7 +25,7 @@ run: run-dev
 
 # Run the project in development mode.
 run-dev:
-	ENV=dev go run .
+	ENV=dev GIN_MODE=${GIN_MODE} go run .
 
 # Run the project in production mode.
 run-prod:
@@ -53,58 +57,47 @@ install-tools:
 	@$(MAKE) install-hooks
 	@echo ""
 	@echo "------------------------------------------------------------"
-	@echo "Go tools installed. For best results and to use these tools"
-	@echo "directly from your terminal, please ensure '$(shell go env GOPATH)/bin'"
-	@echo "is in your system's PATH. You might need to add:"
+	@echo "Go tools installed. Ensure '$(shell go env GOPATH)/bin' is in your PATH."
+	@echo "Add this to ~/.bashrc or ~/.zshrc if needed:"
 	@echo '  export PATH=$$(go env GOPATH)/bin:$$PATH'
-	@echo "to your shell configuration file (e.g., ~/.bashrc or ~/.zshrc)"
-	@echo "and then 'source' it or open a new terminal."
 	@echo "------------------------------------------------------------"
 	@echo ""
 
-# Create or update the generated source code.
+# Create or update generated code and docs.
 generate:
 	@$(MAKE) generate-api
 	@$(MAKE) generate-db
 	@$(MAKE) docs
 
-# Create or update the generated source code for the 'api' package.
 generate-api:
 	go generate -x ./api/...
 	@$(MAKE) tidy
 
-# Create or update the generated source code for the 'db' package.
 generate-db:
 	go generate -x ./db/...
 	@$(MAKE) tidy
 
-# Generate API documentation from code annotations.
+# Generate Swagger docs.
 docs:
 	@echo "Generating API documentation..."
-	@command -v swag >/dev/null 2>&1 || { echo "WARNING: 'swag' is not in your shell's PATH. Attempting to use absolute path. For general use, consider adding '$(shell go env GOPATH)/bin' to your PATH as instructed by 'make install-tools'."; }
+	@command -v swag >/dev/null 2>&1 || { echo "WARNING: 'swag' not in PATH."; }
 	$(shell go env GOPATH)/bin/swag init --generalInfo main.go --output docs/
-	@echo "Documentation generated at docs/"
-	@echo ""
-	@echo "After running 'make run' or 'make dev', access the documentation at:"
-	@echo "  - Swagger UI: http://localhost:8080/swagger/index.html"
-	@echo "  - Alternative docs: http://localhost:8080/docs/index.html"
+	@echo "Docs generated at docs/"
+	@echo "Swagger UI: http://localhost:8080/swagger/index.html"
 	@echo ""
 
-# Serve docs locally (runs server with docs available).
+# Serve docs locally.
 docs-serve: docs
 	@echo "Starting server with documentation..."
-	@echo "Once the server is running, you can access the API documentation at:"
-	@echo "  - Swagger UI: http://localhost:8080/swagger/index.html"
-	@echo "  - Alternative docs: http://localhost:8080/docs/index.html"
-	@$(MAKE) run
+	ENV=${ENV} GIN_MODE=${GIN_MODE} go run .
 
 # Execute the binary for the project.
 execute-binary:
-	${BINARY_NAME}
+	ENV=${ENV} GIN_MODE=${GIN_MODE} ${BINARY_NAME}
 
-# Run the project with hot reload(dev mode).
+# Run the project with hot reload (dev mode).
 dev:
-	ENV=dev $(shell go env GOPATH)/bin/air
+	ENV=dev GIN_MODE=${GIN_MODE} $(shell go env GOPATH)/bin/air
 
 # Run the project with hot reload (prod mode).
 dev-prod:

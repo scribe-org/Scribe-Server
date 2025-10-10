@@ -24,6 +24,56 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/contracts": {
+            "get": {
+                "description": "Returns schema contracts for all languages or a specific language if 'lang' query parameter is provided.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "contracts"
+                ],
+                "summary": "Get contracts.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "en",
+                        "description": "Language code (ISO 639-1)",
+                        "name": "lang",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Schema contracts\".",
+                        "schema": {
+                            "$ref": "#/definitions/models.ContractsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid language code\".",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Language not supported\".",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error\".",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/data-version/{lang}": {
             "get": {
                 "description": "Returns last modified dates for each data type of a specific language.",
@@ -126,6 +176,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/language-stats": {
+            "get": {
+                "description": "Returns the number of nouns and verbs for the specified language codes.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "statistics"
+                ],
+                "summary": "Get statistics for one or multiple languages",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of language codes to filter (e.g., 'fr,de,es')",
+                        "name": "codes",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of language statistics",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.LanguageStatisticsReponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Language not found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/languages": {
             "get": {
                 "description": "Returns a list of all supported languages with their available data types.",
@@ -188,6 +290,15 @@ const docTemplate = `{
                 }
             }
         },
+        "models.ContractsResponse": {
+            "type": "object",
+            "properties": {
+                "contracts": {
+                    "type": "object",
+                    "additionalProperties": {}
+                }
+            }
+        },
         "models.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -204,7 +315,7 @@ const docTemplate = `{
                 },
                 "data": {
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {}
                 },
                 "language": {
                     "type": "string"
@@ -222,6 +333,23 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "models.LanguageStatisticsReponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "language_name": {
+                    "type": "string"
+                },
+                "nouns": {
+                    "type": "integer"
+                },
+                "verbs": {
+                    "type": "integer"
                 }
             }
         },
@@ -249,7 +377,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "scribe-server.toolforge.org",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Scribe Server API",
