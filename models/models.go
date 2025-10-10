@@ -54,11 +54,11 @@ type ContractsResponse struct {
 }
 
 type LanguageStatisticsReponse struct {
-	Code          string `json:"code"`
-	LanguageName  *string `json:"language_name"`
-	Nouns         *int   `json:"nouns"`
-	Verbs         *int   `json:"verbs"`
-	Translations  *int   `json:"translations"`
-	Prepositions  *int   `json:"prepositions"`
-	EmojiKeywords *int   `json:"emoji_keywords"`
+	Code         string  `json:"code"`
+	LanguageName *string `json:"language_name"`
+	Nouns        *int    `json:"nouns"`
+	Verbs        *int    `json:"verbs"`
+	// Translations  *int   `json:"translations"`
+	// Prepositions  *int   `json:"prepositions"`
+	// EmojiKeywords *int   `json:"emoji_keywords"`
 }
