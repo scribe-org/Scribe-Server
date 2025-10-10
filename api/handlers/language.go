@@ -22,14 +22,15 @@ import (
 	"github.com/spf13/viper"
 )
 
-// GetAvailableLanguages handles GET /languages.
-// @Summary Get available languages.
-// @Description Returns a list of all supported languages with their available data types.
-// @Tags languages
-// @Accept json
-// @Produce json
-// @Success 200 {object} models.AvailableLanguagesResponse "List of supported languages".
-// @Failure 500 {object} models.ErrorResponse "Internal server error".
+// GetAvailableLanguages returns a list of all supported languages and their available data types.
+//
+// @Summary List all supported languages
+// @Description Fetches all languages currently supported by Scribe, along with their associated data types.
+// @Tags Languages
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} models.AvailableLanguagesResponse "Successfully retrieved available languages"
+// @Failure 500 {object} models.ErrorResponse "Internal server error occurred while fetching languages"
 // @Router /api/v1/languages [get]
 func GetAvailableLanguages(c *gin.Context) {
 	languages, err := database.GetAvailableLanguages()
@@ -58,17 +59,18 @@ func GetAvailableLanguages(c *gin.Context) {
 	})
 }
 
-// GetLanguageData handles GET /data/:lang.
-// @Summary Get language data.
-// @Description Returns all available language data and schema contract for a specific language.
-// @Tags language-data
-// @Accept json
-// @Produce json
-// @Param lang path string true "Language code (ISO 639-1)" example(en).
-// @Success 200 {object} models.LanguageDataResponse "Complete language data with schema".
-// @Failure 400 {object} models.ErrorResponse "Invalid language code".
-// @Failure 404 {object} models.ErrorResponse "Language not supported".
-// @Failure 500 {object} models.ErrorResponse "Internal server error".
+// GetLanguageData returns the full dataset and schema contract for a specific language.
+//
+// @Summary Retrieve full language data
+// @Description Returns all available language data and schema contract for the given ISO 639-1 language code.
+// @Tags Language Data
+// @Accept  json
+// @Produce  json
+// @Param lang path string true "Language code (ISO 639-1)" example(en)
+// @Success 200 {object} models.LanguageDataResponse "Successfully retrieved language data"
+// @Failure 400 {object} models.ErrorResponse "Invalid or malformed language code"
+// @Failure 404 {object} models.ErrorResponse "Requested language not found or unsupported"
+// @Failure 500 {object} models.ErrorResponse "Internal server error while fetching data"
 // @Router /api/v1/data/{lang} [get]
 func GetLanguageData(c *gin.Context) {
 	lang := c.Param("lang")
@@ -138,16 +140,17 @@ func GetLanguageData(c *gin.Context) {
 	HandleSuccess(c, response)
 }
 
-// GetLanguageVersion handles GET /data-version/:lang.
-// @Summary Get language data versions.
-// @Description Returns last modified dates for each data type of a specific language.
-// @Tags language-data
-// @Accept json
-// @Produce json
-// @Param lang path string true "Language code (ISO 639-1)" example(en).
-// @Success 200 {object} models.LanguageVersionResponse "Language version information".
+// GetLanguageVersion returns version information (last modified dates) for all data types of a given language.
+//
+// @Summary Get version information for a language
+// @Description Provides last modified timestamps for each data type of the specified language.
+// @Tags Language Data
+// @Accept  json
+// @Produce  json
+// @Param lang path string true "Language code (ISO 639-1)" example(fr)
+// @Success 200 {object} models.LanguageVersionResponse "Successfully retrieved language version details"
 // @Failure 400 {object} models.ErrorResponse "Invalid language code"
-// @Failure 404 {object} models.ErrorResponse "Language not supported"
+// @Failure 404 {object} models.ErrorResponse "Language not found"
 // @Failure 500 {object} models.ErrorResponse "Internal server error"
 // @Router /api/v1/data-version/{lang} [get]
 func GetLanguageVersion(c *gin.Context) {
@@ -188,17 +191,18 @@ func GetLanguageVersion(c *gin.Context) {
 	HandleSuccess(c, response)
 }
 
-// GetContracts handles GET /contracts.
-// @Summary Get contracts.
-// @Description Returns schema contracts for all languages or a specific language if 'lang' query parameter is provided.
-// @Tags contracts
-// @Accept json
-// @Produce json
-// @Param lang query string false "Language code (ISO 639-1)" example(en).
-// @Success 200 {object} models.ContractsResponse "Schema contracts".
-// @Failure 400 {object} models.ErrorResponse "Invalid language code".
-// @Failure 404 {object} models.ErrorResponse "Language not supported".
-// @Failure 500 {object} models.ErrorResponse "Internal server error".
+// GetContracts returns schema contracts for all languages or a specific one if a query parameter is provided.
+//
+// @Summary Retrieve schema contracts
+// @Description If a 'lang' query parameter is provided, returns the contract for that specific language. Otherwise, returns all contracts.
+// @Tags Contracts
+// @Accept  json
+// @Produce  json
+// @Param lang query string false "Language code (ISO 639-1)" example(es)
+// @Success 200 {object} models.ContractsResponse "Successfully retrieved contracts"
+// @Failure 400 {object} models.ErrorResponse "Invalid language code provided"
+// @Failure 404 {object} models.ErrorResponse "Language not supported"
+// @Failure 500 {object} models.ErrorResponse "Failed to load contract files"
 // @Router /api/v1/contracts [get]
 func GetContracts(c *gin.Context) {
 	lang := c.Query("lang")

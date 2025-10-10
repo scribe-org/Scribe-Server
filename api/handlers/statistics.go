@@ -20,7 +20,7 @@ import (
 // @Tags statistics
 // @Accept json
 // @Produce json
-// @Param codes query string false "Comma-separated list of language codes to filter (e.g., 'fr,de,es')"
+// @Param codes query string false "Comma-separated list of language codes to filter (e.g., "fr,de,es")"
 // @Success 200 {array} models.LanguageStatisticsReponse "List of language statistics"
 // @Failure 400 {object} models.ErrorResponse "Bad request"
 // @Failure 404 {object} models.ErrorResponse "Language not found"

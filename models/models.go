@@ -5,60 +5,82 @@ package models
 
 import "time"
 
-// ErrorResponse represents an error response.
+// ErrorResponse represents a generic error message returned by the API.
+// swagger:model ErrorResponse
 type ErrorResponse struct {
+	// Description of the error
 	Error string `json:"error"`
 }
 
-// Contract represents the data schema contract.
+// Contract represents the data schema contract that defines structure and metadata for language data.
+// swagger:model Contract
 type Contract struct {
-	Version   string                       `json:"version"`
-	UpdatedAt string                       `json:"updated_at"`
-	Fields    map[string]map[string]string `json:"fields"`
+	// Contract version identifier
+	Version string `json:"version"`
+	// Last update timestamp (RFC3339 format)
+	UpdatedAt string `json:"updated_at"`
+	// Field definitions grouped by section and name
+	Fields map[string]map[string]string `json:"fields"`
 }
 
-// LanguageDataResponse represents the full language data response.
+// LanguageDataResponse represents the complete response when fetching a language’s data.
+// swagger:model LanguageDataResponse
 type LanguageDataResponse struct {
-	Language string         `json:"language"`
-	Contract Contract       `json:"contract"`
-	Data     map[string]any `json:"data"`
+	// ISO code of the language
+	Language string `json:"language"`
+	// Contract details defining the schema
+	Contract Contract `json:"contract"`
+	// Actual data, structured according to the contract
+	Data map[string]any `json:"data"`
 }
 
-// LanguageVersionResponse represents version information for a language.
+// LanguageVersionResponse represents version information for a language dataset.
+// swagger:model LanguageVersionResponse
 type LanguageVersionResponse struct {
-	Language string            `json:"language"`
+	// ISO code of the language
+	Language string `json:"language"`
+	// Map of data types to version identifiers
 	Versions map[string]string `json:"versions"`
 }
 
-// LanguageDataVersion represents a row in the language_data_versions table.
+// LanguageDataVersion represents a single record in the language_data_versions table.
+// swagger:model LanguageDataVersion
 type LanguageDataVersion struct {
 	LanguageISO string    `json:"language_iso"`
 	UpdatedAt   time.Time `json:"updated_at"`
 	CreatedAt   time.Time `json:"created_at"`
 }
 
-// LanguageInfo represents basic language information.
+// LanguageInfo represents basic information about a supported language.
+// swagger:model LanguageInfo
 type LanguageInfo struct {
-	Code      string   `json:"code"`
+	// ISO code of the language (e.g. "en", "fr")
+	Code string `json:"code"`
+	// List of supported data types for this language
 	DataTypes []string `json:"data_types"`
 }
 
-// AvailableLanguagesResponse represents the response for available languages.
+// AvailableLanguagesResponse represents a list of languages that are currently available.
+// swagger:model AvailableLanguagesResponse
 type AvailableLanguagesResponse struct {
 	Languages []LanguageInfo `json:"languages"`
 }
 
-// ContractsResponse represents the response for contracts available for languages.
+// ContractsResponse represents all contract metadata available for supported languages.
+// swagger:model ContractsResponse
 type ContractsResponse struct {
 	Contracts map[string]any `json:"contracts"`
 }
 
+// LanguageStatisticsReponse represents linguistic statistics for a language.
+// swagger:model LanguageStatisticsReponse
 type LanguageStatisticsReponse struct {
-	Code         string  `json:"code"`
+	// ISO code of the language
+	Code string `json:"code"`
+	// Human-readable language name (nullable)
 	LanguageName *string `json:"language_name"`
-	Nouns        *int    `json:"nouns"`
-	Verbs        *int    `json:"verbs"`
-	// Translations  *int   `json:"translations"`
-	// Prepositions  *int   `json:"prepositions"`
-	// EmojiKeywords *int   `json:"emoji_keywords"`
+	// Count of noun entries
+	Nouns *int `json:"nouns"`
+	// Count of verb entries
+	Verbs *int `json:"verbs"`
 }
