@@ -4,9 +4,12 @@ package database
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"strings"
 
+	"github.com/go-sql-driver/mysql"
+	"github.com/scribe-org/scribe-server/models"
 	"github.com/spf13/viper"
 )
 
@@ -78,4 +81,78 @@ func GetLanguageDataTypes(lang string) ([]string, error) {
 	}
 
 	return dataTypes, nil
+}
+
+// GetLanguageStat gets statistics for a specific language (only nouns and verbs).
+func GetLanguageStat(lan string) (map[string]any, error) {
+	lang := strings.ToUpper(strings.TrimSpace(lan))
+
+	if !regexp.MustCompile(`^[A-Z]{2}$`).MatchString(lang) {
+		return nil, fmt.Errorf("invalid language code: %s", lang)
+	}
+
+	query := fmt.Sprintf(`
+        SELECT
+            (SELECT COUNT(*) FROM %sLanguageDataNounsScribe) AS nouns,
+            (SELECT COUNT(*) FROM %sLanguageDataVerbsScribe) AS verbs
+    `, lang, lang)
+
+	row := DB.QueryRow(query)
+
+	var nouns, verbs int
+	err := row.Scan(&nouns, &verbs)
+	if err != nil {
+		// Handle missing-table error (MySQL)
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1146 {
+			log.Printf("⚠️ Skipping %s — missing table: %s", lang, mysqlErr.Message)
+			return nil, nil
+		}
+		// Handle missing-table error (SQLite or fallback)
+		if strings.Contains(err.Error(), "doesn't exist") ||
+			strings.Contains(err.Error(), "no such table") {
+			log.Printf("⚠️ Skipping %s — missing table(s): %v", lang, err)
+			return nil, nil
+		}
+		return nil, fmt.Errorf("error scanning stats for %s: %w", lang, err)
+	}
+
+	stats := map[string]any{
+		"code":  strings.ToLower(lang),
+		"nouns": nouns,
+		"verbs": verbs,
+	}
+
+	return stats, nil
+}
+
+// GetAllLanguageStats gets statistics for all available languages (only nouns and verbs).
+func GetAllLanguageStats() ([]models.LanguageStatisticsReponse, error) {
+	availableLanguages, err := GetAvailableLanguages()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get available languages: %w", err)
+	}
+
+	allStats := []models.LanguageStatisticsReponse{}
+
+	for _, lan := range availableLanguages {
+		stat, err := GetLanguageStat(lan)
+		if err != nil {
+			log.Printf("⚠️ Error fetching stats for %s: %v", lan, err)
+			continue
+		}
+		if stat == nil {
+			continue
+		}
+
+		langName := GetLanguageDisplayName(lan)
+
+		allStats = append(allStats, models.LanguageStatisticsReponse{
+			Code:         stat["code"].(string),
+			LanguageName: &langName,
+			Nouns:        ToIntPtr(stat["nouns"].(int)),
+			Verbs:        ToIntPtr(stat["verbs"].(int)),
+		})
+	}
+
+	return allStats, nil
 }

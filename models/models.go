@@ -52,3 +52,13 @@ type AvailableLanguagesResponse struct {
 type ContractsResponse struct {
 	Contracts map[string]any `json:"contracts"`
 }
+
+type LanguageStatisticsReponse struct {
+	Code          string `json:"code"`
+	LanguageName  *string `json:"language_name"`
+	Nouns         *int   `json:"nouns"`
+	Verbs         *int   `json:"verbs"`
+	Translations  *int   `json:"translations"`
+	Prepositions  *int   `json:"prepositions"`
+	EmojiKeywords *int   `json:"emoji_keywords"`
+}

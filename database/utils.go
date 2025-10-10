@@ -4,6 +4,7 @@ package database
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/scribe-org/scribe-server/internal/constants"
 )
@@ -30,4 +31,50 @@ func IsValidTableName(tableName string) bool {
 	}
 
 	return matched
+}
+
+// ToIntPtr converts various numeric types to a pointer to int.
+func ToIntPtr(v any) *int {
+	if v == nil {
+		return nil
+	}
+	switch val := v.(type) {
+	case int:
+		return &val
+	case int64:
+		i := int(val)
+		return &i
+	default:
+		return nil
+	}
+}
+
+// ToStringPtr converts a string to a pointer to string.
+func ToStringPtr(v any) *string {
+	if v == nil {
+		return nil
+	}
+	switch val := v.(type) {
+	case string:
+		return &val
+	default:
+		return nil
+	}
+}
+
+func GetLanguageDisplayName(code string) string {
+	names := map[string]string{
+		"EN": "English",
+		"FR": "French",
+		"DE": "German",
+		"ES": "Spanish",
+		"IT": "Italian",
+		"PT": "Portuguese",
+		"RU": "Russian",
+		"SV": "Swedish",
+	}
+	if name, ok := names[strings.ToUpper(code)]; ok {
+		return name
+	}
+	return strings.ToUpper(code)
 }
