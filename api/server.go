@@ -18,8 +18,8 @@ import (
 
 // HandleRequests sets up and starts the server.
 func HandleRequests() {
-	viper.AutomaticEnv();
-	
+	viper.AutomaticEnv()
+
 	// Initialize database connection.
 	if err := database.InitDatabase(); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)

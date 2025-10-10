@@ -62,6 +62,7 @@ func ToStringPtr(v any) *string {
 	}
 }
 
+// GetLanguageDisplayName returns the display name for a given language code.
 func GetLanguageDisplayName(code string) string {
 	names := map[string]string{
 		"EN": "English",
