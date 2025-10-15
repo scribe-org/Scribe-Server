@@ -85,29 +85,35 @@ func GetLanguageDataTypes(lang string) ([]string, error) {
 
 // GetLanguageStat gets statistics for a specific language (only nouns and verbs).
 func GetLanguageStat(lan string) (map[string]any, error) {
+	// Normalize and validate language code (e.g., "EN", "FR")
 	lang := strings.ToUpper(strings.TrimSpace(lan))
-
 	if !regexp.MustCompile(`^[A-Z]{2}$`).MatchString(lang) {
 		return nil, fmt.Errorf("invalid language code: %s", lang)
 	}
 
+	nounsTable := lang + "LanguageDataNounsScribe"
+	verbsTable := lang + "LanguageDataVerbsScribe"
+
+	if !IsValidTableName(nounsTable) || !IsValidTableName(verbsTable) {
+		return nil, fmt.Errorf("invalid table names for language: %s", lang)
+	}
+
 	query := fmt.Sprintf(`
         SELECT
-            (SELECT COUNT(*) FROM %sLanguageDataNounsScribe) AS nouns,
-            (SELECT COUNT(*) FROM %sLanguageDataVerbsScribe) AS verbs
-    `, lang, lang)
+            (SELECT COUNT(*) FROM %s) AS nouns,
+            (SELECT COUNT(*) FROM %s) AS verbs
+    `, nounsTable, verbsTable)
 
+	// Execute query
 	row := DB.QueryRow(query)
 
 	var nouns, verbs int
 	err := row.Scan(&nouns, &verbs)
 	if err != nil {
-		// Handle missing-table error (MySQL)
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1146 {
 			log.Printf("⚠️ Skipping %s — missing table: %s", lang, mysqlErr.Message)
 			return nil, nil
 		}
-		// Handle missing-table error (SQLite or fallback)
 		if strings.Contains(err.Error(), "doesn't exist") ||
 			strings.Contains(err.Error(), "no such table") {
 			log.Printf("⚠️ Skipping %s — missing table(s): %v", lang, err)
@@ -116,13 +122,11 @@ func GetLanguageStat(lan string) (map[string]any, error) {
 		return nil, fmt.Errorf("error scanning stats for %s: %w", lang, err)
 	}
 
-	stats := map[string]any{
+	return map[string]any{
 		"code":  strings.ToLower(lang),
 		"nouns": nouns,
 		"verbs": verbs,
-	}
-
-	return stats, nil
+	}, nil
 }
 
 // GetAllLanguageStats gets statistics for all available languages (only nouns and verbs).
@@ -144,14 +148,7 @@ func GetAllLanguageStats() ([]models.LanguageStatisticsReponse, error) {
 			continue
 		}
 
-		langName := GetLanguageDisplayName(lan)
-
-		allStats = append(allStats, models.LanguageStatisticsReponse{
-			Code:         stat["code"].(string),
-			LanguageName: &langName,
-			Nouns:        ToIntPtr(stat["nouns"].(int)),
-			Verbs:        ToIntPtr(stat["verbs"].(int)),
-		})
+		allStats = append(allStats, BuildLanguageStatResponse(lan, stat))
 	}
 
 	return allStats, nil

@@ -70,14 +70,7 @@ func GetLanguageStats(c *gin.Context) {
 			continue
 		}
 
-		langName := database.GetLanguageDisplayName(strings.ToUpper(code))
-
-		statsList = append(statsList, models.LanguageStatisticsReponse{
-			Code:         code,
-			LanguageName: &langName,
-			Nouns:        database.ToIntPtr(stat["nouns"].(int)),
-			Verbs:        database.ToIntPtr(stat["verbs"].(int)),
-		})
+		statsList = append(statsList, database.BuildLanguageStatResponse(code, stat))
 	}
 
 	if len(statsList) == 0 {

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/scribe-org/scribe-server/internal/constants"
+	"github.com/scribe-org/scribe-server/models"
 )
 
 // IsValidTableName validates table names to prevent SQL injection.
@@ -62,20 +63,34 @@ func ToStringPtr(v any) *string {
 	}
 }
 
+var languageNames = map[string]string{
+	"EN": "English",
+	"FR": "French",
+	"DE": "German",
+	"ES": "Spanish",
+	"IT": "Italian",
+	"PT": "Portuguese",
+	"RU": "Russian",
+	"SV": "Swedish",
+}
+
 // GetLanguageDisplayName returns the display name for a given language code.
 func GetLanguageDisplayName(code string) string {
-	names := map[string]string{
-		"EN": "English",
-		"FR": "French",
-		"DE": "German",
-		"ES": "Spanish",
-		"IT": "Italian",
-		"PT": "Portuguese",
-		"RU": "Russian",
-		"SV": "Swedish",
-	}
-	if name, ok := names[strings.ToUpper(code)]; ok {
+	if name, ok := languageNames[strings.ToUpper(code)]; ok {
 		return name
 	}
 	return strings.ToUpper(code)
+}
+
+// BuildLanguageStatResponse constructs a LanguageStatisticsReponse object from raw stat data.
+func BuildLanguageStatResponse(code string, stat map[string]any) models.LanguageStatisticsReponse {
+	langCode := strings.ToUpper(code)
+	langName := GetLanguageDisplayName(langCode)
+
+	return models.LanguageStatisticsReponse{
+		Code:         strings.ToLower(langCode),
+		LanguageName: &langName,
+		Nouns:        ToIntPtr(stat["nouns"].(int)),
+		Verbs:        ToIntPtr(stat["verbs"].(int)),
+	}
 }
