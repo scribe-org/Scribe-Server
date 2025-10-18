@@ -3,12 +3,31 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/scribe-org/scribe-server/api"
 	"github.com/spf13/viper"
 
 	_ "github.com/scribe-org/scribe-server/docs"
 )
+
+func logEnvironment() {
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = "dev"
+	}
+	ginMode := os.Getenv("GIN_MODE")
+	if ginMode == "" {
+		ginMode = "debug"
+	}
+
+	log.Println("========================================")
+	log.Printf("🌍 Environment: %s", env)
+	log.Printf("🚀 GIN_MODE: %s", ginMode)
+	log.Println("========================================")
+	fmt.Println()
+}
 
 // @title           Scribe Server API
 // @version         1.0
@@ -22,12 +41,13 @@ import (
 // @license.name  GPL-3.0 license
 // @license.url   https://github.com/scribe-org/Scribe-Server/blob/main/LICENSE.txt
 
-// @host      localhost:8080
+// @host      scribe-server.toolforge.org
 // @BasePath  /
 
 // @externalDocs.description  GitHub Repository
 // @externalDocs.url          https://github.com/scribe-org/Scribe-Server
 func main() {
+	logEnvironment()
 	// Read in the config file.
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")

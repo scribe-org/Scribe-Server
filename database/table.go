@@ -8,12 +8,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+// MARK: Table
+
 // TableExists checks if a table exists in the database.
 func TableExists(tableName string) (bool, error) {
 	query := `
-		SELECT COUNT(*) 
-		FROM information_schema.TABLES 
-		WHERE TABLE_SCHEMA = ? 
+		SELECT COUNT(*)
+		FROM information_schema.TABLES
+		WHERE TABLE_SCHEMA = ?
 		AND TABLE_NAME = ?
 	`
 
@@ -25,6 +27,8 @@ func TableExists(tableName string) (bool, error) {
 
 	return count > 0, nil
 }
+
+// MARK: Columns
 
 // GetTableSchema returns the column names and types for a specific table
 // in the connected MySQL/MariaDB database.
@@ -57,6 +61,8 @@ func GetTableSchema(tableName string) (map[string]string, error) {
 
 	return schema, nil
 }
+
+// MARK: Rows
 
 // GetTableData retrieves all rows and columns from a given table.
 // The result is a slice of maps, where each map represents a row with column-value pairs.
