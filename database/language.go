@@ -13,6 +13,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+// MARK: Available Data
+
 // GetAvailableLanguages gets all available languages in the database.
 func GetAvailableLanguages() ([]string, error) {
 	query := `
@@ -83,9 +85,11 @@ func GetLanguageDataTypes(lang string) ([]string, error) {
 	return dataTypes, nil
 }
 
+// MARK: Language Stats
+
 // GetLanguageStat gets statistics for a specific language (only nouns and verbs).
 func GetLanguageStat(lan string) (map[string]any, error) {
-	// Normalize and validate language code (e.g., "EN", "FR")
+	// Normalize and validate language code (e.g., "EN", "FR").
 	lang := strings.ToUpper(strings.TrimSpace(lan))
 	if !regexp.MustCompile(`^[A-Z]{2}$`).MatchString(lang) {
 		return nil, fmt.Errorf("invalid language code: %s", lang)
@@ -104,7 +108,7 @@ func GetLanguageStat(lan string) (map[string]any, error) {
             (SELECT COUNT(*) FROM %s) AS verbs
     `, nounsTable, verbsTable)
 
-	// Execute query
+	// Execute the query.
 	row := DB.QueryRow(query)
 
 	var nouns, verbs int

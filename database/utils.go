@@ -82,7 +82,7 @@ func GetLanguageDisplayName(code string) string {
 	return strings.ToUpper(code)
 }
 
-// BuildLanguageStatResponse constructs a LanguageStatisticsReponse object from raw stat data.
+// BuildLanguageStatResponse constructs a LanguageStatisticsResponse object from raw stat data.
 func BuildLanguageStatResponse(code string, stat map[string]any) models.LanguageStatisticsReponse {
 	langCode := strings.ToUpper(code)
 	langName := GetLanguageDisplayName(langCode)
