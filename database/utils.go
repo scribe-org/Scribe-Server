@@ -10,7 +10,7 @@ import (
 	"github.com/scribe-org/scribe-server/models"
 )
 
-// # MARK: - Validation Helpers
+// MARK: Validation Helpers
 
 // IsValidTableName validates table names to prevent SQL injection.
 func IsValidTableName(tableName string) bool {
@@ -36,7 +36,7 @@ func IsValidTableName(tableName string) bool {
 	return matched
 }
 
-// # MARK: - Pointer Conversion
+// MARK: Pointer Conversion
 
 // ToIntPtr converts various numeric types to a pointer to int.
 func ToIntPtr(v any) *int {
@@ -67,7 +67,7 @@ func ToStringPtr(v any) *string {
 	}
 }
 
-// # MARK: - Language Metadata
+// MARK: Language Metadata
 
 var languageNames = map[string]string{
 	"EN": "English",
@@ -88,7 +88,7 @@ func GetLanguageDisplayName(code string) string {
 	return strings.ToUpper(code)
 }
 
-// # MARK: - Response Builders
+// MARK: Response Builders
 
 // BuildLanguageStatResponse constructs a LanguageStatisticsResponse object from raw stat data.
 func BuildLanguageStatResponse(code string, stat map[string]any) models.LanguageStatisticsReponse {

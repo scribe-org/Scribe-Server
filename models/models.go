@@ -5,7 +5,7 @@ package models
 
 import "time"
 
-// # MARK: - Error Models
+// MARK: Error Models
 
 // ErrorResponse represents a generic error message returned by the API.
 // swagger:model ErrorResponse
@@ -14,7 +14,7 @@ type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
-// # MARK: - Contract Models
+// MARK: Contract Models
 
 // Contract represents the data schema contract that defines structure and metadata for language data.
 // swagger:model Contract
@@ -33,7 +33,7 @@ type ContractsResponse struct {
 	Contracts map[string]any `json:"contracts"`
 }
 
-// # MARK: - Language Data Models
+// MARK: Language Data Models
 
 // LanguageDataResponse represents the complete response when fetching a language’s data.
 // swagger:model LanguageDataResponse
@@ -54,7 +54,7 @@ type LanguageDataVersion struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
-// # MARK: - Metadata Models
+// MARK: Metadata Models
 
 // LanguageVersionResponse represents version information for a language dataset.
 // swagger:model LanguageVersionResponse
@@ -80,7 +80,7 @@ type AvailableLanguagesResponse struct {
 	Languages []LanguageInfo `json:"languages"`
 }
 
-// # MARK: - Statistics Models
+// MARK: Statistics Models
 
 // LanguageStatisticsReponse represents linguistic statistics for a language.
 // swagger:model LanguageStatisticsReponse

@@ -16,7 +16,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// # MARK: - Server Initialization
+// MARK: Server Initialization
 
 // HandleRequests sets up and starts the server.
 func HandleRequests() {
@@ -40,7 +40,8 @@ func HandleRequests() {
 	// Create Gin router with default middleware (logger and recovery).
 	r := gin.Default()
 
-	// # MARK: - Proxy Configuration
+	// MARK: Proxy Configuration
+
 	// Proxies trust security warning.
 	trustedProxies := []string{} // Default empty (trusts nothing)
 	if os.Getenv("ENV") == "prod" {
@@ -78,7 +79,7 @@ func HandleRequests() {
 	startServer(r)
 }
 
-// # MARK: - Swagger Documentation
+// MARK: Swagger Documentation
 
 // setupSwagger configures the Swagger documentation endpoint.
 func setupSwagger(r *gin.Engine) {
@@ -88,7 +89,7 @@ func setupSwagger(r *gin.Engine) {
 
 }
 
-// # MARK: - Static File Handling
+// MARK: Static File Handling
 
 // setupStaticFiles configures static file serving.
 func setupStaticFiles(r *gin.Engine) {
@@ -106,7 +107,7 @@ func setupStaticFiles(r *gin.Engine) {
 	r.StaticFile("/favicon.ico", "./static/favicon.ico")
 }
 
-// # MARK: - Server Startup
+// MARK: Server Startup
 
 // startServer starts the HTTP server.
 func startServer(r *gin.Engine) {

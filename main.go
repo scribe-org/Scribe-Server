@@ -12,7 +12,7 @@ import (
 	_ "github.com/scribe-org/scribe-server/docs"
 )
 
-// # MARK: - Environment Logging
+// MARK: Environment Logging
 
 // logEnvironment prints out key runtime environment info such as ENV and GIN_MODE.
 func logEnvironment() {
@@ -32,7 +32,7 @@ func logEnvironment() {
 	fmt.Println()
 }
 
-// # MARK: - Swagger Annotations
+// MARK: Swagger Annotations
 //
 // These annotations define Scribe Server's API documentation,
 // versioning, and contact/license information.
@@ -51,12 +51,13 @@ func logEnvironment() {
 // @externalDocs.description  GitHub Repository
 // @externalDocs.url          https://github.com/scribe-org/Scribe-Server
 
-// # MARK: - Main Entry Point
+// MARK: Main Entry Point
 
 func main() {
 	logEnvironment()
 
-	// # MARK: Config Setup
+	// MARK: Config Setup
+
 	// Read configuration from file or environment variables.
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
@@ -81,6 +82,7 @@ func main() {
 	}
 	viper.SetDefault("contractsDir", "./contracts")
 
-	// # MARK: Start Server
+	// MARK: Start Server
+
 	api.HandleRequests()
 }

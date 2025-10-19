@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// # MARK: - Get Available Languages
+// MARK: Get Available Languages
 
 // GetAvailableLanguages retrieves all available languages in the database.
 func GetAvailableLanguages() ([]string, error) {
@@ -43,7 +43,7 @@ func GetAvailableLanguages() ([]string, error) {
 	return languages, nil
 }
 
-// # MARK: - Data Types Retrieval
+// MARK: Data Types Retrieval
 
 // GetLanguageDataTypes retrieves all available data types in a sample language table.
 func GetLanguageDataTypes(lang string) ([]string, error) {
@@ -87,7 +87,7 @@ func GetLanguageDataTypes(lang string) ([]string, error) {
 	return dataTypes, nil
 }
 
-// # MARK: - Language Statistics
+// MARK: Language Statistics
 
 // GetLanguageStat retrieves noun and verb statistics for a specific language.
 func GetLanguageStat(lan string) (map[string]any, error) {
