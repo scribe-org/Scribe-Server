@@ -5,12 +5,16 @@ package models
 
 import "time"
 
+// # MARK: - Error Models
+
 // ErrorResponse represents a generic error message returned by the API.
 // swagger:model ErrorResponse
 type ErrorResponse struct {
 	// Description of the error
 	Error string `json:"error"`
 }
+
+// # MARK: - Contract Models
 
 // Contract represents the data schema contract that defines structure and metadata for language data.
 // swagger:model Contract
@@ -23,6 +27,14 @@ type Contract struct {
 	Fields map[string]map[string]string `json:"fields"`
 }
 
+// ContractsResponse represents all contract metadata available for supported languages.
+// swagger:model ContractsResponse
+type ContractsResponse struct {
+	Contracts map[string]any `json:"contracts"`
+}
+
+// # MARK: - Language Data Models
+
 // LanguageDataResponse represents the complete response when fetching a language’s data.
 // swagger:model LanguageDataResponse
 type LanguageDataResponse struct {
@@ -34,6 +46,16 @@ type LanguageDataResponse struct {
 	Data map[string]any `json:"data"`
 }
 
+// LanguageDataVersion represents a single record in the language_data_versions table.
+// swagger:model LanguageDataVersion
+type LanguageDataVersion struct {
+	LanguageISO string    `json:"language_iso"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+// # MARK: - Metadata Models
+
 // LanguageVersionResponse represents version information for a language dataset.
 // swagger:model LanguageVersionResponse
 type LanguageVersionResponse struct {
@@ -41,14 +63,6 @@ type LanguageVersionResponse struct {
 	Language string `json:"language"`
 	// Map of data types to version identifiers
 	Versions map[string]string `json:"versions"`
-}
-
-// LanguageDataVersion represents a single record in the language_data_versions table.
-// swagger:model LanguageDataVersion
-type LanguageDataVersion struct {
-	LanguageISO string    `json:"language_iso"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	CreatedAt   time.Time `json:"created_at"`
 }
 
 // LanguageInfo represents basic information about a supported language.
@@ -66,11 +80,7 @@ type AvailableLanguagesResponse struct {
 	Languages []LanguageInfo `json:"languages"`
 }
 
-// ContractsResponse represents all contract metadata available for supported languages.
-// swagger:model ContractsResponse
-type ContractsResponse struct {
-	Contracts map[string]any `json:"contracts"`
-}
+// # MARK: - Statistics Models
 
 // LanguageStatisticsReponse represents linguistic statistics for a language.
 // swagger:model LanguageStatisticsReponse

@@ -13,9 +13,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-// MARK: Available Data
+// # MARK: - Get Available Languages
 
-// GetAvailableLanguages gets all available languages in the database.
+// GetAvailableLanguages retrieves all available languages in the database.
 func GetAvailableLanguages() ([]string, error) {
 	query := `
 		SELECT DISTINCT SUBSTRING(TABLE_NAME, 1, 2) as language_code
@@ -43,7 +43,9 @@ func GetAvailableLanguages() ([]string, error) {
 	return languages, nil
 }
 
-// GetLanguageDataTypes gets all available data types in a sample language table.
+// # MARK: - Data Types Retrieval
+
+// GetLanguageDataTypes retrieves all available data types in a sample language table.
 func GetLanguageDataTypes(lang string) ([]string, error) {
 	if len(lang) != 2 {
 		return nil, fmt.Errorf("invalid language code")
@@ -85,9 +87,9 @@ func GetLanguageDataTypes(lang string) ([]string, error) {
 	return dataTypes, nil
 }
 
-// MARK: Language Stats
+// # MARK: - Language Statistics
 
-// GetLanguageStat gets statistics for a specific language (only nouns and verbs).
+// GetLanguageStat retrieves noun and verb statistics for a specific language.
 func GetLanguageStat(lan string) (map[string]any, error) {
 	// Normalize and validate language code (e.g., "EN", "FR").
 	lang := strings.ToUpper(strings.TrimSpace(lan))
@@ -133,7 +135,7 @@ func GetLanguageStat(lan string) (map[string]any, error) {
 	}, nil
 }
 
-// GetAllLanguageStats gets statistics for all available languages (only nouns and verbs).
+// GetAllLanguageStats retrieves statistics for all available languages (only nouns and verbs).
 func GetAllLanguageStats() ([]models.LanguageStatisticsReponse, error) {
 	availableLanguages, err := GetAvailableLanguages()
 	if err != nil {

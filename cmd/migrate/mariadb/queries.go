@@ -15,6 +15,8 @@ import (
 	"golang.org/x/text/language"
 )
 
+// # MARK: - Batch Execution
+
 // ExecuteBatch executes a batch of SQL statements.
 func ExecuteBatch(stmt *sql.Stmt, batch [][]interface{}) error {
 	for _, values := range batch {
@@ -25,6 +27,7 @@ func ExecuteBatch(stmt *sql.Stmt, batch [][]interface{}) error {
 	return nil
 }
 
+// # MARK: - Table Naming
 // generateMariaTableName creates the MariaDB table name with proper capitalization and suffixes.
 func generateMariaTableName(langCode, tableName string) string {
 	// Remove sqlite_ prefix if present.
@@ -47,6 +50,8 @@ func generateMariaTableName(langCode, tableName string) string {
 	// ENLanguageData + nouns -> ENLanguageDataNounsScribe
 	return langCode + cleanTableName + "Scribe"
 }
+
+// # MARK: - Migration Core
 
 // MigrateTable migrates a single table from SQLite to MariaDB.
 func MigrateTable(sqlite *sql.DB, mariaDB *sql.DB, langCode, tableName string) error {
@@ -117,6 +122,7 @@ func MigrateTable(sqlite *sql.DB, mariaDB *sql.DB, langCode, tableName string) e
 	return nil
 }
 
+// MARK: -  Table Check
 // tableExists checks if a table exists in the MariaDB database.
 func tableExists(db *sql.DB, tableName string) (bool, error) {
 	var exists int
@@ -128,6 +134,7 @@ func tableExists(db *sql.DB, tableName string) (bool, error) {
 	return exists > 0, nil
 }
 
+// # MARK: - Data Migration
 // performDataMigration handles the actual data transfer between databases.
 func performDataMigration(sqlite *sql.DB, mariaDB *sql.DB, schema *types.TableSchema, srcTable, destTable string) error {
 	columns := "`" + strings.Join(schema.ColumnNames, "`, `") + "`"
@@ -174,6 +181,7 @@ func performDataMigration(sqlite *sql.DB, mariaDB *sql.DB, schema *types.TableSc
 	return nil
 }
 
+// #  MARK: - Batch Processing
 // processBatches handles processing rows in batches.
 func processBatches(rows *sql.Rows, stmt *sql.Stmt, columnNames []string, tableName string) error {
 	batchSize := 5000
