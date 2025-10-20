@@ -175,23 +175,9 @@ After adding this line, remember to apply the changes by sourcing the file (e.g.
 
 # Supported Languages [`⇧`](#contents)
 
-Scribe's goal is functional, feature-rich keyboards and interfaces for all languages. Check the [Scribe-Data extract_transform](https://github.com/scribe-org/Scribe-Data/tree/main/src/scribe_data/extract_transform) directory for queries for currently supported languages and those that have substantial data on [Wikidata](https://www.wikidata.org/).
+Scribe's goal is functional, feature-rich keyboards for all languages. You can check the currently available data for all Scribe applications on our website at [scri.be/docs/server/available-data](https://scri.be/docs/server/available-data).
 
-The following table shows the supported languages and the amount of data available for each on [Wikidata](https://www.wikidata.org/) and via [Unicode CLDR](https://github.com/unicode-org/cldr) for emojis:
-
-| Languages  |   Nouns | Verbs | Translations\* | Prepositions† | Emoji Keywords |
-| :--------- | ------: | ----: | -------------: | ------------: | -------------: |
-| French     |  18,082 | 6,575 |         67,652 |             - |          2,488 |
-| German     | 194,762 | 3,637 |         67,652 |           215 |          2,898 |
-| Italian    |  59,910 | 7,654 |         67,652 |             - |          2,457 |
-| Portuguese |   5,281 |   539 |         67,652 |             - |          2,327 |
-| Russian    | 194,567 |    15 |         67,652 |            15 |          3,827 |
-| Spanish    |  62,949 | 7,938 |         67,652 |             - |          3,134 |
-| Swedish    |  47,039 | 4,682 |         67,652 |             - |          2,913 |
-
-`*` Given the current **`beta`** status where words are machine translated.
-
-`†` Only for languages for which preposition annotation is needed.
+See [scribe_data/wikidata/language_data_extraction](https://github.com/scribe-org/Scribe-Data/tree/main/src/scribe_data/wikidata/language_data_extraction) for queries in the [Scribe-Data](https://github.com/scribe-org/Scribe-Data) project for currently supported languages and those that have substantial data on [Wikidata](https://www.wikidata.org/). Also see the [`new keyboard`](https://github.com/scribe-org/Scribe-iOS/issues?q=is%3Aissue+is%3Aopen+label%3A%22new+keyboard%22) label in the [Issues](https://github.com/scribe-org/Scribe-iOS/issues) for keyboards that are currently in progress or being discussed, and [suggest a new keyboard](https://github.com/scribe-org/Scribe-iOS/issues/new?assignees=&labels=new+keyboard&template=new_keyboard.yml&title=Add+%3Clanguage%3E+keyboard) if you don't see it being worked on already!
 
 <a id="featured-by"></a>
 
