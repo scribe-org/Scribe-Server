@@ -22,6 +22,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+// MARK: Languages Endpoints
+
 // GetAvailableLanguages returns a list of all supported languages and their available data types.
 //
 // @Summary List all supported languages
@@ -58,6 +60,8 @@ func GetAvailableLanguages(c *gin.Context) {
 		Languages: languageInfos,
 	})
 }
+
+// MARK: Language Data Retrieval
 
 // GetLanguageData returns the full dataset and schema contract for a specific language.
 //
@@ -140,6 +144,8 @@ func GetLanguageData(c *gin.Context) {
 	HandleSuccess(c, response)
 }
 
+// MARK: Language Version Info
+
 // GetLanguageVersion returns version information (last modified dates) for all data types of a given language.
 //
 // @Summary Get version information for a language
@@ -190,6 +196,8 @@ func GetLanguageVersion(c *gin.Context) {
 
 	HandleSuccess(c, response)
 }
+
+// MARK: Contracts Retrieval
 
 // GetContracts returns schema contracts for all languages or a specific one if a query parameter is provided.
 //
@@ -248,6 +256,8 @@ func GetContracts(c *gin.Context) {
 		Contracts: contracts,
 	})
 }
+
+// MARK: Contract Loading Helpers
 
 // loadSingleContract reads and unmarshals a single contract file.
 func loadSingleContract(contractsDir, lang string) (map[string]any, error) {

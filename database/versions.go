@@ -12,6 +12,8 @@ import (
 	"golang.org/x/text/language"
 )
 
+// MARK: Table Creation
+
 // CreateLanguageDataVersionsTable creates the `language_data_versions` table if it does not already exist.
 // This table tracks the last updated time for each language's dataset.
 func CreateLanguageDataVersionsTable() error {
@@ -32,6 +34,8 @@ func CreateLanguageDataVersionsTable() error {
 	return nil
 }
 
+// MARK: Version Update
+
 // UpdateLanguageVersion updates the `updated_at` timestamp for a specific language in the `language_data_versions` table.
 // If the language does not exist, it inserts a new row.
 func UpdateLanguageVersion(lang string) error {
@@ -48,6 +52,8 @@ func UpdateLanguageVersion(lang string) error {
 
 	return nil
 }
+
+// MARK: Get Language Versions
 
 // GetLanguageVersions returns a map of data types to their last modified date for the given language.
 func GetLanguageVersions(lang string) (map[string]string, error) {

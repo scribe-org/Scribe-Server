@@ -16,6 +16,8 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// MARK: Server Initialization
+
 // HandleRequests sets up and starts the server.
 func HandleRequests() {
 	viper.AutomaticEnv()
@@ -37,6 +39,8 @@ func HandleRequests() {
 
 	// Create Gin router with default middleware (logger and recovery).
 	r := gin.Default()
+
+	// MARK: Proxy Configuration
 
 	// Proxies trust security warning.
 	trustedProxies := []string{} // Default empty (trusts nothing)
@@ -75,6 +79,8 @@ func HandleRequests() {
 	startServer(r)
 }
 
+// MARK: Swagger Documentation
+
 // setupSwagger configures the Swagger documentation endpoint.
 func setupSwagger(r *gin.Engine) {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -82,6 +88,8 @@ func setupSwagger(r *gin.Engine) {
 	log.Printf("📖 API Documentation available at: /swagger/index.html")
 
 }
+
+// MARK: Static File Handling
 
 // setupStaticFiles configures static file serving.
 func setupStaticFiles(r *gin.Engine) {
@@ -98,6 +106,8 @@ func setupStaticFiles(r *gin.Engine) {
 	}
 	r.StaticFile("/favicon.ico", "./static/favicon.ico")
 }
+
+// MARK: Server Startup
 
 // startServer starts the HTTP server.
 func startServer(r *gin.Engine) {
