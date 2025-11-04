@@ -97,7 +97,6 @@ func setupSwagger(r *gin.Engine) {
 // setupStaticFiles configures static file serving.
 func setupStaticFiles(r *gin.Engine) {
 	fileSystem := viper.GetString("fileSystem")
-	fmt.Println("FileSystem =", fileSystem)
 	if fileSystem == "" {
 		fileSystem = "./"
 	}
