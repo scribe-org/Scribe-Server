@@ -5,7 +5,10 @@ package api
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/scribe-org/scribe-server/api/validators"
@@ -94,16 +97,32 @@ func setupSwagger(r *gin.Engine) {
 // setupStaticFiles configures static file serving.
 func setupStaticFiles(r *gin.Engine) {
 	fileSystem := viper.GetString("fileSystem")
-	if fileSystem != "" {
-		log.Printf("Serving files from: %s", fileSystem)
-
-		// Check if the directory exists.
-		if _, err := os.Stat(fileSystem); os.IsNotExist(err) {
-			log.Printf("Warning: Directory %s does not exist, static file serving disabled", fileSystem)
-		} else {
-			r.Static("/packs", fileSystem)
-		}
+	fmt.Println("FileSystem =", fileSystem)
+	if fileSystem == "" {
+		fileSystem = "./"
 	}
+
+	log.Printf("Serving files from: %s", fileSystem)
+
+	if _, err := os.Stat(fileSystem); os.IsNotExist(err) {
+		log.Printf("Warning: Directory %s does not exist, static file serving disabled", fileSystem)
+		return
+	}
+
+	// packs directory
+	fs := http.FileServer(http.Dir(filepath.Join(fileSystem, "packs")))
+	r.GET("/packs/*filepath", func(c *gin.Context) {
+		path := c.Param("filepath")
+		fullPath := filepath.Join(fileSystem, "packs", path)
+
+		if info, err := os.Stat(fullPath); err == nil && info.IsDir() && !strings.HasSuffix(c.Request.URL.Path, "/") {
+			c.Redirect(http.StatusMovedPermanently, c.Request.URL.Path+"/")
+			return
+		}
+
+		http.StripPrefix("/packs/", fs).ServeHTTP(c.Writer, c.Request)
+	})
+
 	r.StaticFile("/favicon.ico", "./static/favicon.ico")
 }
 

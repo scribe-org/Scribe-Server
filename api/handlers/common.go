@@ -22,7 +22,8 @@ func HandleSuccess(c *gin.Context, data any) {
 	c.JSON(http.StatusOK, data)
 }
 
-// Hello handles the root endpoint.
-func Hello(c *gin.Context) {
-	c.String(http.StatusOK, "Hello, I'm Scribe!")
+// ServeHome handles the root endpoint.
+func ServeHome(c *gin.Context) {
+	c.Header("Content-Type", "text/html; charset=utf-8")
+	c.File("./static/index.html")
 }

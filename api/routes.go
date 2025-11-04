@@ -9,7 +9,7 @@ import (
 
 // SetupRoutes configures all API routes with versioning.
 func SetupRoutes(r *gin.Engine) {
-	r.GET("/", handlers.Hello)
+	r.GET("/", handlers.ServeHome)
 
 	api := r.Group("/api")
 	{
