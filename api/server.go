@@ -108,7 +108,7 @@ func setupStaticFiles(r *gin.Engine) {
 		return
 	}
 
-	// packs directory
+	// Language data packs directory.
 	fs := http.FileServer(http.Dir(filepath.Join(fileSystem, "packs")))
 	r.GET("/packs/*filepath", func(c *gin.Context) {
 		path := c.Param("filepath")

@@ -1,269 +1,348 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Scribe-Server</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: #e0e0e0;
-            background: #0a0a0a;
-            min-height: 100vh;
-            padding: 20px;
-        }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        line-height: 1.6;
+        color: #e0e0e0;
+        background: #0a0a0a;
+        min-height: 100vh;
+        padding: 20px;
+      }
 
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: #1a1a1a;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        padding: 50px;
+        animation: fadeIn 0.6s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      h1 {
+        color: #3e95cc;
+        font-size: 3em;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      .tagline {
+        color: #999;
+        font-size: 1.2em;
+        margin-bottom: 30px;
+        font-style: italic;
+      }
+
+      .description {
+        font-size: 1.1em;
+        margin-bottom: 40px;
+        color: #ccc;
+        line-height: 1.8;
+      }
+
+      .section {
+        margin-bottom: 40px;
+      }
+
+      h2 {
+        color: #3e95cc;
+        font-size: 1.8em;
+        margin-bottom: 15px;
+        border-bottom: 3px solid #3e95cc;
+        padding-bottom: 10px;
+      }
+
+      .links {
+        display: grid;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .link-button {
+        display: flex;
+        align-items: center;
+        padding: 18px 25px;
+        background: #3e95cc;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.05em;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(62, 149, 204, 0.3);
+      }
+
+      .link-button:hover {
+        transform: translateX(5px);
+        box-shadow: 0 6px 20px rgba(62, 149, 204, 0.5);
+        background: #3a8dc2;
+      }
+
+      .link-button::before {
+        content: "→";
+        margin-right: 15px;
+        font-size: 1.3em;
+        font-weight: bold;
+      }
+
+      .secondary-link {
+        background: #2c7ba3;
+      }
+
+      .secondary-link:hover {
+        background: #27709a;
+      }
+
+      .endpoints-list {
+        background: #252525;
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 20px;
+        border-left: 4px solid #3e95cc;
+      }
+
+      .endpoints-list ul {
+        list-style: none;
+      }
+
+      .endpoints-list li {
+        padding: 12px 0;
+        border-bottom: 1px solid #333;
+        color: #ccc;
+        font-family: "Courier New", monospace;
+        font-size: 0.95em;
+      }
+
+      .endpoints-list li:last-child {
+        border-bottom: none;
+      }
+
+      .endpoints-list li::before {
+        content: "✅";
+        margin-right: 12px;
+      }
+
+      .icon-section {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: -80px;
+        margin-top: -30px;
+      }
+
+      .icon {
+        width: 120px;
+        height: 120px;
+        opacity: 0.9;
+        filter: drop-shadow(0 0 12px rgba(62, 149, 204, 0.6));
+      }
+
+      .footer {
+        margin-top: 50px;
+        padding-top: 30px;
+        border-top: 2px solid #333;
+        text-align: center;
+        color: #666;
+      }
+
+      .footer a {
+        color: #3e95cc;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .footer a:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 768px) {
         .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: #1a1a1a;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            padding: 50px;
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+          padding: 30px 20px;
         }
 
         h1 {
-            color: #3E95CC;
-            font-size: 3em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .tagline {
-            color: #999;
-            font-size: 1.2em;
-            margin-bottom: 30px;
-            font-style: italic;
-        }
-
-        .description {
-            font-size: 1.1em;
-            margin-bottom: 40px;
-            color: #ccc;
-            line-height: 1.8;
-        }
-
-        .section {
-            margin-bottom: 40px;
-        }
-
-        h2 {
-            color: #3E95CC;
-            font-size: 1.8em;
-            margin-bottom: 15px;
-            border-bottom: 3px solid #3E95CC;
-            padding-bottom: 10px;
-        }
-
-        .links {
-            display: grid;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .link-button {
-            display: flex;
-            align-items: center;
-            padding: 18px 25px;
-            background: #3E95CC;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1.05em;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(62, 149, 204, 0.3);
-        }
-
-        .link-button:hover {
-            transform: translateX(5px);
-            box-shadow: 0 6px 20px rgba(62, 149, 204, 0.5);
-            background: #3a8dc2;
-        }
-
-        .link-button::before {
-            content: "→";
-            margin-right: 15px;
-            font-size: 1.3em;
-            font-weight: bold;
-        }
-
-        .secondary-link {
-            background: #2c7ba3;
-        }
-
-        .secondary-link:hover {
-            background: #27709a;
-        }
-
-        .endpoints-list {
-            background: #252525;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            border-left: 4px solid #3E95CC;
-        }
-
-        .endpoints-list ul {
-            list-style: none;
-        }
-
-        .endpoints-list li {
-            padding: 12px 0;
-            border-bottom: 1px solid #333;
-            color: #ccc;
-            font-family: 'Courier New', monospace;
-            font-size: 0.95em;
-        }
-
-        .endpoints-list li:last-child {
-            border-bottom: none;
-        }
-
-        .endpoints-list li::before {
-            content: "✅";
-            margin-right: 12px;
+          font-size: 2.2em;
         }
 
         .icon-section {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: -80px;
-            margin-top: -30px;
+          margin-bottom: -60px;
         }
 
         .icon {
-            width: 120px;
-            height: 120px;
-            opacity: 0.9;
-            filter: drop-shadow(0 0 12px rgba(62, 149, 204, 0.6));
+          width: 80px;
+          height: 80px;
         }
-
-        .footer {
-            margin-top: 50px;
-            padding-top: 30px;
-            border-top: 2px solid #333;
-            text-align: center;
-            color: #666;
-        }
-
-        .footer a {
-            color: #3E95CC;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 30px 20px;
-            }
-
-            h1 {
-                font-size: 2.2em;
-            }
-
-            .icon-section {
-                margin-bottom: -60px;
-            }
-
-            .icon {
-                width: 80px;
-                height: 80px;
-            }
-        }
+      }
     </style>
-</head>
-<body>
-<div class="container">
-    <div class="icon-section">
-        <svg class="icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <linearGradient id="scribeGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#3E95CC"/>
-                    <stop offset="100%" stop-color="#63B3ED"/>
-                </linearGradient>
-            </defs>
-            <rect x="10" y="10" width="80" height="80" rx="8" fill="none" stroke="url(#scribeGradient)" stroke-width="3"/>
-            <rect x="25" y="45" width="12" height="35" rx="2" fill="url(#scribeGradient)"/>
-            <rect x="44" y="35" width="12" height="45" rx="2" fill="url(#scribeGradient)"/>
-            <rect x="63" y="25" width="12" height="55" rx="2" fill="url(#scribeGradient)"/>
-            <circle cx="50" cy="20" r="8" stroke="url(#scribeGradient)" stroke-width="2" fill="none"/>
+  </head>
+  <body>
+    <div class="container">
+      <div class="icon-section">
+        <svg
+          class="icon"
+          viewBox="0 0 100 100"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <linearGradient id="scribeGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3E95CC" />
+              <stop offset="100%" stop-color="#63B3ED" />
+            </linearGradient>
+          </defs>
+          <rect
+            x="10"
+            y="10"
+            width="80"
+            height="80"
+            rx="8"
+            fill="none"
+            stroke="url(#scribeGradient)"
+            stroke-width="3"
+          />
+          <rect
+            x="25"
+            y="45"
+            width="12"
+            height="35"
+            rx="2"
+            fill="url(#scribeGradient)"
+          />
+          <rect
+            x="44"
+            y="35"
+            width="12"
+            height="45"
+            rx="2"
+            fill="url(#scribeGradient)"
+          />
+          <rect
+            x="63"
+            y="25"
+            width="12"
+            height="55"
+            rx="2"
+            fill="url(#scribeGradient)"
+          />
+          <circle
+            cx="50"
+            cy="20"
+            r="8"
+            stroke="url(#scribeGradient)"
+            stroke-width="2"
+            fill="none"
+          />
         </svg>
+      </div>
 
-    </div>
+      <h1>Scribe-Server</h1>
+      <p class="tagline">Backend API for Wikidata-powered language data</p>
 
-    <h1>Scribe-Server</h1>
-    <p class="tagline">Backend API for Wikidata-powered language data</p>
+      <div class="description">
+        Scribe-Server is a backend service that provides the API by which data
+        is available for download within Scribe applications. The goal is to create
+        a Scribe-Data based regularly updating dataset that can signal new data
+        availability as well as allow for language pack downloads. The
+        Scribe-Server API can be used as a data source for pre-processed
+        language data.
+      </div>
 
-    <div class="description">
-        Scribe-Server is a backend service that provides the API by which data is available for download within Scribe apps. The goal is to create a Scribe-Data based regularly updating dataset that can signal new data availability as well as allow for language pack downloads. The Scribe-Server API can be used as a data source for pre-processed language data.
-    </div>
-
-  <div class="section">
+      <div class="section">
         <h2>API Resources</h2>
         <div class="links">
-            <a href="/docs/index.html" class="link-button">API Documentation (Swagger UI)</a>
-            <a href="https://scri.be/docs/server/available-data" class="link-button secondary-link">Available Data</a>
-            <a href="/packs/sqlite" class="link-button secondary-link">Download SQLite Language Packs</a>
-
+          <a href="/docs/index.html" class="link-button">
+            API Documentation (Swagger UI)
+          </a>
+          <a
+            href="https://scri.be/docs/server/available-data"
+            class="link-button secondary-link"
+          >
+            Available Data
+          </a>
+          <a href="/packs/sqlite" class="link-button secondary-link">
+            Download SQLite Language Packs
+          </a>
         </div>
-    </div>
+      </div>
 
-    <div class="section">
+      <div class="section">
         <h2>API Endpoints</h2>
         <div class="endpoints-list">
-            <ul>
-                <li>GET /api/v1/languages - List available languages</li>
-                <li>GET /api/v1/contracts[?lang_iso=xx] - Get contracts (optional language filter)</li>
-                <li>GET /api/v1/data/:lang_iso - Get full language data with schema</li>
-                <li>GET /api/v1/data-version/:lang_iso - Get version info for a language</li>
-                <li>GET /api/v1/language-stats?codes=fr,de - Get statistics for all or selected languages</li>
-            </ul>
+          <ul>
+            <li>GET /api/v1/languages - List available languages</li>
+            <li>
+              GET /api/v1/contracts[?lang_iso=xx] - Get contracts (optional
+              language filter)
+            </li>
+            <li>
+              GET /api/v1/data/:lang_iso - Get full language data with schema
+            </li>
+            <li>
+              GET /api/v1/data-version/:lang_iso - Get version info for a
+              language
+            </li>
+            <li>
+              GET /api/v1/language-stats?codes=fr,de - Get statistics for all or
+              selected languages
+            </li>
+          </ul>
         </div>
-    </div>
+      </div>
 
-    <div class="section">
+      <div class="section">
         <div class="links">
-            <a href="https://github.com/scribe-org/Scribe-Server" class="link-button">View on GitHub</a>
-            <a href="https://scri.be" class="link-button secondary-link">Visit Scribe Website</a>
+          <a
+            href="https://github.com/scribe-org/Scribe-Server"
+            class="link-button"
+          >
+          View on GitHub
+          </a>
+          <a href="https://scri.be" class="link-button secondary-link">
+            Visit Scribe Website
+          </a>
         </div>
-    </div>
+      </div>
 
-    <div class="footer">
-        <p>Scribe is part of the <a href="https://www.wikimedia.org/">Wikimedia</a> ecosystem</p>
-        <p style="margin-top: 10px;">Licensed under GPL-3.0 | Data from <a href="https://www.wikidata.org/">Wikidata</a></p>
-        <p style="margin-top: 15px; font-size: 0.9em;">
-            <a href="https://github.com/scribe-org">GitHub</a> •
-            <a href="https://scri.be">Website</a> •
-            <a href="https://github.com/scribe-org/Scribe-iOS">iOS App</a> •
-            <a href="https://github.com/scribe-org/Scribe-Android">Android App</a> •
-            <a href="https://github.com/scribe-org/Scribe-Data">Data CLI</a> •
-            <a href="https://github.com/scribe-org/Scribe-Desktop">Desktop App</a>
+      <div class="footer">
+        <p>
+          Scribe is part of the
+          <a href="https://www.wikimedia.org/">Wikimedia</a> ecosystem
         </p>
+        <p style="margin-top: 10px">
+          <Licensed href="https://github.com/scribe-org/Scribe-Server/blob/main/LICENSE.txt">Licensed under GPL-3.0</a>
+            • Data from
+          <a href="https://www.wikidata.org/">Wikidata</a>
+        </p>
+        <p style="margin-top: 15px; font-size: 0.9em">
+          <a href="https://github.com/scribe-org">GitHub</a> •
+          <a href="https://scri.be">Website</a> •
+          <a href="https://github.com/scribe-org/Scribe-Data">Data CLI</a> •
+          <a href="https://github.com/scribe-org/Scribe-iOS">iOS App</a> •
+          <a href="https://github.com/scribe-org/Scribe-Android">Android App</a> •
+          <a href="https://github.com/scribe-org/Scribe-Desktop">Desktop App</a>
+        </p>
+      </div>
     </div>
-</div>
-</body>
+  </body>
 </html>
