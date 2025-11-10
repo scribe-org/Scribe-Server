@@ -3,11 +3,11 @@ name: Update Scribe Data and Deploy to Toolforge
 on:
   # Trigger on push to main branch.
   push:
-    branches: [main]
+    branches: [main, fix/deployment-and-download-page]
   
   # Will be used when cotributor is trying to merge into main
   pull_request:
-    branches:
+    branches: [main, fix/deployment-and-download-page]
     
   # Trigger: When there is a GitHub Release.
   release:
