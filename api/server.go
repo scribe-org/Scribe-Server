@@ -101,18 +101,25 @@ func setupStaticFiles(r *gin.Engine) {
 		fileSystem = "./"
 	}
 
-	log.Printf("Serving files from: %s", fileSystem)
+	// Always convert to absolute path (resolves "./packs" safely)
+	absPath, err := filepath.Abs(fileSystem)
+	if err != nil {
+		log.Printf("Error resolving absolute path for %s: %v", fileSystem, err)
+		absPath = fileSystem
+	}
 
-	if _, err := os.Stat(fileSystem); os.IsNotExist(err) {
+	log.Printf("Serving files from: %s", absPath)
+
+	if _, err := os.Stat(absPath); os.IsNotExist(err) {
 		log.Printf("Warning: Directory %s does not exist, static file serving disabled", fileSystem)
 		return
 	}
 
 	// Language data packs directory.
-	fs := http.FileServer(http.Dir(filepath.Join(fileSystem, "packs")))
+	fs := http.FileServer(http.Dir(absPath))
 	r.GET("/packs/*filepath", func(c *gin.Context) {
 		path := c.Param("filepath")
-		fullPath := filepath.Join(fileSystem, "packs", path)
+		fullPath := filepath.Join(absPath, path)
 
 		if info, err := os.Stat(fullPath); err == nil && info.IsDir() && !strings.HasSuffix(c.Request.URL.Path, "/") {
 			c.Redirect(http.StatusMovedPermanently, c.Request.URL.Path+"/")
@@ -122,7 +129,10 @@ func setupStaticFiles(r *gin.Engine) {
 		http.StripPrefix("/packs/", fs).ServeHTTP(c.Writer, c.Request)
 	})
 
-	r.StaticFile("/favicon.ico", "./static/favicon.ico")
+	faviconPath := filepath.Join(absPath, "..", "static", "favicon.ico")
+	if _, err := os.Stat(faviconPath); err == nil {
+		r.StaticFile("/favicon.ico", faviconPath)
+	}
 }
 
 // MARK: Server Startup
