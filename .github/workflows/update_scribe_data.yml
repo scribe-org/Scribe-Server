@@ -104,7 +104,7 @@ jobs:
 
           echo "📤 Transferring package to Toolforge..."
           scp -o ConnectTimeout=60 ./scribe-data-sqlite.tar.gz \
-            ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org:/data/project/scribe-test-server/scribe-data-sqlite.tar.gz
+            ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org:/data/project/scribe-server/scribe-data-sqlite.tar.gz
 
           if [ $? -ne 0 ]; then
             echo "❌ SCP file transfer failed."
@@ -119,8 +119,8 @@ jobs:
             # --- Switch to the tool user ---
             become scribe-server
 
-            # --- Running as the tool user (e.g., scribe-test-server) ---
-            # Current Directory: /data/project/scribe-test-server
+            # --- Running as the tool user (e.g., scribe-server) ---
+            # Current Directory: /data/project/scribe-server
 
             # Move the package into the Scribe-Server directory
             if [ ! -f "./scribe-data-sqlite.tar.gz" ]; then
