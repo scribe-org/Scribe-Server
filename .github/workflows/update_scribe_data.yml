@@ -4,7 +4,11 @@ on:
   # Trigger on push to main branch.
   push:
     branches: [main]
-
+  
+  # Will be used when cotributor is trying to merge into main
+  pull_request:
+    branches:
+    
   # Trigger: When there is a GitHub Release.
   release:
     types: [published]
@@ -44,7 +48,7 @@ jobs:
       - name: Make script executable
         run: chmod +x ./update_data.sh
 
-      - name: Run update script
+      - name: Run update script (skips migration)
         run: ./update_data.sh true
 
       - name: Create deployment package
@@ -88,10 +92,8 @@ jobs:
       - name: Deploy to Toolforge
         if: success()
         run: |
-          # 1. Add Toolforge to known hosts
           ssh-keyscan -H login.toolforge.org >> ~/.ssh/known_hosts
 
-          # 2. Transfer the package directly to the tool's project directory
           echo "📤 Transferring package to Toolforge..."
           scp -o ConnectTimeout=60 ./scribe-data-sqlite.tar.gz \
             ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org:/data/project/scribe-test-server/scribe-data-sqlite.tar.gz
@@ -102,13 +104,12 @@ jobs:
           fi
           echo "✅ Package transferred successfully."
 
-          # 3. Run a single script on the remote server to deploy the package
           echo "🚀 Starting remote deployment process..."
           ssh -o ConnectTimeout=60 \
             ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org << 'DEPLOY_SCRIPT_EOF'
 
             # --- Switch to the tool user ---
-            become scribe-test-server
+            become scribe-server
 
             # --- Running as the tool user (e.g., scribe-test-server) ---
             # Current Directory: /data/project/scribe-test-server
