@@ -83,6 +83,14 @@ jobs:
           path: ./scribe-data-sqlite.tar.gz
           retention-days: 30
 
+      - name: Debug - Check if secret exists
+        run: |
+          if [ -z "${{ secrets.TOOLFORGE_SSH_KEY }}" ]; then
+            echo "SECRET IS EMPTY OR NOT SET"
+          else
+            echo "Secret exists and has content"
+          fi
+
       - name: Setup SSH for Toolforge deployment
         if: success()
         uses: webfactory/ssh-agent@v0.9.0
