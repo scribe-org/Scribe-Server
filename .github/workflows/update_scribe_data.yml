@@ -1,22 +1,22 @@
 name: Update Scribe Data and Deploy to Toolforge
 
 on:
-  # Trigger on push to main branch.
+  # Dispatch on push to main branch.
   push:
     branches: [main]
 
-  # Will be used when cotributor is trying to merge into main.
+  # Will be used when contributor is trying to merge into main.
   # pull_request:
   #   branches: [main, fix/deployment-and-download-page]
 
-  # Trigger when there is a GitHub release.
+  # Dispatch when there is a GitHub release.
   release:
     types: [published]
 
   # Manual dispatch.
   workflow_dispatch:
 
-  # Monthly schedule run.
+  # Monthly scheduled dispatch.
   schedule:
     - cron: "0 0 1 * *" # run on the 1st of every month at midnight UTC
 
