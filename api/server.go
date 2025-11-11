@@ -46,7 +46,7 @@ func HandleRequests() {
 	// MARK: Proxy Configuration
 
 	// Proxies trust security warning.
-	trustedProxies := []string{} // Default empty (trusts nothing)
+	trustedProxies := []string{} // default empty (trusts nothing)
 	if os.Getenv("ENV") == "prod" {
 		// Trust RFC 1918 private network ranges commonly used by cloud providers and load balancers.
 		trustedProxies = []string{
@@ -98,31 +98,80 @@ func setupSwagger(r *gin.Engine) {
 func setupStaticFiles(r *gin.Engine) {
 	fileSystem := viper.GetString("fileSystem")
 	if fileSystem == "" {
-		fileSystem = "./"
+		fileSystem = "./packs"
 	}
 
-	log.Printf("Serving files from: %s", fileSystem)
+	absPath, err := filepath.Abs(fileSystem)
+	if err != nil {
+		log.Fatalf("Error resolving absolute path for %s: %v", fileSystem, err)
+	}
 
-	if _, err := os.Stat(fileSystem); os.IsNotExist(err) {
-		log.Printf("Warning: Directory %s does not exist, static file serving disabled", fileSystem)
+	log.Printf("Serving files from: %s", absPath)
+	if _, err := os.Stat(absPath); os.IsNotExist(err) {
+		log.Printf("Warning: Directory %s does not exist, static file serving disabled", absPath)
 		return
 	}
 
-	// Language data packs directory.
-	fs := http.FileServer(http.Dir(filepath.Join(fileSystem, "packs")))
+	sqlitePath := filepath.Join(absPath, "sqlite")
+	log.Printf("SQLite directory path: %s", sqlitePath)
+
+	// Single unified handler for all /packs/* routes.
 	r.GET("/packs/*filepath", func(c *gin.Context) {
 		path := c.Param("filepath")
-		fullPath := filepath.Join(fileSystem, "packs", path)
+
+		if path == "/sqlite/list" {
+			files, err := os.ReadDir(sqlitePath)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not read directory"})
+				return
+			}
+			var sqliteFiles []string
+			for _, file := range files {
+				if !file.IsDir() && strings.HasSuffix(file.Name(), ".sqlite") {
+					sqliteFiles = append(sqliteFiles, file.Name())
+				}
+			}
+			c.JSON(http.StatusOK, sqliteFiles)
+			return
+		}
+
+		if strings.HasPrefix(path, "/sqlite/") && strings.HasSuffix(path, ".sqlite") {
+			filename := strings.TrimPrefix(path, "/sqlite/")
+			// Prevent directory traversal.
+			if strings.Contains(filename, "..") || strings.Contains(filename, "/") {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid filename"})
+				return
+			}
+
+			filePath := filepath.Join(sqlitePath, filename)
+			if _, err := os.Stat(filePath); os.IsNotExist(err) {
+				c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
+				return
+			}
+			// Set headers to force download.
+			c.Header("Content-Description", "File Transfer")
+			c.Header("Content-Transfer-Encoding", "binary")
+			c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+			c.Header("Content-Type", "application/x-sqlite3")
+			c.File(filePath)
+			return
+		}
+
+		fullPath := filepath.Join(absPath, path)
 
 		if info, err := os.Stat(fullPath); err == nil && info.IsDir() && !strings.HasSuffix(c.Request.URL.Path, "/") {
 			c.Redirect(http.StatusMovedPermanently, c.Request.URL.Path+"/")
 			return
 		}
 
+		fs := http.FileServer(http.Dir(absPath))
 		http.StripPrefix("/packs/", fs).ServeHTTP(c.Writer, c.Request)
 	})
 
-	r.StaticFile("/favicon.ico", "./static/favicon.ico")
+	faviconPath := filepath.Join(absPath, "..", "static", "favicon.ico")
+	if _, err := os.Stat(faviconPath); err == nil {
+		r.StaticFile("/favicon.ico", faviconPath)
+	}
 }
 
 // MARK: Server Startup

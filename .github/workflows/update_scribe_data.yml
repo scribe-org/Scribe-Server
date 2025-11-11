@@ -1,24 +1,22 @@
 name: Update Scribe Data and Deploy to Toolforge
 
 on:
-  # Trigger on push to main branch.
+  # Dispatch on push to main branch.
   push:
     branches: [main]
 
-  # Trigger: When there is a GitHub Release.
+  # Will be used when contributor is trying to merge into main.
+  # pull_request:
+  #   branches: [main, fix/deployment-and-download-page]
+
+  # Dispatch when there is a GitHub release.
   release:
     types: [published]
 
-  # Manual trigger.
+  # Manual dispatch.
   workflow_dispatch:
-    inputs:
-      force_update:
-        description: "Force data update even if no release"
-        required: false
-        default: "false"
-        type: boolean
 
-  # Monthly schedule run.
+  # Monthly scheduled dispatch.
   schedule:
     - cron: "0 0 1 * *" # run on the 1st of every month at midnight UTC
 
@@ -44,7 +42,7 @@ jobs:
       - name: Make script executable
         run: chmod +x ./update_data.sh
 
-      - name: Run update script
+      - name: Run update script (skips migration)
         run: ./update_data.sh true
 
       - name: Create deployment package
@@ -64,7 +62,7 @@ jobs:
           tar -czf scribe-data-sqlite.tar.gz -C ./packs/sqlite .
           echo "📦 Created deployment package"
 
-          # Verify the package was created and show its size
+          # Verify the package was created and show its size.
           if [ -f "scribe-data-sqlite.tar.gz" ]; then
             echo "✅ Package created successfully: $(ls -lh scribe-data-sqlite.tar.gz)"
           else
@@ -79,6 +77,14 @@ jobs:
           path: ./scribe-data-sqlite.tar.gz
           retention-days: 30
 
+      - name: Debug - Check if secret exists
+        run: |
+          if [ -z "${{ secrets.TOOLFORGE_SSH_KEY }}" ]; then
+            echo "SECRET IS EMPTY OR NOT SET"
+          else
+            echo "Secret exists and has content"
+          fi
+
       - name: Setup SSH for Toolforge deployment
         if: success()
         uses: webfactory/ssh-agent@v0.9.0
@@ -88,13 +94,11 @@ jobs:
       - name: Deploy to Toolforge
         if: success()
         run: |
-          # 1. Add Toolforge to known hosts
           ssh-keyscan -H login.toolforge.org >> ~/.ssh/known_hosts
 
-          # 2. Transfer the package directly to the tool's project directory
           echo "📤 Transferring package to Toolforge..."
           scp -o ConnectTimeout=60 ./scribe-data-sqlite.tar.gz \
-            ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org:/data/project/scribe-test-server/scribe-data-sqlite.tar.gz
+            ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org:/data/project/scribe-server/scribe-data-sqlite.tar.gz
 
           if [ $? -ne 0 ]; then
             echo "❌ SCP file transfer failed."
@@ -102,18 +106,17 @@ jobs:
           fi
           echo "✅ Package transferred successfully."
 
-          # 3. Run a single script on the remote server to deploy the package
           echo "🚀 Starting remote deployment process..."
           ssh -o ConnectTimeout=60 \
             ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org << 'DEPLOY_SCRIPT_EOF'
 
-            # --- Switch to the tool user ---
-            become scribe-test-server
+            # Switch to the tool user.
+            become scribe-server
 
-            # --- Running as the tool user (e.g., scribe-test-server) ---
-            # Current Directory: /data/project/scribe-test-server
+            # Running as the tool user (e.g., scribe-server).
+            # Current Directory: /data/project/scribe-server
 
-            # Move the package into the Scribe-Server directory
+            # Move the package into the Scribe-Server directory.
             if [ ! -f "./scribe-data-sqlite.tar.gz" ]; then
               echo "❌ Package not found in project directory."
               exit 1
@@ -126,29 +129,29 @@ jobs:
               exit 1
             fi
 
-            # Navigate into the Scribe-Server directory
+            # Navigate into the Scribe-Server directory.
             cd ./Scribe-Server || { echo "❌ Failed to navigate to Scribe-Server."; exit 1; }
 
-            # Create a backup of existing data
+            # Create a backup of existing data.
             if [ -d "./packs/sqlite" ]; then
               BACKUP_NAME="sqlite.backup.$(date +%Y%m%d_%H%M%S)"
               mv ./packs/sqlite ./packs/$BACKUP_NAME
               echo "📦 Backed up existing data to $BACKUP_NAME"
             fi
 
-            # Create packs directory and extract the new data
+            # Create packs directory and extract the new data.
             mkdir -p ./packs/sqlite
             echo "📤 Extracting new data..."
             tar -xzf scribe-data-sqlite.tar.gz -C ./packs/sqlite/
 
-            # Run database migration
+            # Run database migration.
             echo "🔄 Building migration tool..."
             go build -o ./bin/migrate-scribe-data ./cmd/migrate
 
             echo "🔄 Running migration tool..."
             ./bin/migrate-scribe-data
 
-            # Clean up the deployment package
+            # Clean up the deployment package.
             rm ./scribe-data-sqlite.tar.gz
 
             echo "🎉 Deployment completed successfully!"
