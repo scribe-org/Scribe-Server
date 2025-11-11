@@ -4,10 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Scribe SQLite Database Download</title>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       * {
         margin: 0;
@@ -16,8 +22,8 @@
       }
 
       body {
-        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Oxygen, Ubuntu, Cantarell, sans-serif;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         line-height: 1.6;
         color: #e0e0e0;
         background: #0a0a0a;
@@ -66,13 +72,9 @@
       }
 
       .back-button::before {
-        font-family: 'Material Symbols Outlined';
+        font-family: "Material Symbols Outlined";
         content: "arrow_back";
-        font-variation-settings:
-          'FILL' 0,
-          'wght' 600,
-          'GRAD' 0,
-          'opsz' 24;
+        font-variation-settings: "FILL" 0, "wght" 600, "GRAD" 0, "opsz" 24;
         font-weight: 600;
         margin-right: 8px;
         font-size: 1.1em;
@@ -130,18 +132,14 @@
         background: #3a8dc2;
       }
 
-     .download-link::before {
-        font-family: 'Material Symbols Outlined';
+      .download-link::before {
+        font-family: "Material Symbols Outlined";
         content: "download";
-        font-variation-settings:
-          'FILL' 0,
-          'wght' 400,
-          'GRAD' 0,
-          'opsz' 24;
-        font-weight: 400; 
+        font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+        font-weight: 400;
         margin-right: 15px;
         font-size: 1.3em;
-        vertical-align: middle; 
+        vertical-align: middle;
       }
 
       .footer {
@@ -176,53 +174,51 @@
   <body>
     <div class="container">
       <a href="/" class="back-button">Back to Home</a>
-
       <h1>Scribe SQLite Database Download</h1>
-
       <p class="description">
         You can click any of the links below to download the most recent
         Scribe-Data SQLite database.
       </p>
-
       <div class="downloads-section">
         <h2>Available Databases</h2>
-        <div class="download-list" id="downloadList">
-        </div>
+        <div class="download-list" id="downloadList"></div>
       </div>
-
       <div class="footer">
         <p>
-          <a href="https://github.com/scribe-org/Scribe-Server">View on GitHub</a> •
-          <a href="https://scri.be">Scribe Website</a> •
+          <a href="https://github.com/scribe-org/Scribe-Server">
+            View on GitHub
+          </a>
+          • <a href="https://scri.be">Scribe Website</a> •
           <a href="/docs/index.html">API Documentation</a>
         </p>
       </div>
     </div>
 
     <script>
-      // Fetch and display available SQLite files
+      // Fetch and display available SQLite files.
       async function loadDownloads() {
         try {
-          const response = await fetch('/packs/sqlite/list');
+          const response = await fetch("/packs/sqlite/list");
           const files = await response.json();
-          
-          const downloadList = document.getElementById('downloadList');
-          
+
+          const downloadList = document.getElementById("downloadList");
+
           if (files && files.length > 0) {
-            files.forEach(file => {
-              const link = document.createElement('a');
+            files.forEach((file) => {
+              const link = document.createElement("a");
               link.href = `/packs/sqlite/${file}`;
-              link.className = 'download-link';
+              link.className = "download-link";
               link.textContent = file;
               link.download = file;
               downloadList.appendChild(link);
             });
           } else {
-            downloadList.innerHTML = '<p style="color: #999;">No databases available at the moment.</p>';
+            downloadList.innerHTML =
+              '<p style="color: #999;">No databases available at the moment.</p>';
           }
         } catch (error) {
-          console.error('Error loading downloads:', error);
-          document.getElementById('downloadList').innerHTML = 
+          console.error("Error loading downloads:", error);
+          document.getElementById("downloadList").innerHTML =
             '<p style="color: #999;">Error loading database files.</p>';
         }
       }

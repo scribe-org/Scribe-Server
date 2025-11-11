@@ -46,7 +46,7 @@ func HandleRequests() {
 	// MARK: Proxy Configuration
 
 	// Proxies trust security warning.
-	trustedProxies := []string{} // Default empty (trusts nothing)
+	trustedProxies := []string{} // default empty (trusts nothing)
 	if os.Getenv("ENV") == "prod" {
 		// Trust RFC 1918 private network ranges commonly used by cloud providers and load balancers.
 		trustedProxies = []string{
@@ -115,7 +115,7 @@ func setupStaticFiles(r *gin.Engine) {
 	sqlitePath := filepath.Join(absPath, "sqlite")
 	log.Printf("SQLite directory path: %s", sqlitePath)
 
-	// Single unified handler for all /packs/* routes
+	// Single unified handler for all /packs/* routes.
 	r.GET("/packs/*filepath", func(c *gin.Context) {
 		path := c.Param("filepath")
 
@@ -137,7 +137,7 @@ func setupStaticFiles(r *gin.Engine) {
 
 		if strings.HasPrefix(path, "/sqlite/") && strings.HasSuffix(path, ".sqlite") {
 			filename := strings.TrimPrefix(path, "/sqlite/")
-			// Prevent directory traversal
+			// Prevent directory traversal.
 			if strings.Contains(filename, "..") || strings.Contains(filename, "/") {
 				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid filename"})
 				return
@@ -148,7 +148,7 @@ func setupStaticFiles(r *gin.Engine) {
 				c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
 				return
 			}
-			// Set headers to force download
+			// Set headers to force download.
 			c.Header("Content-Description", "File Transfer")
 			c.Header("Content-Transfer-Encoding", "binary")
 			c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))

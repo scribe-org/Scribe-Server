@@ -4,23 +4,17 @@ on:
   # Trigger on push to main branch.
   push:
     branches: [main]
-  
-  # Will be used when cotributor is trying to merge into main
+
+  # Will be used when cotributor is trying to merge into main.
   # pull_request:
   #   branches: [main, fix/deployment-and-download-page]
-    
-  # Trigger: When there is a GitHub Release.
+
+  # Trigger when there is a GitHub release.
   release:
     types: [published]
 
-  # Manual trigger.
+  # Manual dispatch.
   workflow_dispatch:
-    inputs:
-      force_update:
-        description: "Force data update even if no release"
-        required: false
-        default: "false"
-        type: boolean
 
   # Monthly schedule run.
   schedule:
@@ -68,7 +62,7 @@ jobs:
           tar -czf scribe-data-sqlite.tar.gz -C ./packs/sqlite .
           echo "📦 Created deployment package"
 
-          # Verify the package was created and show its size
+          # Verify the package was created and show its size.
           if [ -f "scribe-data-sqlite.tar.gz" ]; then
             echo "✅ Package created successfully: $(ls -lh scribe-data-sqlite.tar.gz)"
           else
@@ -116,13 +110,13 @@ jobs:
           ssh -o ConnectTimeout=60 \
             ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org << 'DEPLOY_SCRIPT_EOF'
 
-            # --- Switch to the tool user ---
+            # Switch to the tool user.
             become scribe-server
 
-            # --- Running as the tool user (e.g., scribe-server) ---
+            # Running as the tool user (e.g., scribe-server).
             # Current Directory: /data/project/scribe-server
 
-            # Move the package into the Scribe-Server directory
+            # Move the package into the Scribe-Server directory.
             if [ ! -f "./scribe-data-sqlite.tar.gz" ]; then
               echo "❌ Package not found in project directory."
               exit 1
@@ -135,29 +129,29 @@ jobs:
               exit 1
             fi
 
-            # Navigate into the Scribe-Server directory
+            # Navigate into the Scribe-Server directory.
             cd ./Scribe-Server || { echo "❌ Failed to navigate to Scribe-Server."; exit 1; }
 
-            # Create a backup of existing data
+            # Create a backup of existing data.
             if [ -d "./packs/sqlite" ]; then
               BACKUP_NAME="sqlite.backup.$(date +%Y%m%d_%H%M%S)"
               mv ./packs/sqlite ./packs/$BACKUP_NAME
               echo "📦 Backed up existing data to $BACKUP_NAME"
             fi
 
-            # Create packs directory and extract the new data
+            # Create packs directory and extract the new data.
             mkdir -p ./packs/sqlite
             echo "📤 Extracting new data..."
             tar -xzf scribe-data-sqlite.tar.gz -C ./packs/sqlite/
 
-            # Run database migration
+            # Run database migration.
             echo "🔄 Building migration tool..."
             go build -o ./bin/migrate-scribe-data ./cmd/migrate
 
             echo "🔄 Running migration tool..."
             ./bin/migrate-scribe-data
 
-            # Clean up the deployment package
+            # Clean up the deployment package.
             rm ./scribe-data-sqlite.tar.gz
 
             echo "🎉 Deployment completed successfully!"
