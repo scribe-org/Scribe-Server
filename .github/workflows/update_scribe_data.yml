@@ -3,11 +3,11 @@ name: Update Scribe Data and Deploy to Toolforge
 on:
   # Dispatch on push to main branch.
   push:
-    branches: [main]
+    branches: [main, feat/server-matrix-notification]
 
   # Will be used when contributor is trying to merge into main.
-  # pull_request:
-  #   branches: [main, fix/deployment-and-download-page]
+  pull_request:
+    branches: [main, feat/server-matrix-notification]
 
   # Dispatch when there is a GitHub release.
   release:
@@ -43,6 +43,7 @@ jobs:
         run: chmod +x ./update_data.sh
 
       - name: Run update script (skips migration)
+        id: run_script
         run: ./update_data.sh true
 
       - name: Create deployment package
@@ -158,12 +159,30 @@ jobs:
 
           DEPLOY_SCRIPT_EOF
 
-      - name: Notify on success
+      - name: Notify Matrix on Success
         if: success()
         run: |
-          echo "🎉 Scribe-Data update and deployment completed successfully!"
-          echo "📊 SQLite files have been updated on Toolforge"
-          echo "🔄 Database migration completed"
+          echo "🎉 Scribe-Data update completed. Sending report to Matrix..."
+          
+          LANG_COUNT="${{ steps.run_script.outputs.LANG_COUNT }}"
+          LANG_LIST="${{ steps.run_script.outputs.LANG_LIST }}"
+          TYPES_COUNT="${{ steps.run_script.outputs.TYPES_COUNT }}"
+          TYPES_LIST="${{ steps.run_script.outputs.TYPES_LIST }}"
+          SQLITE_COUNT="${{ steps.run_script.outputs.SQLITE_COUNT }}"
+          
+          TITLE="✅ Toolforge Server Update Successful"
+          REPO="${{ github.repository }}"
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          DATE="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+          curl -X POST "${{ secrets.MATRIX_HOMESERVER }}/_matrix/client/r0/rooms/${{ secrets.MATRIX_DATA_ROOM_ID }}/send/m.room.message?access_token=${{ secrets.MATRIX_SCRIBE_BOT_ACCESS_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"msgtype\": \"m.text\",
+              \"format\": \"org.matrix.custom.html\",
+              \"body\": \"$TITLE - Data updated on Toolforge.\",
+              \"formatted_body\": \"<h4>$TITLE</h4><ul><li><strong>Languages processed:</strong> $LANG_COUNT ($LANG_LIST)</li><li><strong>Data types processed:</strong> $TYPES_COUNT ($TYPES_LIST)</li><li><strong>Data Generation:</strong> Completed</li><li><strong>SQLite Conversion:</strong> Completed</li><li><strong>Files Copied:</strong> $SQLITE_COUNT files to the server</li></ul><p>🎉 Data fetched from Scribe-Data has been updated on Toolforge and migrated to MariaDB!</p><p><a href='$RUN_URL'>View Full Log</a></p>\"
+            }"
 
       - name: Notify on failure
         if: failure()

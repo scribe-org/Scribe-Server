@@ -16,7 +16,8 @@ SKIP_MIGRATION=${1:-false}
 PROJECT_ROOT=$(pwd)
 
 # Define target languages and data types.
-TARGET_LANGUAGES=("english" "french" "german" "italian" "spanish" "portuguese" "russian" "swedish")
+TARGET_LANGUAGES=("english")
+# TARGET_LANGUAGES=("english" "french" "german" "italian" "spanish" "portuguese" "russian" "swedish")
 DATA_TYPES=("nouns" "verbs")
 
 RED='\033[0;31m'
@@ -138,7 +139,8 @@ DUMP_FILE="$DUMP_DIR/latest-lexemes.json.bz2"
 if [ ! -f "$DUMP_FILE" ]; then
     log "📥 Downloading Wikidata lexeme dump..."
     # Auto-confirm the download prompt with "y" for the initial confirmation.
-    echo "y" | scribe-data download -wdv latest || {
+    # scribe-data download -wdv latest
+    echo "y" | scribe-data download -wdv 20251210 || {
         error "Failed to download Wikidata dump"
         exit 1
     }
@@ -308,6 +310,17 @@ log "  • SQLite Conversion: Completed"
 log "  • Files Copied: $SQLITE_FILES files"
 log "  • Migration: Completed"
 log "  • Log file: $LOG_FILE"
+
+# MARK: Export Stats to GitHub Actions
+# This checks if we are running in GitHub Actions and writes the variables
+if [ -n "$GITHUB_OUTPUT" ]; then
+    echo "Exporting stats to GitHub Output..."
+    echo "LANG_COUNT=${#TARGET_LANGUAGES[@]}" >> "$GITHUB_OUTPUT"
+    echo "LANG_LIST=${TARGET_LANGUAGES[*]}" >> "$GITHUB_OUTPUT"
+    echo "TYPES_COUNT=${#DATA_TYPES[@]}" >> "$GITHUB_OUTPUT"
+    echo "TYPES_LIST=${DATA_TYPES[*]}" >> "$GITHUB_OUTPUT"
+    echo "SQLITE_COUNT=$SQLITE_FILES" >> "$GITHUB_OUTPUT"
+fi
 
 echo
 success "🎉 Scribe-Data has been updated and migrated to MariaDB!"
