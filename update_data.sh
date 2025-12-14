@@ -16,8 +16,7 @@ SKIP_MIGRATION=${1:-false}
 PROJECT_ROOT=$(pwd)
 
 # Define target languages and data types.
-TARGET_LANGUAGES=("english")
-# TARGET_LANGUAGES=("english" "french" "german" "italian" "spanish" "portuguese" "russian" "swedish")
+TARGET_LANGUAGES=("english" "french" "german" "italian" "spanish" "portuguese" "russian" "swedish")
 DATA_TYPES=("nouns" "verbs")
 
 RED='\033[0;31m'

@@ -3,7 +3,7 @@ name: Update Scribe Data and Deploy to Toolforge
 on:
   # Dispatch on push to main branch.
   push:
-    branches: [main, feat/server-matrix-notification]
+    branches: [main]
 
   # Will be used when contributor is trying to merge into main.
   # pull_request:
