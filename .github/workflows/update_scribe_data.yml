@@ -171,22 +171,26 @@ jobs:
           SQLITE_COUNT="${{ steps.run_script.outputs.SQLITE_COUNT }}"
 
           # Format lists with commas
-          LANG_LIST_FORMATTED=$(echo "$LANG_LIST" | sed 's/ /, /g')
-          TYPES_LIST_FORMATTED=$(echo "$TYPES_LIST" | sed 's/ /, /g')
+          LANG_LIST_FORMATTED=$(echo "$LANG_LIST" | sed 's/ /, /g' | sed 's/"/\\"/g')
+          TYPES_LIST_FORMATTED=$(echo "$TYPES_LIST" | sed 's/ /, /g' | sed 's/"/\\"/g')
           
           TITLE="✅ Toolforge Server Update Successful"
           REPO="${{ github.repository }}"
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          DATE="$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          
+          JSON_PAYLOAD=$(cat <<EOF
+          {
+            "msgtype": "m.text",
+            "format": "org.matrix.custom.html",
+            "body": "$TITLE - Data updated on Toolforge.",
+            "formatted_body": "<h4>$TITLE</h4><ul><li><strong>Languages processed:</strong> $LANG_COUNT ($LANG_LIST_FORMATTED)</li><li><strong>Data types processed:</strong> $TYPES_COUNT ($TYPES_LIST_FORMATTED)</li><li><strong>Data Generation:</strong> Completed</li><li><strong>SQLite Conversion:</strong> Completed</li><li><strong>Files Copied:</strong> $SQLITE_COUNT files to the server</li></ul><p>🎉 Data fetched from Scribe-Data has been updated on Toolforge and migrated to MariaDB!</p><p><a href='$RUN_URL'>View Full Log</a></p>"
+          }
+          EOF
+          )
 
-          curl -X POST "${{ secrets.MATRIX_HOMESERVER }}/_matrix/client/r0/rooms/${{ secrets.MATRIX_DATA_ROOM_ID }}/send/m.room.message?access_token=${{ secrets.MATRIX_SCRIBE_BOT_ACCESS_TOKEN }}" \
+          curl -v --fail --show-error -X POST "${{ secrets.MATRIX_HOMESERVER }}/_matrix/client/r0/rooms/${{ secrets.MATRIX_DATA_ROOM_ID }}/send/m.room.message?access_token=${{ secrets.MATRIX_SCRIBE_BOT_ACCESS_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d "{
-              \"msgtype\": \"m.text\",
-              \"format\": \"org.matrix.custom.html\",
-              \"body\": \"$TITLE - Data updated on Toolforge.\",
-              \"formatted_body\": \"<h4>$TITLE</h4><ul><li><strong>Languages processed:</strong> $LANG_COUNT ($LANG_LIST_FORMATTED)</li><li><strong>Data types processed:</strong> $TYPES_COUNT ($TYPES_LIST_FORMATTED)</li><li><strong>Data Generation:</strong> Completed</li><li><strong>SQLite Conversion:</strong> Completed</li><li><strong>Files Copied:</strong> $SQLITE_COUNT files to the server</li></ul><p>🎉 Data fetched from Scribe-Data has been updated on Toolforge and migrated to MariaDB!</p><p><a href='$RUN_URL'>View Full Log</a></p>\"
-            }"
+            -d "$JSON_PAYLOAD"
 
       - name: Notify on failure
         if: failure()
