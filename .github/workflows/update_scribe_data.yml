@@ -198,7 +198,7 @@ jobs:
           echo "❌ Deployment failed. Check the logs above for details."
           TITLE="❌ Toolforge Server Update Failed"
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-           curl -X POST "${{ secrets.MATRIX_HOMESERVER }}/_matrix/client/r0/rooms/${{ secrets.MATRIX_ROOM_ID }}/send/m.room.message?access_token=${{ secrets.MATRIX_ACCESS_TOKEN }}" \
+           curl -X POST "${{ secrets.MATRIX_HOMESERVER }}/_matrix/client/r0/rooms/${{ secrets.MATRIX_DATA_ROOM_ID }}/send/m.room.message?access_token=${{ secrets.MATRIX_SCRIBE_BOT_ACCESS_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d "{
               \"msgtype\": \"m.text\",
