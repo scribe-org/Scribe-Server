@@ -163,21 +163,21 @@ jobs:
         if: success()
         run: |
           echo "🎉 Scribe-Data update completed. Sending report to Matrix..."
-          
+
           LANG_COUNT="${{ steps.run_script.outputs.LANG_COUNT }}"
           LANG_LIST="${{ steps.run_script.outputs.LANG_LIST }}"
           TYPES_COUNT="${{ steps.run_script.outputs.TYPES_COUNT }}"
           TYPES_LIST="${{ steps.run_script.outputs.TYPES_LIST }}"
           SQLITE_COUNT="${{ steps.run_script.outputs.SQLITE_COUNT }}"
 
-          # Format lists with commas
+          # Format lists with commas.
           LANG_LIST_FORMATTED=$(echo "$LANG_LIST" | sed 's/ /, /g' | sed 's/"/\\"/g')
           TYPES_LIST_FORMATTED=$(echo "$TYPES_LIST" | sed 's/ /, /g' | sed 's/"/\\"/g')
-          
+
           TITLE="✅ Toolforge Server Update Successful"
           REPO="${{ github.repository }}"
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          
+
           JSON_PAYLOAD=$(cat <<EOF
           {
             "msgtype": "m.text",

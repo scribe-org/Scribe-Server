@@ -311,7 +311,8 @@ log "  • Migration: Completed"
 log "  • Log file: $LOG_FILE"
 
 # MARK: Export Stats to GitHub Actions
-# This checks if we are running in GitHub Actions and writes the variables
+
+# This checks if we are running in GitHub Actions and writes the variables.
 if [ -n "$GITHUB_OUTPUT" ]; then
     echo "Exporting stats to GitHub Output..."
     echo "LANG_COUNT=${#TARGET_LANGUAGES[@]}" >> "$GITHUB_OUTPUT"
