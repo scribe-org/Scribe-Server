@@ -7,7 +7,7 @@ on:
 
   # Will be used when contributor is trying to merge into main.
   # pull_request:
-  #   branches: [main, fix/deployment-and-download-page]
+  #   branches: [main, feat/server-matrix-notification]
 
   # Dispatch when there is a GitHub release.
   release:
@@ -43,6 +43,7 @@ jobs:
         run: chmod +x ./update_data.sh
 
       - name: Run update script (skips migration)
+        id: run_script
         run: ./update_data.sh true
 
       - name: Create deployment package
@@ -158,19 +159,50 @@ jobs:
 
           DEPLOY_SCRIPT_EOF
 
-      - name: Notify on success
+      - name: Send Matrix Success Notification
         if: success()
         run: |
-          echo "🎉 Scribe-Data update and deployment completed successfully!"
-          echo "📊 SQLite files have been updated on Toolforge"
-          echo "🔄 Database migration completed"
+          echo "🎉 Scribe-Data update completed. Sending report to Matrix..."
+
+          LANG_COUNT="${{ steps.run_script.outputs.LANG_COUNT }}"
+          LANG_LIST="${{ steps.run_script.outputs.LANG_LIST }}"
+          TYPES_COUNT="${{ steps.run_script.outputs.TYPES_COUNT }}"
+          TYPES_LIST="${{ steps.run_script.outputs.TYPES_LIST }}"
+          SQLITE_COUNT="${{ steps.run_script.outputs.SQLITE_COUNT }}"
+
+          # Format lists with commas.
+          LANG_LIST_FORMATTED=$(echo "$LANG_LIST" | sed 's/ /, /g' | sed 's/"/\\"/g')
+          TYPES_LIST_FORMATTED=$(echo "$TYPES_LIST" | sed 's/ /, /g' | sed 's/"/\\"/g')
+
+          TITLE="✅ Toolforge Server Update Successful"
+          REPO="${{ github.repository }}"
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          JSON_PAYLOAD=$(cat <<EOF
+          {
+            "msgtype": "m.text",
+            "format": "org.matrix.custom.html",
+            "body": "$TITLE - Data updated on Toolforge.",
+            "formatted_body": "<h4>$TITLE</h4><ul><li><strong>Languages processed:</strong> $LANG_COUNT ($LANG_LIST_FORMATTED)</li><li><strong>Data types processed:</strong> $TYPES_COUNT ($TYPES_LIST_FORMATTED)</li><li><strong>Data Generation:</strong> Completed</li><li><strong>SQLite Conversion:</strong> Completed</li><li><strong>Files Copied:</strong> $SQLITE_COUNT files to the server</li></ul><p>🎉 Data fetched from Scribe-Data has been updated on Toolforge and migrated to MariaDB!</p><p><a href='$RUN_URL'>View Full Log</a></p>"
+          }
+          EOF
+          )
+
+          curl -v --fail --show-error -X POST "${{ secrets.MATRIX_HOMESERVER }}/_matrix/client/r0/rooms/${{ secrets.MATRIX_DATA_ROOM_ID }}/send/m.room.message?access_token=${{ secrets.MATRIX_SCRIBE_BOT_ACCESS_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "$JSON_PAYLOAD"
 
       - name: Notify on failure
         if: failure()
         run: |
           echo "❌ Deployment failed. Check the logs above for details."
-          echo "🔍 Common issues:"
-          echo "  - SSH key authentication"
-          echo "  - Network connectivity to Toolforge"
-          echo "  - File transfer permissions"
-          echo "  - Package extraction issues"
+          TITLE="❌ Toolforge Server Update Failed"
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+           curl -X POST "${{ secrets.MATRIX_HOMESERVER }}/_matrix/client/r0/rooms/${{ secrets.MATRIX_DATA_ROOM_ID }}/send/m.room.message?access_token=${{ secrets.MATRIX_SCRIBE_BOT_ACCESS_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"msgtype\": \"m.text\",
+              \"format\": \"org.matrix.custom.html\",
+              \"body\": \"$TITLE - Automated update process encountered an error.\",
+              \"formatted_body\": \"<h4>$TITLE</h4><p>⚠️ The automated update process encountered an error.</p><h5>🔍 Details:</h5><ul><li><strong>Workflow:</strong> ${{ github.workflow }}</li><li><strong>Job:</strong> ${{ github.job }}</li><li><strong>Branch:</strong> ${{ github.ref_name }}</li></ul><p><a href='$RUN_URL'>View Full Log</a></p><h5>⚠️ Common Issues:</h5><ul><li>SSH authentication to Toolforge</li><li>Wikidata dump download timeout</li><li>Corrupted/Bad Wikidata dump downloaded</li><li>SQLite generation errors</li><li>Network connectivity issues</li></ul><p>Please check the logs for more details.</p>\"
+            }" || echo "⚠️ Failed to send Matrix notification (non-fatal)"
