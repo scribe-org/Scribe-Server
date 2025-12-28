@@ -309,6 +309,18 @@ log "  • Files Copied: $SQLITE_FILES files"
 log "  • Migration: Completed"
 log "  • Log file: $LOG_FILE"
 
+# MARK: Export Stats to GitHub Actions
+
+# This checks if we are running in GitHub Actions and writes the variables.
+if [ -n "$GITHUB_OUTPUT" ]; then
+    echo "Exporting stats to GitHub Output..."
+    echo "LANG_COUNT=${#TARGET_LANGUAGES[@]}" >> "$GITHUB_OUTPUT"
+    echo "LANG_LIST=${TARGET_LANGUAGES[*]}" >> "$GITHUB_OUTPUT"
+    echo "TYPES_COUNT=${#DATA_TYPES[@]}" >> "$GITHUB_OUTPUT"
+    echo "TYPES_LIST=${DATA_TYPES[*]}" >> "$GITHUB_OUTPUT"
+    echo "SQLITE_COUNT=$SQLITE_FILES" >> "$GITHUB_OUTPUT"
+fi
+
 echo
 success "🎉 Scribe-Data has been updated and migrated to MariaDB!"
 echo
