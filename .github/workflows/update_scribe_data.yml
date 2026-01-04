@@ -21,6 +21,20 @@ on:
     - cron: "0 0 1 * *" # run on the 1st of every month at midnight UTC
 
 jobs:
+  check-repository:
+    runs-on: ubuntu-latest
+    outputs:
+      is_remote_main: ${{ steps.check.outputs.is_remote_main }}
+    steps:
+      - name: Check repository
+        id: check
+        run: |
+          if [ "$GITHUB_REPOSITORY" = "scribe-org/Scribe-Server" ]; then
+            echo "is_remote_main=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_remote_main=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::This workflow should only run in scribe-org/Scribe-Server repository."
+          fi
   update-and-deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 180 # 3 hours timeout for large data processing
