@@ -4,7 +4,7 @@ package handlers
 
 import "fmt"
 
-// normalizeMap ensure all map types are converted to a standard map[string]any format.
+// Ensure all map types are converted to a standard map[string, any] format.
 func normalizeMap(i any) any {
 	switch x := i.(type) {
 
