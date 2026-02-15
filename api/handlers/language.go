@@ -319,7 +319,6 @@ func loadAllContracts(contractsDir string) (map[string]any, error) {
 		}
 
 		contracts[langCode] = normalizeMap(contract)
-
 	}
 
 	return contracts, nil
