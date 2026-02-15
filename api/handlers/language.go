@@ -4,7 +4,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -20,6 +19,7 @@ import (
 	"github.com/scribe-org/scribe-server/internal/constants"
 	"github.com/scribe-org/scribe-server/models"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 )
 
 // MARK: Languages Endpoints
@@ -252,8 +252,8 @@ func GetContracts(c *gin.Context) {
 		return
 	}
 
-	HandleSuccess(c, models.ContractsResponse{
-		Contracts: contracts,
+	HandleYAMLSuccess(c, gin.H{
+		"contracts": contracts,
 	})
 }
 
@@ -261,16 +261,25 @@ func GetContracts(c *gin.Context) {
 
 // loadSingleContract reads and unmarshals a single contract file.
 func loadSingleContract(contractsDir, lang string) (map[string]any, error) {
-	filePath := filepath.Join(contractsDir, lang+".json")
+	filePathYaml := filepath.Join(contractsDir, lang+".yaml")
+	filePathYml := filepath.Join(contractsDir, lang+".yml")
+
+	filePath := filePathYaml
+	if _, err := os.Stat(filePathYaml); os.IsNotExist(err) {
+		filePath = filePathYml
+	}
+
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("could not read contract file for %s: %w", lang, err)
 	}
 
 	var contract any
-	if err := json.Unmarshal(data, &contract); err != nil {
+	if err := yaml.Unmarshal(data, &contract); err != nil {
 		return nil, fmt.Errorf("could not unmarshal contract for %s: %w", lang, err)
 	}
+
+	contract = normalizeMap(contract)
 
 	return map[string]any{lang: contract}, nil
 }
@@ -285,12 +294,16 @@ func loadAllContracts(contractsDir string) (map[string]any, error) {
 	}
 
 	for _, file := range files {
-		// Skip directories and non-json files.
-		if file.IsDir() || filepath.Ext(file.Name()) != ".json" {
+		if file.IsDir() {
 			continue
 		}
 
-		langCode := strings.TrimSuffix(file.Name(), ".json")
+		ext := filepath.Ext(file.Name())
+		if ext != ".yaml" && ext != ".yml" {
+			continue
+		}
+
+		langCode := strings.TrimSuffix(file.Name(), ext)
 		filePath := filepath.Join(contractsDir, file.Name())
 
 		data, err := os.ReadFile(filePath)
@@ -300,12 +313,13 @@ func loadAllContracts(contractsDir string) (map[string]any, error) {
 		}
 
 		var contract any
-		if err := json.Unmarshal(data, &contract); err != nil {
+		if err := yaml.Unmarshal(data, &contract); err != nil {
 			log.Printf("Warning: could not unmarshal contract file %s: %v", file.Name(), err)
 			continue
 		}
 
-		contracts[langCode] = contract
+		contracts[langCode] = normalizeMap(contract)
+
 	}
 
 	return contracts, nil

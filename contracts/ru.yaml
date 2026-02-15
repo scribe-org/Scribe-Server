@@ -1,0 +1,31 @@
+numbers:
+  nominativeSingular: nominativePlural
+genders:
+  canonical: [gender]
+  feminines: []
+  masculines: []
+  commons: []
+  neuters: []
+conjugations:
+  1:
+    sectionTitle: Настоящее
+    tenses:
+      1:
+        tenseTitle: Indicative Present
+        tenseForms:
+          я: indicativePresentFirstPersonSingular
+          ты: indicativePresentSecondPersonSingular
+          он/она/оно: indicativePresentThirdPersonSingular
+          мы: indicativePresentFirstPersonPlural
+          вы: indicativePresentSecondPersonPlural
+          они: indicativePresentThirdPersonPlural
+  2:
+    sectionTitle: Прошедшее
+    tenses:
+      1:
+        tenseTitle: Indicative Past
+        tenseForms:
+          я/ты/она: feminineIndicativePast
+          я/ты/он: masculineIndicativePast
+          оно: neuterIndicativePast
+          мы/вы/они: indicativePastPlural

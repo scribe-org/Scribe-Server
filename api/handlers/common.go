@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/scribe-org/scribe-server/models"
+	"gopkg.in/yaml.v3"
 )
 
 // HandleError sends a standardized error response.
@@ -20,6 +21,17 @@ func HandleError(c *gin.Context, statusCode int, message string) {
 // HandleSuccess sends a standardized success response.
 func HandleSuccess(c *gin.Context, data any) {
 	c.JSON(http.StatusOK, data)
+}
+
+// HandleYAMLSuccess sends a standardized success responsen for the contract file.
+func HandleYAMLSuccess(c *gin.Context, data any) {
+	out, err := yaml.Marshal(data)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Failed to encode YAML")
+		return
+	}
+
+	c.Data(http.StatusOK, "application/x-yaml; charset=utf-8", out)
 }
 
 // ServeHome handles the root endpoint.

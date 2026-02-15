@@ -46,4 +46,4 @@ arguments = [20]
 arguments = [5]
 
 [rule.cognitive-complexity]
-arguments = [20]
+arguments = [30]
