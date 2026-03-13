@@ -1,3 +1,5 @@
+<a id="top"></a>
+
 # Contributing to Scribe-Server
 
 Thank you for your interest in contributing!
@@ -8,14 +10,13 @@ Following these guidelines helps to communicate that you respect the time of the
 
 If you have questions or would like to communicate with the team, please [join us in our public Matrix chat rooms](https://matrix.to/#/#scribe_community:matrix.org). We'd be happy to hear from you!
 
-<a id="contents"></a>
+## Contents
 
-# **Contents**
-
-- [First steps as a contributor](#first-steps)
+- [First steps as a contributor](#first-steps-as-a-contributor)
+- [Mentorship and Growth](#mentorship-and-growth)
 - [Learning the tech stack](#learning-the-tech)
-- [Development environment](#dev-env)
-- [Issues and projects](#issues-projects)
+- [Development environment](#development-environment)
+- [Issues and projects](#issues-and-projects)
 - [Bug reports](#bug-reports)
 - [Feature requests](#feature-requests)
 - [Pull requests](#pull-requests)
@@ -23,9 +24,7 @@ If you have questions or would like to communicate with the team, please [join u
 - [Documentation](#documentation)
 - [Deployment testing](#deployment-testing)
 
-<a id="first-steps"></a>
-
-## First steps as a contributor [`⇧`](#contents)
+## First steps as a contributor
 
 Thank you for your interest in contributing to Scribe-Server! We look forward to welcoming you to the community and working with you to build an tools for language learners to communicate effectively :) The following are some suggested steps for people interested in joining our community:
 
@@ -42,9 +41,25 @@ Thank you for your interest in contributing to Scribe-Server! We look forward to
 > [!NOTE]
 > Those new to Go or wanting to work on their Go skills are more than welcome to contribute! The team would be happy to help you on your development journey :)
 
-<a id="learning-the-tech"></a>
+<sub><a href="#top">Back to top.</a></sub>
 
-## Learning the tech stack [`⇧`](#contents)
+## Mentorship and Growth
+
+Onboarding and mentoring new members is vital to a healthy open-source community.
+
+We need contributors who are onboarded to gain new skills and take on greater roles by triaging issues, reviewing contributions, and maintaining the project. We also need them to help new contributors to grow as well. Please let us know if you have goals to develop as an open-source contributor and we'll work with you to achieve them.
+
+We also have expectations about the behavior of those who want to grow with us. Mentorship is earned, not given.
+
+To be blunt, those who are mainly sending AI generated contributions are not demonstrating an interest in growing their skills and are not helping to develop the project. This is not to say that all uses of AI for contributions are bad, but **AI should be a tool, not the contributor itself**.
+
+Continued constructive contributions, new open issues, and clear communication helps the project. We would be happy to help community members who can make these contributions to expand their skills and take on further responsibilities.
+
+If you like the sound of this, then we look forward to working with you!
+
+<sub><a href="#top">Back to top.</a></sub>
+
+## Learning the tech stack
 
 Scribe is very open to contributions from people in the early stages of their coding journey! The following is a select list of documentation pages to help you understand the technologies we use.
 
@@ -68,9 +83,9 @@ Scribe is very open to contributions from people in the early stages of their co
 </p>
 </details>
 
-<a id="dev-env"></a>
+<sub><a href="#top">Back to top.</a></sub>
 
-# Development environment [`⇧`](#contents)
+## Development environment
 
 Scribe-Server is developed using the [Go](https://go.dev/) programming language. Those new to Go or wanting to develop their skills are more than welcome to contribute! The first step on your Go journey would be to read through the [Go documentation](https://go.dev/doc), with the [Effective Go](https://go.dev/doc/effective_go) page in particular having great insights into the language's good practices and standards. The general steps to setting up a development environment are:
 
@@ -111,7 +126,6 @@ git remote add upstream https://github.com/scribe-org/Scribe-Server.git
 3. Navigate to the root directory of the project
 
 4. Create a `config.yaml` file with the configuration needed for the project
-
    - Reference the [`config-example.yaml`](./config-example.yaml) to get started
 
 ## Important Note on PATH Configuration for Go Tools
@@ -127,7 +141,6 @@ export PATH=$(go env GOPATH)/bin:$PATH
 After adding this line, remember to apply the changes by sourcing the file (e.g., `source ~/.bashrc`) or by opening a new terminal session.
 
 5. Install [MariaDB](https://mariadb.com/) locally via its [installation guide](https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/installing-mariadb/binary-packages).
-
    - Create a database using the `database.name` value from your `config.yaml` with the following commands (using Homebrew, for example):
 
    ```bash
@@ -161,16 +174,15 @@ After adding this line, remember to apply the changes by sourcing the file (e.g.
    ```
 
    Once the server is running (via `make run` or `make dev`), you can access the API documentation at:
-
    - Swagger UI: http://localhost:8080/swagger/index.html</br>
    - Alternative docs: http://localhost:8080/docs/index.html
 
 > [!NOTE]
 > Feel free to contact the team in the [Data room on Matrix](https://matrix.to/#/#ScribeData:matrix.org) if you're having problems getting your environment setup!
 
-<a id="issues-projects"></a>
+<sub><a href="#top">Back to top.</a></sub>
 
-# Issues and projects [`⇧`](#contents)
+## Issues and projects
 
 The [issue tracker for Scribe-Server](https://github.com/scribe-org/Scribe-Server/issues) is the preferred channel for [bug reports](#bug-reports), [features requests](#feature-requests) and [submitting pull requests](#pull-requests). Scribe also organizes related issues into [projects](https://github.com/scribe-org/Scribe-Server/projects).
 
@@ -179,9 +191,9 @@ The [issue tracker for Scribe-Server](https://github.com/scribe-org/Scribe-Serve
 
 Be sure to check the [`-next release-`](https://github.com/scribe-org/Scribe-Server/labels/-next%20release-) and [`-priority-`](https://github.com/scribe-org/Scribe-Server/labels/-priority-) labels in the [issues](https://github.com/scribe-org/Scribe-Server/issues) for those that are most important, as well as those marked [`good first issue`](https://github.com/scribe-org/Scribe-Server/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) that are tailored for first-time contributors.
 
-<a id="bug-reports"></a>
+<sub><a href="#top">Back to top.</a></sub>
 
-# Bug reports [`⇧`](#contents)
+## Bug reports
 
 A bug is a _demonstrable problem_ that is caused by the code in the repository. Good bug reports are extremely helpful - thank you!
 
@@ -205,15 +217,15 @@ To make the above steps easier, the Scribe team asks that contributors report bu
 
 Again, thank you for your time in reporting issues!
 
-<a id="feature-requests"></a>
+<sub><a href="#top">Back to top.</a></sub>
 
-# Feature requests [`⇧`](#contents)
+## Feature requests
 
 Feature requests are more than welcome! Please take a moment to find out whether your idea fits with the scope and aims of the project. When making a suggestion, provide as much detail and context as possible, and further make clear the degree to which you would like to contribute in its development. Feature requests are marked with the [`Feature`](https://github.com/scribe-org/Scribe-Server/issues?q=is%3Aissue%20state%3Aopen%20type%3AFeature) type, and can be made using the [feature request](https://github.com/scribe-org/Scribe-Server/issues/new?assignees=&labels=feature&template=feature_request.yml) template.
 
-<a id="pull-requests"></a>
+<sub><a href="#top">Back to top.</a></sub>
 
-# Pull requests [`⇧`](#contents)
+## Pull requests
 
 Good pull requests - patches, improvements and new features - are the foundation of our community making Scribe-Server. They should remain focused in scope and avoid containing unrelated commits. Note that all contributions to this project will be made under [the specified license](https://github.com/scribe-org/Scribe-Server/blob/main/LICENSE.txt) and should follow the code style standards ([contact us](https://matrix.to/#/#scribe_community:matrix.org) if unsure).
 
@@ -258,24 +270,24 @@ When making a contribution, adhering to the [GitHub flow](https://guides.github.
 
 Thank you in advance for your contributions!
 
-<a id="data-edits"></a>
+<sub><a href="#top">Back to top.</a></sub>
 
-# Data edits [`⇧`](#contents)
+## Data edits
 
 > [!NOTE]\
 > Please see the [Wikidata and Scribe Guide](https://github.com/scribe-org/Organization/blob/main/WIKIDATAGUIDE.md) for an overview of [Wikidata](https://www.wikidata.org/) and how Scribe uses it.
 
 Scribe does not accept direct edits to the grammar JSON files as they are sourced from [Wikidata](https://www.wikidata.org/). Edits can be discussed and the [Scribe-Data](https://github.com/scribe-org/Scribe-Data) queries will be changed and ran before an update. If there is a problem with one of the files, then the fix should be made on [Wikidata](https://www.wikidata.org/) and not on Scribe. Feel free to let us know that edits have been made by [opening a data issue](https://github.com/scribe-org/Scribe-Server/issues/new?assignees=&labels=data&template=data_wikidata.yml) or contacting us in the [issues for Scribe-Data](https://github.com/scribe-org/Scribe-Data/issues) and we'll be happy to integrate them!
 
-<a id="documentation"></a>
+<sub><a href="#top">Back to top.</a></sub>
 
-# Documentation [`⇧`](#contents)
+## Documentation
 
 Documentation is an invaluable way to contribute to coding projects as it allows others to more easily understand the project structure and contribute. Issues related to documentation are marked with the [`documentation`](https://github.com/scribe-org/Scribe-Server/labels/documentation) label.
 
-<a id="deployment-testing"></a>
+<sub><a href="#top">Back to top.</a></sub>
 
-# Deployment testing
+## Deployment testing
 
 This guide explains how to test the GitHub Actions workflow that updates data and deploys to Toolforge via GitHub Actions.
 
@@ -329,3 +341,5 @@ In your GitHub repository → **Settings → Secrets and variables → Actions**
 - Go to **GitHub → Actions → "Update Scribe Data and Deploy to Toolforge"**
 - Click **"Run workflow"** → Choose branch if needed → **Run workflow**
 - Check logs for status and output
+
+<sub><a href="#top">Back to top.</a></sub>

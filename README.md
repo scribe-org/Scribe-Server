@@ -1,3 +1,5 @@
+<a id="top"></a>
+
 <div align="center">
   <a href="https://github.com/scribe-org/Scribe-Server"><img src="https://raw.githubusercontent.com/scribe-org/Scribe-Server/main/.github/resources/images/ScribeServerGitHubOrgBanner.png" width=1024 alt="Scribe-Server Logo"></a>
 </div>
@@ -21,18 +23,14 @@ Scribe apps are available on [iOS](https://github.com/scribe-org/Scribe-iOS), [A
 
 Check out Scribe's [architecture diagrams](https://github.com/scribe-org/Organization/blob/main/ARCHITECTURE.md) for an overview of the organization including our applications, services and processes. It depicts the projects that [Scribe](https://github.com/scribe-org) is developing as well as the relationships between them and the external systems with which they interact.
 
-<a id="contents"></a>
-
-# **Contents**
+# Contents
 
 - [Contributing](#contributing)
 - [Environment Setup](#environment-setup)
 - [Supported Languages](#supported-languages)
 - [Featured By](#featured-by)
 
-<a id="contributing"></a>
-
-# Contributing [`⇧`](#contents)
+# Contributing
 
 <a href="https://matrix.to/#/#scribe_community:matrix.org">
   <img src="https://raw.githubusercontent.com/scribe-org/Organization/main/resources/images/logos/MatrixLogoGrey.png" width="175" alt="Public Matrix Chat" align="right">
@@ -49,7 +47,7 @@ Those interested can further check the [`-next release-`](https://github.com/scr
 
 After your first few pull requests organization members would be happy to discuss granting you further rights as a contributor, with a maintainer role then being possible after continued interest in the project. Scribe seeks to be an inclusive and supportive organization. We'd love to have you on the team!
 
-### Ways to Help [`⇧`](#contents)
+### Ways to Help
 
 - [Reporting bugs](https://github.com/scribe-org/Scribe-Server/issues/new?assignees=&labels=bug&template=bug_report.yml) as they're found 🐞
 - Working on [new features](https://github.com/scribe-org/Scribe-Server/issues?q=is%3Aissue+is%3Aopen+label%3Afeature) ✨
@@ -57,23 +55,23 @@ After your first few pull requests organization members would be happy to discus
 - [Documentation](https://github.com/scribe-org/Scribe-Server/issues?q=is%3Aissue+is%3Aopen+label%3Adocumentation) for onboarding and project cohesion 📝
 - Adding language data to [Scribe-Data](https://github.com/scribe-org/Scribe-Data/issues) via [Wikidata](https://www.wikidata.org/)! 🗃️
 
-### Road Map [`⇧`](#contents)
+### Road Map
 
 The Scribe road map can be followed in the organization's [project board](https://github.com/orgs/scribe-org/projects/1) where we list the most important issues along with their priority, status and an indication of which sub projects they're included in (if applicable).
 
 > [!NOTE]\
 > Consider joining our [bi-weekly developer syncs](https://etherpad.wikimedia.org/p/scribe-dev-sync)!
 
-### Data Edits [`⇧`](#contents)
+### Data Edits
 
 > [!NOTE]\
 > Please see the [Wikidata and Scribe Guide](https://github.com/scribe-org/Organization/blob/main/WIKIDATAGUIDE.md) for an overview of [Wikidata](https://www.wikidata.org/) and how Scribe uses it.
 
 Scribe does not accept direct edits to the grammar JSON files as they are sourced from [Wikidata](https://www.wikidata.org/). Edits can be discussed and the [Scribe-Data](https://github.com/scribe-org/Scribe-Data) queries will be changed and ran before an update. If there is a problem with one of the files, then the fix should be made on [Wikidata](https://www.wikidata.org/) and not on Scribe. Feel free to let us know that edits have been made by [opening a data issue](https://github.com/scribe-org/Scribe-Server/issues/new?assignees=&labels=data&template=data_wikidata.yml) or contacting us in the [issues for Scribe-Data](https://github.com/scribe-org/Scribe-Data/issues) and we'll be happy to integrate them!
 
-<a id="environment-setup"></a>
+<sub><a href="#top">Back to top.</a></sub>
 
-# Environment Setup [`⇧`](#contents)
+# Environment Setup
 
 Scribe-Server is developed using the [Go](https://go.dev/) programming language. Those new to Go or wanting to develop their skills are more than welcome to contribute! The first step on your Go journey would be to read through the [Go documentation](https://go.dev/doc), with the [Effective Go](https://go.dev/doc/effective_go) page in particular having great insights into the language's good practices and standards. The general steps to setting up a development environment are:
 
@@ -114,7 +112,6 @@ git remote add upstream https://github.com/scribe-org/Scribe-Server.git
 3. Navigate to the root directory of the project
 
 4. Create a `config.yaml` file with the configuration needed for the project
-
    - Reference the [`config-example.yaml`](./config-example.yaml) to get started
 
 ## Important Note on PATH Configuration for Go Tools
@@ -130,7 +127,6 @@ export PATH=$(go env GOPATH)/bin:$PATH
 After adding this line, remember to apply the changes by sourcing the file (e.g., `source ~/.bashrc`) or by opening a new terminal session.
 
 5. Install [MariaDB](https://mariadb.com/) locally via its [installation guide](https://mariadb.com/docs/server/server-management/install-and-upgrade-mariadb/installing-mariadb/binary-packages).
-
    - Create a database using the `database.name` value from your `config.yaml` with the following commands (using Homebrew, for example):
 
    ```bash
@@ -164,24 +160,23 @@ After adding this line, remember to apply the changes by sourcing the file (e.g.
    ```
 
    Once the server is running (via `make run` or `make dev`), you can access the API documentation at:
-
    - Swagger UI: http://localhost:8080/swagger/index.html</br>
    - Alternative docs: http://localhost:8080/docs/index.html
 
 > [!NOTE]
 > Feel free to contact the team in the [Data room on Matrix](https://matrix.to/#/#ScribeData:matrix.org) if you're having problems getting your environment setup!
 
-<a id="supported-languages"></a>
+<sub><a href="#top">Back to top.</a></sub>
 
-# Supported Languages [`⇧`](#contents)
+# Supported Languages
 
 Scribe's goal is functional, feature-rich keyboards for all languages. You can check the currently available languages and data for Scribe applications on our website at [scri.be/docs/server/available-data](https://scri.be/docs/server/available-data).
 
 See [scribe_data/wikidata/language_data_extraction](https://github.com/scribe-org/Scribe-Data/tree/main/src/scribe_data/wikidata/language_data_extraction) for queries in the [Scribe-Data](https://github.com/scribe-org/Scribe-Data) project for currently supported languages and those that have substantial data on [Wikidata](https://www.wikidata.org/). Also see the [`new keyboard`](https://github.com/scribe-org/Scribe-iOS/issues?q=is%3Aissue+is%3Aopen+label%3A%22new+keyboard%22) label in the [Issues](https://github.com/scribe-org/Scribe-iOS/issues) for keyboards that are currently in progress or being discussed, and [suggest a new keyboard](https://github.com/scribe-org/Scribe-iOS/issues/new?assignees=&labels=new+keyboard&template=new_keyboard.yml&title=Add+%3Clanguage%3E+keyboard) if you don't see it being worked on already!
 
-<a id="featured-by"></a>
+<sub><a href="#top">Back to top.</a></sub>
 
-# Featured By [`⇧`](#contents)
+# Featured By
 
 Please see the [blog posts page on our website](https://scri.be/docs/about/blog-posts) for a list of articles on Scribe, and feel free to open a pull request to add one that you've written at [scribe-org/scri.be](https://github.com/scribe-org/scri.be)!
 
@@ -207,7 +202,9 @@ The following organizations have supported the development of Scribe projects th
   <br>
 </div>
 
-# Powered By [`⇧`](#contents)
+<sub><a href="#top">Back to top.</a></sub>
+
+# Powered By
 
 ### Contributors
 
@@ -239,3 +236,5 @@ The Scribe community would like to thank all the great software that made Scribe
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <br>
 </div>
+
+<sub><a href="#top">Back to top.</a></sub>
