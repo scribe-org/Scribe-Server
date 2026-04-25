@@ -63,7 +63,6 @@ log "Log file: $LOG_FILE"
 log "📦 Setting up Scribe-Data repository..."
 if [ ! -d "$SCRIBE_DATA_DIR" ]; then
     log "Cloning Scribe-Data repository..."
-    #git clone --depth=1 https://github.com/scribe-org/Scribe-Data.git "$SCRIBE_DATA_DIR" || {
     git clone --depth=1 --branch fix/emoji-keywords-sqlite-generation https://github.com/LJSigersmith/Scribe-Data.git "$SCRIBE_DATA_DIR" || {
         error "Failed to clone Scribe-Data repo"
         exit 1
