@@ -16,8 +16,7 @@ SKIP_MIGRATION=${1:-false}
 PROJECT_ROOT=$(pwd)
 
 # Define target languages and data types.
-TARGET_LANGUAGES=("english") #"french" "german" "italian" "spanish" "portuguese" "russian" "swedish")
-# DATA_TYPES=("nouns" "verbs" "emoji_keywords")
+TARGET_LANGUAGES=("english" "french" "german" "italian" "spanish" "portuguese" "russian" "swedish")
 DATA_TYPES=("nouns" "verbs" "emoji_keywords")
 
 RED='\033[0;31m'
@@ -63,8 +62,7 @@ log "Log file: $LOG_FILE"
 log "📦 Setting up Scribe-Data repository..."
 if [ ! -d "$SCRIBE_DATA_DIR" ]; then
     log "Cloning Scribe-Data repository..."
-    #git clone --depth=1 https://github.com/scribe-org/Scribe-Data.git "$SCRIBE_DATA_DIR" || {
-    git clone --depth=1 --branch fix/emoji-keywords-sqlite-generation https://github.com/LJSigersmith/Scribe-Data.git "$SCRIBE_DATA_DIR" || {
+    git clone --depth=1 https://github.com/scribe-org/Scribe-Data.git "$SCRIBE_DATA_DIR" || {
         error "Failed to clone Scribe-Data repo"
         exit 1
     }
