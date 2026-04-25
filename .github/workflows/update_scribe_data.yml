@@ -60,6 +60,15 @@ jobs:
         id: run_script
         run: ./update_data.sh true
 
+      - name: Verify SQLite output
+        run: |
+          DB="./packs/sqlite/ENLanguageData.sqlite"
+          echo "Tables in $DB:"
+          sqlite3 "$DB" ".tables"
+          echo ""
+          echo "Sample row from emoji_keywords:"
+          sqlite3 "$DB" "SELECT * FROM emoji_keywords LIMIT 1;"
+
       - name: Create deployment package
         run: |
           if [ ! -d "./packs/sqlite" ]; then
