@@ -16,8 +16,9 @@ SKIP_MIGRATION=${1:-false}
 PROJECT_ROOT=$(pwd)
 
 # Define target languages and data types.
-TARGET_LANGUAGES=("english" "french" "german" "italian" "spanish" "portuguese" "russian" "swedish")
-DATA_TYPES=("nouns" "verbs")
+TARGET_LANGUAGES=("english") #"french" "german" "italian" "spanish" "portuguese" "russian" "swedish")
+# DATA_TYPES=("nouns" "verbs" "emoji_keywords")
+DATA_TYPES=("nouns" "verbs" "emoji_keywords")
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -62,7 +63,8 @@ log "Log file: $LOG_FILE"
 log "📦 Setting up Scribe-Data repository..."
 if [ ! -d "$SCRIBE_DATA_DIR" ]; then
     log "Cloning Scribe-Data repository..."
-    git clone --depth=1 https://github.com/scribe-org/Scribe-Data.git "$SCRIBE_DATA_DIR" || {
+    #git clone --depth=1 https://github.com/scribe-org/Scribe-Data.git "$SCRIBE_DATA_DIR" || {
+    git clone --depth=1 --branch fix/emoji-keywords-sqlite-generation https://github.com/LJSigersmith/Scribe-Data.git "$SCRIBE_DATA_DIR" || {
         error "Failed to clone Scribe-Data repo"
         exit 1
     }
@@ -100,6 +102,15 @@ if ! command -v pip &> /dev/null && ! command -v pip3 &> /dev/null; then
     success "pip installed successfully"
 fi
 
+# MARK: System Dependencies
+
+log "🔧 Installing system dependencies for PyICU..."
+sudo apt-get install -y libicu-dev pkg-config g++ python3-dev || {
+    error "Failed to install system dependencies"
+    exit 1
+}
+success "System dependencies installed"
+
 # MARK: Make Venv
 
 log "🧪 Setting up virtual environment..."
@@ -129,6 +140,13 @@ pip install -e . || {
     exit 1
 }
 success "Dependencies installed successfully"
+
+log "🔧 Building PyICU from source against local ICU..."
+pip install --force-reinstall --no-binary :all: PyICU || {
+    error "Failed to build PyICU from source"
+    exit 1
+}
+success "PyICU built from source successfully"
 
 # MARK: Download Wikidata Dump First
 
