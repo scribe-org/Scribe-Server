@@ -131,12 +131,12 @@ pip install -e . || {
 }
 success "Dependencies installed successfully"
 
-# log "🔧 Building PyICU from source against local ICU..."
-# pip install --force-reinstall --no-binary :all: PyICU || {
-#     error "Failed to build PyICU from source"
-#     exit 1
-# }
-# success "PyICU built from source successfully"
+log "🔧 Building PyICU from source against local ICU..."
+pip install --force-reinstall --no-binary :all: PyICU || {
+    error "Failed to build PyICU from source"
+    exit 1
+}
+success "PyICU built from source successfully"
 
 # MARK: Download Wikidata Dump First
 

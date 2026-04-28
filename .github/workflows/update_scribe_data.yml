@@ -51,7 +51,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl git sqlite3 make
+          sudo apt-get install -y curl git sqlite3 make 
 
       - name: Make script executable
         run: chmod +x ./update_data.sh
