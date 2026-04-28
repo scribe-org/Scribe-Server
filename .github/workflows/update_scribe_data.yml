@@ -43,15 +43,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl git sqlite3 make
+          sudo apt-get install -y curl git sqlite3 make libicu-dev pkg-config g++ python3-dev
 
       - name: Make script executable
         run: chmod +x ./update_data.sh
@@ -59,6 +59,15 @@ jobs:
       - name: Run update script (skips migration)
         id: run_script
         run: ./update_data.sh true
+
+      - name: Verify SQLite output
+        run: |
+          DB="./packs/sqlite/ENLanguageData.sqlite"
+          echo "Tables in $DB:"
+          sqlite3 "$DB" ".tables"
+          echo ""
+          echo "Sample row from emoji_keywords:"
+          sqlite3 "$DB" "SELECT * FROM emoji_keywords LIMIT 1;"
 
       - name: Create deployment package
         run: |
