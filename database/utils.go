@@ -36,6 +36,28 @@ func IsValidTableName(tableName string) bool {
 	return matched
 }
 
+// IsValidTranslationTableName validates TranslationData table names.
+// Pattern: TranslationData{TARGET}From{SOURCE} e.g. TranslationDataBNFromDE.
+func IsValidTranslationTableName(tableName string) bool {
+	pattern := `^TranslationData[A-Z]{2,4}From[A-Z]{2,4}$`
+	matched, err := regexp.MatchString(pattern, tableName)
+	if err != nil || !matched {
+		return false
+	}
+
+	if len(tableName) > 60 || len(tableName) < 23 {
+		return false
+	}
+
+	for _, char := range tableName {
+		if !constants.IsAlphaNumeric(char) {
+			return false
+		}
+	}
+
+	return true
+}
+
 // MARK: Pointer Conversion
 
 // ToIntPtr converts various numeric types to a pointer to int.

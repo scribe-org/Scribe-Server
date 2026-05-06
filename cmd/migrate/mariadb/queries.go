@@ -34,21 +34,25 @@ func generateMariaTableName(langCode, tableName string) string {
 	// Remove sqlite_ prefix if present.
 	cleanTableName := strings.TrimPrefix(tableName, "sqlite_")
 
-	// Clean up table name - replace underscores and capitalize properly.
-	cleanTableName = strings.ReplaceAll(cleanTableName, "_", "")
-
-	caser := cases.Title(language.English)
-	cleanTableName = caser.String(cleanTableName)
-
 	// Special handling for TranslationData tables.
-	if strings.HasPrefix(langCode, "TranslationData") {
-		// For TranslationData, just use TranslationData + Language:
-		// TranslationData + english -> TranslationDataEnglish
-		return "TranslationData" + cleanTableName
+	// Table names follow the pattern: {target}_translations_from_{source}
+	// e.g. bn_translations_from_de -> TranslationDataBNFromDE
+	if langCode == "TranslationData" {
+		parts := strings.Split(cleanTableName, "_")
+		if len(parts) == 4 && parts[1] == "translations" && parts[2] == "from" {
+			target := strings.ToUpper(parts[0])
+			source := strings.ToUpper(parts[3])
+			return "TranslationData" + target + "From" + source
+		}
+		// Fallback: strip underscores and title-case.
+		caser := cases.Title(language.English)
+		return "TranslationData" + caser.String(strings.ReplaceAll(cleanTableName, "_", ""))
 	}
 
 	// For language data tables, capitalize table name and add Scribe suffix:
 	// ENLanguageData + nouns -> ENLanguageDataNounsScribe
+	caser := cases.Title(language.English)
+	cleanTableName = caser.String(strings.ReplaceAll(cleanTableName, "_", ""))
 	return langCode + cleanTableName + "Scribe"
 }
 

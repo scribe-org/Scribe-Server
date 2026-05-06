@@ -12,4 +12,10 @@ const (
 
 	// ErrorFetchingLanguageVersions indicates a failure when retrieving language version data.
 	ErrorFetchingLanguageVersions = "Failed to fetch language versions"
+
+	// InvalidTranslationLangCodeError indicates a translation language code is invalid.
+	InvalidTranslationLangCodeError = "Invalid language code. Use 2-4 lowercase letters (e.g. 'bn', 'de', 'dag')"
+
+	// ErrorFetchingTranslationData indicates a failure when retrieving translation data.
+	ErrorFetchingTranslationData = "Failed to fetch translation data"
 )

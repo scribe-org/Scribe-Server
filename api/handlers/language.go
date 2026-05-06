@@ -257,6 +257,49 @@ func GetContracts(c *gin.Context) {
 	})
 }
 
+// MARK: Translation Data Retrieval
+
+// GetTranslationData returns translation data from a source language into a target language.
+//
+// @Summary Retrieve translation data
+// @Description Returns nested translation data for the given target and source language ISO codes.
+// @Tags Translations
+// @Accept  json
+// @Produce  json
+// @Param targetLang path string true "Target language code (ISO 639-1)" example(bn)
+// @Param sourceLang path string true "Source language code (ISO 639-1)" example(de)
+// @Success 200 {object} models.TranslationDataResponse "Successfully retrieved translation data"
+// @Failure 400 {object} models.ErrorResponse "Invalid language code"
+// @Failure 404 {object} models.ErrorResponse "Translation data not found"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /api/v1/translations/{targetLang}/{sourceLang} [get]
+func GetTranslationData(c *gin.Context) {
+	targetLang := c.Param("targetLang")
+	sourceLang := c.Param("sourceLang")
+
+	if !validators.IsValidTranslationLangCode(targetLang) || !validators.IsValidTranslationLangCode(sourceLang) {
+		HandleError(c, http.StatusBadRequest, constants.InvalidTranslationLangCodeError)
+		return
+	}
+
+	data, err := dbqueries.GetTranslationTableData(targetLang, sourceLang)
+	if err != nil {
+		log.Printf("Error fetching translation data for %s/%s: %v", targetLang, sourceLang, err)
+		if strings.Contains(err.Error(), "does not exist") {
+			HandleError(c, http.StatusNotFound, fmt.Sprintf("No translation data for '%s' from '%s'", targetLang, sourceLang))
+			return
+		}
+		HandleError(c, http.StatusInternalServerError, constants.ErrorFetchingTranslationData)
+		return
+	}
+
+	HandleSuccess(c, models.TranslationDataResponse{
+		TargetLang: targetLang,
+		SourceLang: sourceLang,
+		Data:       data,
+	})
+}
+
 // MARK: Contract Loading Helpers
 
 // loadSingleContract reads and unmarshals a single contract file.

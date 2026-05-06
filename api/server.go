@@ -197,6 +197,7 @@ func startServer(r *gin.Engine) {
 	log.Println("  ✅ GET /api/v1/data/:lang_iso       		- Get full language data with schema")
 	log.Println("  ✅ GET /api/v1/data-version/:lang_iso 		- Get version info for a language")
 	log.Println("  ✅ GET /api/v1/language-stats?codes=fr,de         - Get statistics for all or selected languages")
+	log.Println("  ✅ GET /api/v1/translations/:source/:target 		- Get translation data of target from source ")
 	log.Printf("📊 Available languages: %v", availableLanguages)
 
 	log.Fatal(r.Run(hostPort))

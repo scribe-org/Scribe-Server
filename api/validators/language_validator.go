@@ -4,6 +4,7 @@
 package validators
 
 import (
+	"regexp"
 	"slices"
 	"strings"
 	"sync"
@@ -51,4 +52,11 @@ func SanitizeLanguageCode(lang string) string {
 // IsLanguageSupported checks if a language exists in the provided list.
 func IsLanguageSupported(lang string, availableLanguages []string) bool {
 	return slices.Contains(availableLanguages, lang)
+}
+
+// IsValidTranslationLangCode checks if a language code is valid for translation endpoints.
+// Accepts 2–4 lowercase ASCII letters (e.g. "bn", "de", "dag", "pnb").
+func IsValidTranslationLangCode(lang string) bool {
+	matched, err := regexp.MatchString(`^[a-z]{2,4}$`, lang)
+	return err == nil && matched
 }

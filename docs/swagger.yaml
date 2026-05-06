@@ -86,6 +86,33 @@ definitions:
         description: Map of data types to version identifiers
         type: object
     type: object
+  models.TranslationDataResponse:
+    properties:
+      data:
+        additionalProperties:
+          additionalProperties:
+            additionalProperties:
+              $ref: '#/definitions/models.TranslationEntry'
+            type: object
+          type: object
+        description: Nested translation data
+        type: object
+      source_lang:
+        description: ISO code of the source language (e.g. "de")
+        type: string
+      target_lang:
+        description: ISO code of the target language (e.g. "bn")
+        type: string
+    type: object
+  models.TranslationEntry:
+    properties:
+      description:
+        description: Description of the word in the source language
+        type: string
+      translation:
+        description: Translation of the word in the target language
+        type: string
+    type: object
 externalDocs:
   description: GitHub Repository
   url: https://github.com/scribe-org/Scribe-Server
@@ -263,4 +290,45 @@ paths:
       summary: List all supported languages
       tags:
       - Languages
+  /api/v1/translations/{targetLang}/{sourceLang}:
+    get:
+      consumes:
+      - application/json
+      description: Returns nested translation data for the given target and source
+        language ISO codes.
+      parameters:
+      - description: Target language code (ISO 639-1)
+        example: bn
+        in: path
+        name: targetLang
+        required: true
+        type: string
+      - description: Source language code (ISO 639-1)
+        example: de
+        in: path
+        name: sourceLang
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved translation data
+          schema:
+            $ref: '#/definitions/models.TranslationDataResponse'
+        "400":
+          description: Invalid language code
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Translation data not found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Retrieve translation data
+      tags:
+      - Translations
 swagger: "2.0"
