@@ -1,10 +1,20 @@
 # [Toolforge Deployment](https://toolsadmin.wikimedia.org/)
 
-[Toolforge](https://wikitech.wikimedia.org/wiki/Help:Toolforge) is Wikimedia's hosting platform for community tools. This guide walks you through deploying Scribe-Server there from scratch — no prior Toolforge experience needed. To deploy Scribe Server here, you first apply at [toolsadmin.wikimedia.org](https://toolsadmin.wikimedia.org/) with the relevant project details. After your application is approved, you gain SSH access and can set up the environment, database, and web service described below. 
+[Toolforge](https://wikitech.wikimedia.org/wiki/Help:Toolforge) is Wikimedia's hosting platform for community tools. This guide walks you through deploying Scribe-Server on Toolforge from scratch — no prior Toolforge experience needed. To deploy Scribe Server here, you first apply at [toolsadmin.wikimedia.org](https://toolsadmin.wikimedia.org/) with the relevant project details. After your application is approved, you gain SSH access and can set up the environment, database, and web service described below.
+
+## Contents
+
+- [Practical Workflow](#first-steps-as-a-contributor)
+  - [SSH into Toolforge](#ssh-into-toolforge)
+  - [Set Up Go](#set-up-go)
+  - [Configure the Database](#configure-the-database)
+  - [Build and Run the Server](#build-and-run-the-server)
+  - [Install pip](#install-pip)
+  - [Install PyICU](#install-pyicu)
 
 ## Practical Workflow
 
-### 1) SSH into Toolforge
+### SSH into Toolforge
 
 Connect to the login node using your Wikimedia developer account:
 
@@ -25,7 +35,7 @@ git clone https://github.com/scribe-org/Scribe-Server.git
 cd Scribe-Server
 ```
 
-### 2) Set Up Go
+### Set Up Go
 
 Toolforge's [pre-built web images](https://wikitech.wikimedia.org/wiki/Help:Toolforge/Web#Other_/_generic_web_servers) do not include Go, so you install it manually into your home directory.
 
@@ -61,7 +71,7 @@ Why this layout:
 - `GOROOT` must point at your custom location because the system has no Go in `PATH`.
 - Running `go run .` inside Toolforge binds to `0.0.0.0:8000` — this is expected behavior within the Toolforge network.
 
-### 3) Configure the Database
+### Configure the Database
 
 Toolforge provides a shared MariaDB cluster. Your credentials are pre-written to `~/replica.my.cnf` during tool creation.
 
@@ -110,7 +120,7 @@ mysql --defaults-file=~/replica.my.cnf \
   s123456__scribe_server_p
 ```
 
-### 4) Build and Run the Server
+### Build and Run the Server
 
 Each time you deploy an update, stop the running service, pull the latest code, rebuild the binary, and restart:
 
@@ -129,7 +139,7 @@ Why this sequence:
 - `go build -o Scribe-Server .` produces a statically-linked binary that Toolforge can execute directly.
 - The `--mem 4Gi --cpu 2` flags allocate enough headroom for data loading on startup.
 
-### 5) Install pip (Python Tooling)
+### Install pip
 
 If you need Python-based tooling in the project, open a Python 3.13 shell and bootstrap pip:
 
@@ -141,7 +151,10 @@ source venv/bin/activate
 curl -sS https://bootstrap.pypa.io/get-pip.py | python
 ```
 
-### 6) Install PyICU (if ICU Detection Fails)
+### Install PyICU
+
+> [!NOTE]
+> The following should be done if ICU Detection Fails.
 
 The standard PyICU build uses `pkg-config` or `icu-config` to locate ICU headers and libraries. Neither tool is installed on Toolforge, so you must set the paths manually before running `pip install`:
 
