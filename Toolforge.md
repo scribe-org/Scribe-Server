@@ -120,17 +120,37 @@ mysql --defaults-file=~/replica.my.cnf \
   s123456__scribe_server_p
 ```
 
+### Create the Start Script (Only Once)
+
+```bash
+~/Scribe-Server/start-script.sh << 'EOF'
+#!/bin/bash
+cd /data/project/testserver-scribe/Scribe-Server
+export PORT=8000
+./Scribe-Server
+EOF
+```
+
+**Make it executable:**
+
+```.bash
+chmod +x ~/Scribe-Server/start-script.sh
+```
+
 ### Build and Run the Server
 
 Each time you deploy an update, stop the running service, pull the latest code, rebuild the binary, and restart:
 
 ```bash
-chmod +x update_data.sh
+chmod +x start-script.sh
 toolforge webservice stop
 git pull origin main
 go build -o Scribe-Server .
 toolforge webservice --mem 4Gi --cpu 2 jdk17 start \
-  /data/project/scribe-server/Scribe-Server/update_data.sh
+  /data/project/testserver-scribe/Scribe-Server/start-script.sh
+
+kubectl --namespace=tool-scribe-server get ingress  # check for URL
+kubectl logs -l toolforge=tool --tail=50 # see logs; last 50
 ```
 
 Why this sequence:
@@ -139,21 +159,38 @@ Why this sequence:
 - `go build -o Scribe-Server .` produces a statically-linked binary that Toolforge can execute directly.
 - The `--mem 4Gi --cpu 2` flags allocate enough headroom for data loading on startup.
 
-### Install pip
+### Python-based Tooling Setup(To Run [Scribe-Data Fetch Script](./update_data.sh) Successfully)
 
 If you need Python-based tooling in the project, open a Python 3.13 shell and bootstrap pip:
 
 ```bash
-toolforge webservice python3.13 shell
+toolforge webservice --mem 4Gi python3.13 shell
+
+python3 -m venv .venv
 
 source venv/bin/activate
 
 curl -sS https://bootstrap.pypa.io/get-pip.py | python
 ```
 
+then in the root of your project, run:
+
+```bash
+./update_data.sh true # we pass `true` to skip DB migration
+```
+
+once done, exit the python shell by running: `exit`
+
+The run migration:
+
+```bash
+go build -o ./bin/migrate-scribe-data ./cmd/migrate # to build migration file
+./bin/migrate  # to run the migration
+```
+
 ### Install PyICU
 
-> [!NOTE]
+> [**!NOTE**]
 > The following should be done if ICU Detection Fails.
 
 The standard PyICU build uses `pkg-config` or `icu-config` to locate ICU headers and libraries. Neither tool is installed on Toolforge, so you must set the paths manually before running `pip install`:
