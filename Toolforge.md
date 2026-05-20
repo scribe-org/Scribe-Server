@@ -1,3 +1,5 @@
+<a id="top"></a>
+
 # [Toolforge Deployment](https://toolsadmin.wikimedia.org/)
 
 [Toolforge](https://wikitech.wikimedia.org/wiki/Help:Toolforge) is Wikimedia's hosting platform for community tools. This guide walks you through deploying Scribe-Server on Toolforge from scratch — no prior Toolforge experience needed. To deploy Scribe Server here, you first apply at [toolsadmin.wikimedia.org](https://toolsadmin.wikimedia.org/) with the relevant project details. After your application is approved, you gain SSH access and can set up the environment, database, and web service described below.
@@ -7,9 +9,10 @@
 - [Practical Workflow](#first-steps-as-a-contributor)
   - [SSH into Toolforge](#ssh-into-toolforge)
   - [Set Up Go](#set-up-go)
-  - [Configure the Database](#configure-the-database)
+  - [Configure Database](#configure-database)
+  - [Create Start Script](#create-start-script)
   - [Build and Run the Server](#build-and-run-the-server)
-  - [Install pip](#install-pip)
+  - [Python Tooling Setup](#python-tooling-setup)
   - [Install PyICU](#install-pyicu)
 
 ## Practical Workflow
@@ -34,6 +37,8 @@ Then clone the repository into your project directory:
 git clone https://github.com/scribe-org/Scribe-Server.git
 cd Scribe-Server
 ```
+
+<sub><a href="#top">Back to top.</a></sub>
 
 ### Set Up Go
 
@@ -71,7 +76,9 @@ Why this layout:
 - `GOROOT` must point at your custom location because the system has no Go in `PATH`.
 - Running `go run .` inside Toolforge binds to `0.0.0.0:8000` — this is expected behavior within the Toolforge network.
 
-### Configure the Database
+<sub><a href="#top">Back to top.</a></sub>
+
+### Configure Database
 
 Toolforge provides a shared MariaDB cluster. Your credentials are pre-written to `~/replica.my.cnf` during tool creation.
 
@@ -120,7 +127,12 @@ mysql --defaults-file=~/replica.my.cnf \
   s123456__scribe_server_p
 ```
 
-### Create the Start Script (Only Once)
+<sub><a href="#top">Back to top.</a></sub>
+
+### Create Start Script
+
+> [!NOTE]
+> The following only needs to be ran once.
 
 ```bash
 ~/Scribe-Server/start-script.sh << 'EOF'
@@ -131,11 +143,13 @@ export PORT=8000
 EOF
 ```
 
-**Make it executable:**
+Make the script executable:
 
 ```.bash
 chmod +x ~/Scribe-Server/start-script.sh
 ```
+
+<sub><a href="#top">Back to top.</a></sub>
 
 ### Build and Run the Server
 
@@ -159,9 +173,14 @@ Why this sequence:
 - `go build -o Scribe-Server .` produces a statically-linked binary that Toolforge can execute directly.
 - The `--mem 4Gi --cpu 2` flags allocate enough headroom for data loading on startup.
 
-### Python-based Tooling Setup(To Run [Scribe-Data Fetch Script](./update_data.sh) Successfully)
+<sub><a href="#top">Back to top.</a></sub>
 
-If you need Python-based tooling in the project, open a Python 3.13 shell and bootstrap pip:
+### Python Tooling Setup
+
+> [!NOTE]
+> The following is needed to Run [Scribe-Data Fetch Script](./update_data.sh) Successfully.
+
+If you need Python tooling in the project, open a Python 3.13 shell and bootstrap pip:
 
 ```bash
 toolforge webservice --mem 4Gi python3.13 shell
@@ -173,24 +192,26 @@ source venv/bin/activate
 curl -sS https://bootstrap.pypa.io/get-pip.py | python
 ```
 
-then in the root of your project, run:
+Then run the following in the root of the project:
 
 ```bash
 ./update_data.sh true # we pass `true` to skip DB migration
 ```
 
-once done, exit the python shell by running: `exit`
+Once done, exit the python shell by running: `exit`
 
-The run migration:
+Then run the migration:
 
 ```bash
 go build -o ./bin/migrate-scribe-data ./cmd/migrate # to build migration file
 ./bin/migrate  # to run the migration
 ```
 
+<sub><a href="#top">Back to top.</a></sub>
+
 ### Install PyICU
 
-> [**!NOTE**]
+> [!NOTE]
 > The following should be done if ICU Detection Fails.
 
 The standard PyICU build uses `pkg-config` or `icu-config` to locate ICU headers and libraries. Neither tool is installed on Toolforge, so you must set the paths manually before running `pip install`:
@@ -207,3 +228,5 @@ Why these variables:
 - `ICU_VERSION` tells the build script which header subdirectory to target.
 - `PYICU_LFLAGS` points the linker at the system ICU shared objects already present on Toolforge nodes.
 - `PYICU_CFLAGS` points the compiler at the system ICU headers.
+
+<sub><a href="#top">Back to top.</a></sub>
