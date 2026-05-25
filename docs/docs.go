@@ -257,7 +257,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/translations/{targetLang}/{sourceLang}": {
+        "/api/v1/translations": {
             "get": {
                 "description": "Returns nested translation data for the given target and source language ISO codes.",
                 "consumes": [
@@ -273,17 +273,17 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "example": "bn",
-                        "description": "Target language code (ISO 639-1)",
-                        "name": "targetLang",
+                        "example": "de",
+                        "description": "Source language code (ISO 639-1)",
+                        "name": "source_lang",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "example": "de",
-                        "description": "Source language code (ISO 639-1)",
-                        "name": "sourceLang",
+                        "example": "bn",
+                        "description": "Target language code (ISO 639-1)",
+                        "name": "target_lang",
                         "in": "path",
                         "required": true
                     }

@@ -290,23 +290,23 @@ paths:
       summary: List all supported languages
       tags:
       - Languages
-  /api/v1/translations/{targetLang}/{sourceLang}:
+  /api/v1/translations:
     get:
       consumes:
       - application/json
       description: Returns nested translation data for the given target and source
         language ISO codes.
       parameters:
-      - description: Target language code (ISO 639-1)
-        example: bn
-        in: path
-        name: targetLang
-        required: true
-        type: string
       - description: Source language code (ISO 639-1)
         example: de
         in: path
-        name: sourceLang
+        name: source_lang
+        required: true
+        type: string
+      - description: Target language code (ISO 639-1)
+        example: bn
+        in: path
+        name: target_lang
         required: true
         type: string
       produces:

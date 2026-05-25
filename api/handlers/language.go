@@ -266,13 +266,13 @@ func GetContracts(c *gin.Context) {
 // @Tags Translations
 // @Accept  json
 // @Produce  json
-// @Param targetLang path string true "Target language code (ISO 639-1)" example(bn)
-// @Param sourceLang path string true "Source language code (ISO 639-1)" example(de)
+// @Param source_lang path string true "Source language code (ISO 639-1)" example(de)
+// @Param target_lang path string true "Target language code (ISO 639-1)" example(bn)
 // @Success 200 {object} models.TranslationDataResponse "Successfully retrieved translation data"
 // @Failure 400 {object} models.ErrorResponse "Invalid language code"
 // @Failure 404 {object} models.ErrorResponse "Translation data not found"
 // @Failure 500 {object} models.ErrorResponse "Internal server error"
-// @Router /api/v1/translations/{targetLang}/{sourceLang} [get]
+// @Router /api/v1/translations [get]
 func GetTranslationData(c *gin.Context) {
 	sourceLang := c.Query("source_lang")
 	targetLang := c.Query("target_lang")
