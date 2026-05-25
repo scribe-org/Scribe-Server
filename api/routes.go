@@ -21,7 +21,7 @@ func SetupRoutes(r *gin.Engine) {
 			v1.GET("/languages", handlers.GetAvailableLanguages)
 			v1.GET("/contracts", handlers.GetContracts)
 			v1.GET("/language-stats", handlers.GetLanguageStats)
-			v1.GET("/translations/:targetLang/:sourceLang", handlers.GetTranslationData)
+			v1.GET("/translations", handlers.GetTranslationData)
 		}
 	}
 }

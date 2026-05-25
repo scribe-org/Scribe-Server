@@ -18,4 +18,7 @@ const (
 
 	// ErrorFetchingTranslationData indicates a failure when retrieving translation data.
 	ErrorFetchingTranslationData = "Failed to fetch translation data"
+
+	// EmptyTranslationCodeError indicates a failure when language code is not passed.
+	EmptyTranslationCodeError = "Empty translation code detected. Ensure you pass in valid source and target language code"
 )

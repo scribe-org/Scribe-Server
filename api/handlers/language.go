@@ -274,8 +274,13 @@ func GetContracts(c *gin.Context) {
 // @Failure 500 {object} models.ErrorResponse "Internal server error"
 // @Router /api/v1/translations/{targetLang}/{sourceLang} [get]
 func GetTranslationData(c *gin.Context) {
-	targetLang := c.Param("targetLang")
-	sourceLang := c.Param("sourceLang")
+	sourceLang := c.Query("source_lang")
+	targetLang := c.Query("target_lang")
+
+	if sourceLang == "" || targetLang == "" {
+		HandleError(c, http.StatusBadRequest, constants.EmptyTranslationCodeError)
+		return
+	}
 
 	if !validators.IsValidTranslationLangCode(targetLang) || !validators.IsValidTranslationLangCode(sourceLang) {
 		HandleError(c, http.StatusBadRequest, constants.InvalidTranslationLangCodeError)
