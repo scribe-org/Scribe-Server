@@ -250,6 +250,65 @@
                     }
                 }
             }
+        },
+        "/api/v1/translations": {
+            "get": {
+                "description": "Returns nested translation data for the given target and source language ISO codes.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Translations"
+                ],
+                "summary": "Retrieve translation data",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "de",
+                        "description": "Source language code (ISO 639-1)",
+                        "name": "source_lang",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "bn",
+                        "description": "Target language code (ISO 639-1)",
+                        "name": "target_lang",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved translation data",
+                        "schema": {
+                            "$ref": "#/definitions/models.TranslationDataResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid language code",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Translation data not found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -377,6 +436,45 @@
                     "additionalProperties": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "models.TranslationDataResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "Nested translation data",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "#/definitions/models.TranslationEntry"
+                            }
+                        }
+                    }
+                },
+                "source_lang": {
+                    "description": "ISO code of the source language (e.g. \"de\")",
+                    "type": "string"
+                },
+                "target_lang": {
+                    "description": "ISO code of the target language (e.g. \"bn\")",
+                    "type": "string"
+                }
+            }
+        },
+        "models.TranslationEntry": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "Description of the word in the source language",
+                    "type": "string"
+                },
+                "translation": {
+                    "description": "Translation of the word in the target language",
+                    "type": "string"
                 }
             }
         }

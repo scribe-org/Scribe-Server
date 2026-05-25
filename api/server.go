@@ -192,11 +192,12 @@ func startServer(r *gin.Engine) {
 
 	log.Printf("👀 Listening on port %s", hostPort)
 	log.Println("🚀 API Endpoints:")
-	log.Println("  ✅ GET /api/v1/languages                		- List available languages")
-	log.Println("  ✅ GET /api/v1/contracts[?lang_iso=xx]      	- Get contracts (optional language filter)")
-	log.Println("  ✅ GET /api/v1/data/:lang_iso       		- Get full language data with schema")
-	log.Println("  ✅ GET /api/v1/data-version/:lang_iso 		- Get version info for a language")
-	log.Println("  ✅ GET /api/v1/language-stats?codes=fr,de         - Get statistics for all or selected languages")
+	log.Println("  ✅ GET /api/v1/languages                				- List available languages")
+	log.Println("  ✅ GET /api/v1/contracts[?lang_iso=xx]      			- Get contracts (optional language filter)")
+	log.Println("  ✅ GET /api/v1/data/:lang_iso       				- Get full language data with schema")
+	log.Println("  ✅ GET /api/v1/data-version/:lang_iso 				- Get version info for a language")
+	log.Println("  ✅ GET /api/v1/language-stats?codes=fr,de         		- Get statistics for all or selected languages")
+	log.Println("  ✅ GET /api/v1/translations?source_lang=es&target_lang=en  	- Get translation data of target from source")
 	log.Printf("📊 Available languages: %v", availableLanguages)
 
 	log.Fatal(r.Run(hostPort))
