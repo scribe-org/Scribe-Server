@@ -117,31 +117,62 @@ jobs:
           scp -o ConnectTimeout=60 ./scribe-data-sqlite.tar.gz \
             ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org:/data/project/scribe-server/scribe-data-sqlite.tar.gz
 
-          echo "✅ Package transferred successfully."
-          echo "🚀 Starting remote deployment process..."
-          # become must wrap the script; bare `become` then sibling lines fail non-TTY.
-          ssh -o ConnectTimeout=60 \
-            ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org \
-            "become scribe-server bash -s" << 'DEPLOY_SCRIPT_EOF'
-          set -euo pipefail
-          cd /data/project/scribe-server
-
-          test -f ./scribe-data-sqlite.tar.gz
-          mv ./scribe-data-sqlite.tar.gz ./Scribe-Server/
-          cd ./Scribe-Server
-
-          if [ -d "./packs/sqlite" ]; then
-            BACKUP_NAME="sqlite.backup.$(date +%Y%m%d_%H%M%S)"
-            mv ./packs/sqlite ./packs/$BACKUP_NAME
-            echo "📦 Backed up existing data to $BACKUP_NAME"
+          if [ $? -ne 0 ]; then
+            echo "❌ SCP file transfer failed."
+            exit 1
           fi
+          echo "✅ Package transferred successfully."
 
-          mkdir -p ./packs/sqlite
-          tar -xzf scribe-data-sqlite.tar.gz -C ./packs/sqlite/
-          go build -o ./bin/migrate-scribe-data ./cmd/migrate
-          ./bin/migrate-scribe-data
-          rm ./scribe-data-sqlite.tar.gz
-          echo "🎉 Deployment completed successfully!"
+          echo "🚀 Starting remote deployment process..."
+          ssh -o ConnectTimeout=60 \
+            ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org << 'DEPLOY_SCRIPT_EOF'
+
+            # Switch to the tool user.
+            become scribe-server
+
+            # Running as the tool user (e.g., scribe-server).
+            # Current Directory: /data/project/scribe-server
+
+            # Move the package into the Scribe-Server directory.
+            if [ ! -f "./scribe-data-sqlite.tar.gz" ]; then
+              echo "❌ Package not found in project directory."
+              exit 1
+            fi
+            echo "✅ Package verified in project directory."
+
+            mv ./scribe-data-sqlite.tar.gz ./Scribe-Server/
+            if [ $? -ne 0 ]; then
+              echo "❌ Failed to move package into Scribe-Server."
+              exit 1
+            fi
+
+            # Navigate into the Scribe-Server directory.
+            cd ./Scribe-Server || { echo "❌ Failed to navigate to Scribe-Server."; exit 1; }
+
+            # Create a backup of existing data.
+            if [ -d "./packs/sqlite" ]; then
+              BACKUP_NAME="sqlite.backup.$(date +%Y%m%d_%H%M%S)"
+              mv ./packs/sqlite ./packs/$BACKUP_NAME
+              echo "📦 Backed up existing data to $BACKUP_NAME"
+            fi
+
+            # Create packs directory and extract the new data.
+            mkdir -p ./packs/sqlite
+            echo "📤 Extracting new data..."
+            tar -xzf scribe-data-sqlite.tar.gz -C ./packs/sqlite/
+
+            # Run database migration.
+            echo "🔄 Building migration tool..."
+            go build -o ./bin/migrate-scribe-data ./cmd/migrate
+
+            echo "🔄 Running migration tool..."
+            ./bin/migrate-scribe-data
+
+            # Clean up the deployment package.
+            rm ./scribe-data-sqlite.tar.gz
+
+            echo "🎉 Deployment completed successfully!"
+
           DEPLOY_SCRIPT_EOF
 
       - name: Send Matrix Success Notification
