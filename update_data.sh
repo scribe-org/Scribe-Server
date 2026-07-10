@@ -17,7 +17,7 @@ PROJECT_ROOT=$(pwd)
 
 # Define target languages and data types.
 TARGET_LANGUAGES=("english" "french" "german" "italian" "spanish" "portuguese" "russian" "swedish")
-DATA_TYPES=("nouns" "verbs")
+DATA_TYPES=("nouns" "verbs" "emoji_keywords")
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -129,6 +129,26 @@ pip install -e . || {
     exit 1
 }
 success "Dependencies installed successfully"
+
+# MARK: PyICU
+# Toolforge has no pkg-config/icu-config; set ICU paths manually when needed.
+# See Toolforge.md "Install PyICU".
+log "📦 Building PyICU from source against local ICU..."
+if ! command -v pkg-config >/dev/null 2>&1 || ! pkg-config --exists icu-i18n 2>/dev/null; then
+    log "pkg-config/icu not found — setting ICU paths for Toolforge"
+    export ICU_VERSION="${ICU_VERSION:-76}"
+    export PYICU_LFLAGS="${PYICU_LFLAGS:--L/usr/lib/x86_64-linux-gnu -licui18n -licuuc -licudata}"
+    export PYICU_CFLAGS="${PYICU_CFLAGS:--I/usr/include}"
+fi
+pip install --force-reinstall --no-binary :all: PyICU || {
+    error "Failed to build PyICU from source"
+    exit 1
+}
+python3 -c "import icu" || {
+    error "PyICU installed but import failed (import icu)"
+    exit 1
+}
+success "PyICU built from source successfully"
 
 # MARK: Download Wikidata Dump First
 
