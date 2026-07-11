@@ -130,9 +130,24 @@ pip install -e . || {
 }
 success "Dependencies installed successfully"
 
-log "🔧 Building PyICU from source against local ICU..."
+# MARK: PyICU
+
+# Toolforge has no pkg-config/icu-config; set ICU paths manually when needed.
+# See: https://github.com/scribe-org/Scribe-Server/blob/main/TOOLFORGE.md#install-pyicu
+# See: https://gitlab.pyicu.org/main/pyicu
+log "📦 Building PyICU from source against local ICU..."
+if ! command -v pkg-config >/dev/null 2>&1 || ! pkg-config --exists icu-i18n 2>/dev/null; then
+    log "pkg-config/icu not found — setting ICU paths for Toolforge"
+    export ICU_VERSION="${ICU_VERSION:-76}"
+    export PYICU_LFLAGS="${PYICU_LFLAGS:--L/usr/lib/x86_64-linux-gnu -licui18n -licuuc -licudata}"
+    export PYICU_CFLAGS="${PYICU_CFLAGS:--I/usr/include}"
+fi
 pip install --force-reinstall --no-binary :all: PyICU || {
     error "Failed to build PyICU from source"
+    exit 1
+}
+python3 -c "import icu" || {
+    error "PyICU installed but import failed (import icu)"
     exit 1
 }
 success "PyICU built from source successfully"
