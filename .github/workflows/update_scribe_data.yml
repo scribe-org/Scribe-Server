@@ -36,6 +36,8 @@ jobs:
             echo "::warning::This workflow should only run in scribe-org/Scribe-Server repository."
           fi
   update-and-deploy:
+    needs: check-repository
+    if: needs.check-repository.outputs.is_remote_main == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 180 # 3 hours timeout for large data processing
 
