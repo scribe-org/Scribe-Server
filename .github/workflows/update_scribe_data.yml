@@ -45,15 +45,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.12
+      - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
-          python-version: "3.12"
+          python-version: "3.11"
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl git sqlite3 make libicu-dev pkg-config g++ python3-dev
+          sudo apt-get install -y curl git sqlite3 make
 
       - name: Make script executable
         run: chmod +x ./update_data.sh
