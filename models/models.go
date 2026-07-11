@@ -80,6 +80,29 @@ type AvailableLanguagesResponse struct {
 	Languages []LanguageInfo `json:"languages"`
 }
 
+// MARK: Translation Models
+
+// TranslationEntry holds the description and translation for a single word order entry.
+// swagger:model TranslationEntry
+type TranslationEntry struct {
+	// Description of the word in the source language
+	Description string `json:"description"`
+	// Translation of the word in the target language
+	Translation string `json:"translation"`
+}
+
+// TranslationDataResponse represents translation data from a source language into a target language.
+// Data is nested as: word -> wordType -> wordOrder -> TranslationEntry.
+// swagger:model TranslationDataResponse
+type TranslationDataResponse struct {
+	// ISO code of the target language (e.g. "bn")
+	TargetLang string `json:"target_lang"`
+	// ISO code of the source language (e.g. "de")
+	SourceLang string `json:"source_lang"`
+	// Nested translation data
+	Data map[string]map[string]map[string]TranslationEntry `json:"data"`
+}
+
 // MARK: Statistics Models
 
 // LanguageStatisticsReponse represents linguistic statistics for a language.

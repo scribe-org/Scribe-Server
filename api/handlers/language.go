@@ -257,6 +257,54 @@ func GetContracts(c *gin.Context) {
 	})
 }
 
+// MARK: Translation Data Retrieval
+
+// GetTranslationData returns translation data from a source language into a target language.
+//
+// @Summary Retrieve translation data
+// @Description Returns nested translation data for the given target and source language ISO codes.
+// @Tags Translations
+// @Accept  json
+// @Produce  json
+// @Param source_lang path string true "Source language code (ISO 639-1)" example(de)
+// @Param target_lang path string true "Target language code (ISO 639-1)" example(bn)
+// @Success 200 {object} models.TranslationDataResponse "Successfully retrieved translation data"
+// @Failure 400 {object} models.ErrorResponse "Invalid language code"
+// @Failure 404 {object} models.ErrorResponse "Translation data not found"
+// @Failure 500 {object} models.ErrorResponse "Internal server error"
+// @Router /api/v1/translations [get]
+func GetTranslationData(c *gin.Context) {
+	sourceLang := c.Query("source_lang")
+	targetLang := c.Query("target_lang")
+
+	if sourceLang == "" || targetLang == "" {
+		HandleError(c, http.StatusBadRequest, constants.EmptyTranslationCodeError)
+		return
+	}
+
+	if !validators.IsValidTranslationLangCode(targetLang) || !validators.IsValidTranslationLangCode(sourceLang) {
+		HandleError(c, http.StatusBadRequest, constants.InvalidTranslationLangCodeError)
+		return
+	}
+
+	data, err := dbqueries.GetTranslationTableData(targetLang, sourceLang)
+	if err != nil {
+		log.Printf("Error fetching translation data for %s/%s: %v", targetLang, sourceLang, err)
+		if strings.Contains(err.Error(), "does not exist") {
+			HandleError(c, http.StatusNotFound, fmt.Sprintf("No translation data for '%s' from '%s'", targetLang, sourceLang))
+			return
+		}
+		HandleError(c, http.StatusInternalServerError, constants.ErrorFetchingTranslationData)
+		return
+	}
+
+	HandleSuccess(c, models.TranslationDataResponse{
+		TargetLang: targetLang,
+		SourceLang: sourceLang,
+		Data:       data,
+	})
+}
+
 // MARK: Contract Loading Helpers
 
 // loadSingleContract reads and unmarshals a single contract file.
