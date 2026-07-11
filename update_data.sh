@@ -133,7 +133,7 @@ success "Dependencies installed successfully"
 # MARK: PyICU
 
 # Toolforge has no pkg-config/icu-config; set ICU paths manually when needed.
-# See: TOOLFORGE.md "Install PyICU"
+# See: https://github.com/scribe-org/Scribe-Server/blob/main/TOOLFORGE.md#install-pyicu
 # See: https://gitlab.pyicu.org/main/pyicu
 log "📦 Building PyICU from source against local ICU..."
 if ! command -v pkg-config >/dev/null 2>&1 || ! pkg-config --exists icu-i18n 2>/dev/null; then
