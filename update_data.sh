@@ -160,7 +160,7 @@ DUMP_FILE="$DUMP_DIR/latest-lexemes.json.bz2"
 if [ ! -f "$DUMP_FILE" ]; then
     log "📥 Downloading Wikidata lexeme dump..."
     # Auto-confirm the download prompt with "y" for the initial confirmation.
-    echo "y" | scribe-data download -wdv latest || {
+    echo "y" | scribe-data download -wdp "$DUMP_DIR" --dump-snapshot latest-lexemes || {
         error "Failed to download Wikidata dump"
         exit 1
     }
