@@ -15,6 +15,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 ### 🚀 Deployment
 
 - Scribe-Server is now deployed to Wikimedia Toolforge with an automated data update and deployment workflow ([#40](https://github.com/scribe-org/Scribe-Server/pull/40)).
+  - The service can be found at [scribe-server.toolforge.org](https://scribe-server.toolforge.org/)
   - A repository check was added to the update workflow to warn if it's run from an incorrect repo ([#55](https://github.com/scribe-org/Scribe-Server/pull/55)).
   - Matrix notifications were added so the team is alerted on data update workflow runs ([#54](https://github.com/scribe-org/Scribe-Server/pull/54)).
 - A Toolforge deployment guide was added for maintainers ([#63](https://github.com/scribe-org/Scribe-Server/pull/63)).
@@ -30,7 +31,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - Statistics for available languages are now shown via the API ([#45](https://github.com/scribe-org/Scribe-Server/pull/45)).
 - An entry/landing page was set up for Scribe-Server ([#49](https://github.com/scribe-org/Scribe-Server/pull/49)), followed by a dedicated deployment and download page ([#52](https://github.com/scribe-org/Scribe-Server/pull/52)).
 - A translation data retrieval endpoint with validation logic was implemented ([#61](https://github.com/scribe-org/Scribe-Server/pull/61)).
-- OpenAPI/Swagger documentation generation was added for the API, viewable at `/swagger/index.html` and `/docs/index.html` ([#39](https://github.com/scribe-org/Scribe-Server/pull/39)).
+- OpenAPI/Swagger documentation generation was added for the API, viewable at [scribe-server.toolforge.org/swagger/index.html](https://scribe-server.toolforge.org/swagger/index.html) and [scribe-server.toolforge.org/docs/index.html](https://scribe-server.toolforge.org/docs/index.html) ([#39](https://github.com/scribe-org/Scribe-Server/pull/39)).
 
 ### 🐞 Bug Fixes
 
