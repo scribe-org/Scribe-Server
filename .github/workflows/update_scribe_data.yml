@@ -6,8 +6,8 @@ on:
     branches: [main]
 
   # Will be used when contributor is trying to merge into main.
-  pull_request:
-    branches: [main, fix/matrix-notification-process]
+  # pull_request:
+  #   branches: [main, feat/server-matrix-notification]
 
   # Dispatch when there is a GitHub release.
   release:
@@ -227,10 +227,10 @@ jobs:
           TXN_ID=$(date +%s%N)
 
           # URL-encode the room ID to handle special characters safely
-          ROOM_ID=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${{ secrets.TEST_MATRIX_ROOM_ID }}'))")
+          ROOM_ID=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${{ secrets.MATRIX_DATA_ROOM_ID }}'))")
 
           curl -v --fail --show-error -X PUT "${{ secrets.MATRIX_HOMESERVER }}/_matrix/client/v3/rooms/${ROOM_ID}/send/m.room.message/${TXN_ID}" \
-            -H "Authorization: Bearer ${{ secrets.TEST_MATRIX_ACCESS_TOKEN }}" \
+            -H "Authorization: Bearer ${{ secrets.MATRIX_SCRIBE_BOT_ACCESS_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d "$JSON_PAYLOAD"
 
@@ -243,10 +243,10 @@ jobs:
 
           # Generate a unique transaction ID and URL-encode the room ID
           TXN_ID=$(date +%s%N)
-          ROOM_ID=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${{ secrets.TEST_MATRIX_ROOM_ID }}'))")
+          ROOM_ID=$(python3 -c "import urllib.parse; print(urllib.parse.quote('${{ secrets.MATRIX_DATA_ROOM_ID }}'))")
 
            curl -X PUT "${{ secrets.MATRIX_HOMESERVER }}/_matrix/client/v3/rooms/${ROOM_ID}/send/m.room.message/${TXN_ID}" \
-            -H "Authorization: Bearer ${{ secrets.TEST_MATRIX_ACCESS_TOKEN }}" \
+            -H "Authorization: Bearer ${{ secrets.MATRIX_SCRIBE_BOT_ACCESS_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d "{
               \"msgtype\": \"m.text\",
