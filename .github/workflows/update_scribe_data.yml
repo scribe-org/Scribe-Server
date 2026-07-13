@@ -58,28 +58,9 @@ jobs:
       - name: Make script executable
         run: chmod +x ./update_data.sh
 
-      # - name: Run update script (skips migration)
-      #   id: run_script
-      #   run: ./update_data.sh true
-
-      - name: Run update script (MOCK FOR CI TESTING)
+      - name: Run update script (skips migration)
         id: run_script
-        run: |
-          echo "🧪 Skipping the 40-minute update_data.sh script for fast PR testing..."
-          
-          # 1. Mock the GitHub Outputs that the Matrix step expects
-          echo "LANG_COUNT=3" >> "$GITHUB_OUTPUT"
-          echo "LANG_LIST=english french german" >> "$GITHUB_OUTPUT"
-          echo "TYPES_COUNT=2" >> "$GITHUB_OUTPUT"
-          echo "TYPES_LIST=nouns verbs" >> "$GITHUB_OUTPUT"
-          echo "SQLITE_COUNT=5" >> "$GITHUB_OUTPUT"
-          
-          # 2. Create dummy SQLite files so the deployment package step doesn't fail
-          mkdir -p ./packs/sqlite
-          touch ./packs/sqlite/dummy1.sqlite
-          touch ./packs/sqlite/dummy2.sqlite
-          
-          echo "✅ Dummy data generated. Pipeline will now proceed to deployment and Matrix notification."
+        run: ./update_data.sh true
 
       - name: Create deployment package
         run: |
