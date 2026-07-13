@@ -3,7 +3,8 @@ name: Update Scribe Data and Deploy to Toolforge
 on:
   # Dispatch on push to main branch.
   push:
-    branches: [main]
+    branches:
+      - main
 
   # Will be used when contributor is trying to merge into main.
   # pull_request:
@@ -11,7 +12,8 @@ on:
 
   # Dispatch when there is a GitHub release.
   release:
-    types: [published]
+    types:
+      - published
 
   # Manual dispatch.
   workflow_dispatch:

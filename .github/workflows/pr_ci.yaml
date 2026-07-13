@@ -3,7 +3,12 @@ on:
   pull_request:
     branches:
       - main
-    types: [opened, reopened, synchronize]
+    types:
+      - opened
+      - reopened
+      - synchronize
+    paths:
+      - "**/*.go"
 
 permissions:
   contents: read
@@ -17,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: 'go.mod'
+          go-version-file: "go.mod"
 
       - name: Install dependencies
         run: go get .
