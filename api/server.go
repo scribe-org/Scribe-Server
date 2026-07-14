@@ -86,8 +86,8 @@ func HandleRequests() {
 
 // setupSwagger configures the Swagger documentation endpoint.
 func setupSwagger(r *gin.Engine) {
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler()))
+	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler()))
 	log.Printf("📖 API Documentation available at: /swagger/index.html")
 
 }
