@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "**/*.go"
 
   # Will be used when contributor is trying to merge into main.
   # pull_request:

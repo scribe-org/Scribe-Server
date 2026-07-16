@@ -9,12 +9,12 @@ on:
       - reopened
       - synchronize
     paths:
-      - "scribe/**"
+      - "**/*.go"
   push:
     branches:
       - main
     paths:
-      - "scribe/**"
+      - "**/*.go"
 
 jobs:
   check_license_header:
