@@ -152,6 +152,24 @@ python3 -c "import icu" || {
 }
 success "PyICU built from source successfully"
 
+# MARK: Export Contracts
+
+# Contracts are no longer hard coded in Scribe-Server (see Scribe-Server#57).
+# Instead they're exported fresh from Scribe-Data on every run, so the
+CONTRACTS_DIR="./scribe_data_contracts"
+log "📜 Exporting latest data contracts from Scribe-Data..."
+rm -rf "$CONTRACTS_DIR"
+scribe-data ec -od "$CONTRACTS_DIR" || {
+    error "Failed to export data contracts"
+    exit 1
+}
+
+if [ ! -d "$CONTRACTS_DIR" ]; then
+    error "Contracts export reported success but $CONTRACTS_DIR was not found"
+    exit 1
+fi
+success "Data contracts exported to $CONTRACTS_DIR"
+
 # MARK: Download Wikidata Dump First
 
 DUMP_DIR="./scribe_data_wikidata_dumps_export"
@@ -231,39 +249,30 @@ fi
 
 # MARK: Filter Data
 
-CONTRACTS_DIR="$PROJECT_ROOT/contracts"
 log "🔍 Filtering JSON data using contracts..."
 
-if [ ! -d "$CONTRACTS_DIR" ]; then
-    warning "Contracts directory not found: $CONTRACTS_DIR"
-    warning "Skipping filtering step - proceeding with unfiltered data"
-    FILTERED_EXPORT_DIR="./scribe_data_json_export"  # use original data
-else
-    FILTERED_EXPORT_DIR="./scribe_data_json_filtered"
-    mkdir -p "$FILTERED_EXPORT_DIR"
+FILTERED_EXPORT_DIR="./scribe_data_json_filtered"
+mkdir -p "$FILTERED_EXPORT_DIR"
 
-    log "Running: scribe-data fd -cd $CONTRACTS_DIR -id scribe_data_json_export -od $FILTERED_EXPORT_DIR"
-    scribe-data fd -cd "$CONTRACTS_DIR" -id scribe_data_json_export -od "$FILTERED_EXPORT_DIR" || {
-        error "Failed to filter JSON data"
-        exit 1
-    }
-    success "JSON data filtered successfully"
+log "Running: scribe-data fd -cd $CONTRACTS_DIR -id scribe_data_json_export -od $FILTERED_EXPORT_DIR"
+scribe-data fd -cd "$CONTRACTS_DIR" -id scribe_data_json_export -od "$FILTERED_EXPORT_DIR" || {
+    error "Failed to filter JSON data"
+    exit 1
+}
+success "JSON data filtered successfully"
 
-    # Debug: Check filtered files.
-    if [ -d "$FILTERED_EXPORT_DIR" ]; then
-        filtered_files=$(find "$FILTERED_EXPORT_DIR" -name "*.json" | wc -l)
-        log "📊 Generated $filtered_files filtered JSON files"
-    fi
+# Debug: Check filtered files.
+filtered_files=$(find "$FILTERED_EXPORT_DIR" -name "*.json" | wc -l)
+log "📊 Generated $filtered_files filtered JSON files"
 
-    # MARK: Convert Filtered Data to SQLite
+# MARK: Convert Filtered Data to SQLite
 
-    log "🗄️  Converting filtered data to SQLite format..."
-    scribe-data convert -if "$FILTERED_EXPORT_DIR" -lang $LANG_STRING -dt $DATA_TYPES_STRING  -ot sqlite || {
-        error "Failed to convert filtered data to SQLite format"
-        exit 1
-    }
-    success "Filtered data converted to SQLite successfully"
-fi
+log "🗄️  Converting filtered data to SQLite format..."
+scribe-data convert -if "$FILTERED_EXPORT_DIR" -lang $LANG_STRING -dt $DATA_TYPES_STRING -ot sqlite || {
+    error "Failed to convert filtered data to SQLite format"
+    exit 1
+}
+success "Filtered data converted to SQLite successfully"
 
 # MARK: Check SQLite
 
@@ -326,6 +335,7 @@ log "  • Languages processed: ${#TARGET_LANGUAGES[@]} (${TARGET_LANGUAGES[*]})
 log "  • Data types processed: ${#DATA_TYPES[@]}"
 log "  • Total combinations: $TOTAL_COMBINATIONS"
 log "  • Data Generation: Completed"
+log "  • Contracts: Exported fresh from Scribe-Data"
 log "  • SQLite Conversion: Completed"
 log "  • Files Copied: $SQLITE_FILES files"
 log "  • Migration: Completed"
