@@ -47,8 +47,12 @@ jobs:
         id: first_interaction
         uses: actions/first-interaction@v3
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          pr-message: |
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          issue_message: |
+            ## First Issue Commit Check
+
+            Thanks for opening this issue! If you also open a pull request for it, please make sure the commit author email matches your GitHub account so you get credit for the contribution.
+          pr_message: |
             ## First PR Commit Check
 
             - [ ] The commit messages for the remote branch should be checked to make sure the contributor's email is set up correctly so that they receive credit for their contribution
