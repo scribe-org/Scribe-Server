@@ -154,8 +154,8 @@ success "PyICU built from source successfully"
 
 # MARK: Export Contracts
 
-# Contracts are no longer hard coded in Scribe-Server (see Scribe-Server#57).
-# Instead they're exported fresh from Scribe-Data on every run, so the
+# Data contracts are exported fresh from Scribe-Data on every run.
+# This ensures that the contracts that are served with the data are up to date.
 CONTRACTS_DIR="./scribe_data_contracts"
 log "📜 Exporting latest data contracts from Scribe-Data..."
 rm -rf "$CONTRACTS_DIR"
