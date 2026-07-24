@@ -173,7 +173,7 @@ func setupStaticFiles(r *gin.Engine) {
 		r.StaticFile("/favicon.ico", faviconPath)
 	}
 
-	logoPath := filepath.Join(absPath, "..", "static", "images", "ScribeServerLogoWhite.png")
+	logoPath := filepath.Join(absPath, "static", "images", "ScribeServerLogoWhite.png")
 	if _, err := os.Stat(logoPath); err == nil {
 		r.StaticFile("/images/ScribeServerLogoWhite.png", logoPath)
 	}
