@@ -168,12 +168,12 @@ func setupStaticFiles(r *gin.Engine) {
 		http.StripPrefix("/packs/", fs).ServeHTTP(c.Writer, c.Request)
 	})
 
-	faviconPath := filepath.Join(absPath, "..", "static", "favicon.ico")
+	faviconPath := filepath.Join("static", "favicon.ico")
 	if _, err := os.Stat(faviconPath); err == nil {
 		r.StaticFile("/favicon.ico", faviconPath)
 	}
 
-	logoPath := filepath.Join(absPath, "static", "images", "ScribeServerLogoWhite.png")
+	logoPath := filepath.Join("static", "images", "ScribeServerLogoWhite.png")
 	if _, err := os.Stat(logoPath); err == nil {
 		r.StaticFile("/images/ScribeServerLogoWhite.png", logoPath)
 	}
