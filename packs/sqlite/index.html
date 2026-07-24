@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -52,7 +52,9 @@
 
       :focus-visible {
         outline: none;
-        box-shadow: 0 0 0 2px var(--bg-0), 0 0 0 4px var(--accent-amber);
+        box-shadow:
+          0 0 0 2px var(--bg-0),
+          0 0 0 4px var(--accent-amber);
         border-radius: 4px;
       }
 
@@ -63,16 +65,16 @@
         width: 100%;
       }
 
-      /* Background texture */
+      /*
+      MARK: Background texture
+      */
+
       .grid-glow {
         position: fixed;
         inset: 0;
         z-index: -1;
-        background-image: linear-gradient(
-            180deg,
-            rgba(62, 143, 208, 0.09),
-            transparent 45%
-          ),
+        background-image:
+          linear-gradient(180deg, rgba(62, 143, 208, 0.09), transparent 45%),
           radial-gradient(
             60vw 40vw at 82% -10%,
             rgba(62, 143, 208, 0.16),
@@ -144,7 +146,9 @@
         color: var(--text-distinct);
         padding: 8px 14px;
         border-radius: 7px;
-        transition: color 0.15s ease, background 0.15s ease;
+        transition:
+          color 0.15s ease,
+          background 0.15s ease;
       }
 
       .nav-links a:hover {
@@ -198,7 +202,10 @@
         font-size: 1.08rem;
       }
 
-      /* Downloads */
+      /*
+      MARK: Downloads
+      */
+
       .downloads-panel {
         background: var(--bg-1);
         border: 1px solid var(--section-div);
@@ -322,6 +329,9 @@
       }
     </style>
   </head>
+  <!--
+  MARK: Body
+  -->
   <body>
     <div class="grid-glow" aria-hidden="true"></div>
 
@@ -344,7 +354,9 @@
           <div class="section-eyebrow">Data packs</div>
           <h1>Scribe SQLite Database Download</h1>
           <p class="section-desc">
-            You can click any of the links below to download the most recent Scribe-Data SQLite database. Each file is a complete, versioned snapshot.
+            You can click any of the links below to download the most recent
+            Scribe-Data SQLite database. Each file is a complete, versioned
+            snapshot.
           </p>
         </div>
 
@@ -363,7 +375,11 @@
     <footer>
       <div class="wrap footer-grid">
         <div>
-          <a href="/" class="brand" style="margin-bottom: 12px; display: inline-flex">
+          <a
+            href="/"
+            class="brand"
+            style="margin-bottom: 12px; display: inline-flex"
+          >
             <span class="brand-mark">S</span>
             Scribe-Server
           </a>
@@ -388,13 +404,15 @@
         </div>
       </div>
     </footer>
-
+    <!--
+    MARK: Script
+    -->
     <script>
       // Fetch and display available SQLite files.
       async function loadDownloads() {
         const list = document.getElementById("download-list");
         const count = document.getElementById("download-count");
-        
+
         try {
           const response = await fetch("/packs/sqlite/list");
           const files = await response.json();
@@ -402,7 +420,7 @@
           if (files && files.length > 0) {
             list.innerHTML = "";
             count.textContent = `${files.length} file${files.length === 1 ? "" : "s"}`;
-            
+
             files.forEach((file) => {
               const row = document.createElement("a");
               row.href = `/packs/sqlite/${file}`;

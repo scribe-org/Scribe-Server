@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -10,7 +10,7 @@
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    
+
     <link
       href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@500;700;900&family=Red+Hat+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
@@ -70,7 +70,9 @@
 
       :focus-visible {
         outline: none;
-        box-shadow: 0 0 0 2px var(--bg-0), 0 0 0 4px var(--accent-amber);
+        box-shadow:
+          0 0 0 2px var(--bg-0),
+          0 0 0 4px var(--accent-amber);
         border-radius: 4px;
       }
 
@@ -80,16 +82,16 @@
         padding: 0 28px;
       }
 
-      /* Background texture */
+      /*
+      MARK: Background Texture
+      */
+
       .grid-glow {
         position: fixed;
         inset: 0;
         z-index: -1;
-        background-image: linear-gradient(
-            180deg,
-            rgba(62, 143, 208, 0.09),
-            transparent 45%
-          ),
+        background-image:
+          linear-gradient(180deg, rgba(62, 143, 208, 0.09), transparent 45%),
           radial-gradient(
             60vw 40vw at 82% -10%,
             rgba(62, 143, 208, 0.16),
@@ -102,7 +104,10 @@
           );
       }
 
-      /* Header */
+      /*
+      MARK: Header
+      */
+
       header {
         position: sticky;
         top: 0;
@@ -131,24 +136,6 @@
         letter-spacing: -0.01em;
       }
 
-      .brand-mark {
-        width: 30px;
-        height: 30px;
-        border-radius: 8px;
-        background: linear-gradient(
-          145deg,
-          var(--scribe-blue-lighter),
-          var(--scribe-blue-darker)
-        );
-        display: grid;
-        place-items: center;
-        font-family: var(--mono);
-        font-weight: 600;
-        font-size: 0.82rem;
-        color: #ffffff;
-        flex-shrink: 0;
-      }
-
       .nav-links {
         display: flex;
         align-items: center;
@@ -161,7 +148,9 @@
         color: var(--text-distinct);
         padding: 8px 14px;
         border-radius: 7px;
-        transition: color 0.15s ease, background 0.15s ease;
+        transition:
+          color 0.15s ease,
+          background 0.15s ease;
       }
 
       .nav-links a:hover {
@@ -187,7 +176,10 @@
         }
       }
 
-      /* Status pill */
+      /*
+      MARK: Status
+      */
+
       .pill {
         display: inline-flex;
         align-items: center;
@@ -222,7 +214,10 @@
         }
       }
 
-      /* Hero */
+      /*
+      MARK: Hero
+      */
+
       .hero {
         padding: 76px 0 60px;
       }
@@ -282,7 +277,9 @@
         text-decoration: none;
         padding: 12px 20px;
         border-radius: 8px;
-        transition: transform 0.15s ease, background 0.15s ease,
+        transition:
+          transform 0.15s ease,
+          background 0.15s ease,
           border-color 0.15s ease;
       }
 
@@ -328,7 +325,10 @@
         color: var(--text-distinct);
       }
 
-      /* Terminal (signature element) */
+      /*
+      MARK: Terminal Signature
+      */
+
       .terminal {
         background: var(--bg-1);
         border: 1px solid var(--section-div);
@@ -403,7 +403,7 @@
       }
 
       .terminal-line {
-        white-space: pre;
+        white-space: normal;
         color: var(--text-distinct);
         margin-bottom: 2px;
       }
@@ -429,16 +429,20 @@
       .json-str {
         color: var(--accent-amber);
       }
+
       .json-num {
         color: var(--success-green);
       }
+
       .json-bool,
       .json-null {
         color: var(--text-distinct);
       }
+
       .terminal-json.is-loading {
         color: var(--text-distinct);
       }
+
       .terminal-json .comment {
         color: var(--text-distinct);
         font-style: italic;
@@ -460,7 +464,10 @@
         }
       }
 
-      /* Section shell */
+      /*
+      MARK: Section Shell
+      */
+
       section {
         padding: 64px 0;
         border-top: 1px solid var(--section-div);
@@ -493,7 +500,10 @@
         font-size: 1rem;
       }
 
-      /* Pipeline */
+      /*
+      MARK: Pipeline
+      */
+
       .pipeline {
         display: flex;
         align-items: stretch;
@@ -570,7 +580,10 @@
         font-weight: 600;
       }
 
-      /* Endpoints */
+      /*
+      MARK: Endpoints
+      */
+
       .endpoints {
         display: grid;
         gap: 10px;
@@ -585,7 +598,9 @@
         border: 1px solid var(--section-div);
         border-radius: var(--radius);
         padding: 16px 18px;
-        transition: border-color 0.15s ease, background 0.15s ease;
+        transition:
+          border-color 0.15s ease,
+          background 0.15s ease;
       }
 
       .endpoint:hover {
@@ -636,7 +651,10 @@
         }
       }
 
-      /* Languages */
+      /*
+      MARK: Languages
+      */
+
       .lang-grid {
         display: flex;
         flex-wrap: wrap;
@@ -657,7 +675,10 @@
         border-style: dashed;
       }
 
-      /* Downloads */
+      /*
+      MARK: Downloads
+      */
+
       .downloads-panel {
         background: var(--bg-1);
         border: 1px solid var(--section-div);
@@ -733,7 +754,10 @@
         font-size: 0.9rem;
       }
 
-      /* Footer */
+      /*
+      MARK: Footer
+      */
+
       footer {
         border-top: 1px solid var(--section-div);
         padding: 44px 0 40px;
@@ -769,11 +793,16 @@
         margin-top: 18px;
       }
 
-      /* Reveal on scroll */
+      /*
+      MARK: Reveal on Scroll
+      */
+
       .reveal {
         opacity: 0;
         transform: translateY(14px);
-        transition: opacity 0.5s ease, transform 0.5s ease;
+        transition:
+          opacity 0.5s ease,
+          transform 0.5s ease;
       }
 
       .reveal.is-visible {
@@ -782,21 +811,21 @@
       }
     </style>
   </head>
+  <!--
+  MARK: Body
+  -->
   <body>
     <div class="grid-glow" aria-hidden="true"></div>
 
     <header>
       <nav class="nav">
         <a href="/" class="brand">
-          <span class="brand-mark">
-            <span 
-              class="iconify" 
-              data-icon="bi:database" 
-              aria-hidden="true" 
-              style="font-size: 1.1rem;">
-            </span>
-          </span>
-          Scribe-Server
+          <img
+            src="/images/ScribeServerLogoWhite.png"
+            alt="The Scribe-Server logo."
+            width="120px"
+            height="30px"
+          />
         </a>
         <div class="nav-links">
           <a href="#endpoints" class="hide-mobile">API</a>
@@ -816,26 +845,34 @@
           <div>
             <div class="eyebrow">
               <span class="pill"
-                ><span class="dot" aria-hidden="true"></span>Live on
-                Wikimedia Toolforge</span
+                ><span class="dot" aria-hidden="true"></span>Live on Wikimedia
+                Toolforge</span
               >
             </div>
             <h1>
-              The API behind every<br />
-              <span class="accent">Scribe language pack.</span>
+              The API behind every
+              <span class="accent">Scribe language pack</span>
             </h1>
             <p class="lede">
-              Scribe-Server is the backend service that makes Scribe's
-              language data available for download. Built on regularly
-              updating Scribe-Data datasets, it signals when new data is
-              ready and serves it as versioned language packs to every
-              Scribe app.
+              Scribe-Server is the backend service that makes Scribe's language
+              data available for download. Built on regularly updating
+              <a
+                href="https://github.com/scribe-org/Scribe-Data"
+                style="color: var(--scribe-blue-lighter)"
+                >Scribe-Data</a
+              >
+              datasets, it signals when new data is ready and serves it as
+              versioned language packs to every Scribe application.
             </p>
             <div class="hero-actions">
-              <a href="/docs/index.html" class="btn btn-primary">API documentation</a>
+              <a href="/docs/index.html" class="btn btn-primary"
+                >API documentation</a
+              >
               <a
                 href="https://github.com/scribe-org/Scribe-Server"
-                class="btn btn-ghost">View source</a>
+                class="btn btn-ghost"
+                >View source</a
+              >
             </div>
             <div class="hero-stats">
               <div class="stat">
@@ -856,7 +893,12 @@
               </div>
               <span class="terminal-label">scribe-server.toolforge.org</span>
             </div>
-            <div class="lang-chips" id="lang-chips" role="group" aria-label="Choose a language to query GET /api/v1/language-stats">
+            <div
+              class="lang-chips"
+              id="lang-chips"
+              role="group"
+              aria-label="Choose a language to query GET /api/v1/language-stats"
+            >
               <!-- populated by JS -->
             </div>
             <div class="terminal-body">
@@ -877,8 +919,8 @@
             <div class="section-eyebrow">The data pipeline</div>
             <h2>Where Scribe-Server fits</h2>
             <p class="section-desc">
-              Scribe-Server is one link in a small, transparent pipeline —
-              each stage has its own repository and its own maintainers.
+              Scribe-Server is one link in a small, transparent pipeline — each
+              stage has its own repository and its own maintainers.
             </p>
           </div>
           <div class="pipeline reveal">
@@ -886,32 +928,33 @@
               <div class="pipe-index">01</div>
               <div class="pipe-title">Wikidata &amp; Wiktionary</div>
               <div class="pipe-desc">
-                Community-sourced grammar, translations and lexemes, freely
-                licensed.
+                Community-sourced grammar, translations and open-data lexemes,
+                freely licensed.
               </div>
             </div>
             <div class="pipe-node">
               <div class="pipe-index">02</div>
               <div class="pipe-title">Scribe-Data</div>
               <div class="pipe-desc">
-                Queries and formats raw Wikidata into structured JSON
-                contracts or SQlite files.
+                Ingests and formats raw Wikidata and Wiktionary data into
+                structured JSON or SQlite files.
               </div>
             </div>
             <div class="pipe-node is-here">
               <div class="pipe-index">03</div>
               <div class="pipe-title">Scribe-Server</div>
               <div class="pipe-desc">
-                Serves contracts over a REST API and bundles them into
-                versioned SQLite packs.
+                Serves data packs and contracts via a REST API. These are
+                ingested into application SQLite databases.
               </div>
               <span class="pipe-tag">you are here</span>
             </div>
             <div class="pipe-node">
               <div class="pipe-index">04</div>
-              <div class="pipe-title">Scribe apps</div>
+              <div class="pipe-title">Scribe applications</div>
               <div class="pipe-desc">
-                Scribe applications are available on iOS, Android (WIP) and Desktop (planned).
+                Scribe keyboard and verb conjugation applications are available
+                on iOS, Android and Desktop (planned).
               </div>
             </div>
           </div>
@@ -925,8 +968,10 @@
             <h2>API endpoints</h2>
             <p class="section-desc">
               A small, predictable REST surface. Full request and response
-              schemas live in the
-              <a href="/docs/index.html" style="color: var(--scribe-blue-lighter)"
+              schemas are available live in the
+              <a
+                href="/docs/index.html"
+                style="color: var(--scribe-blue-lighter)"
                 >Swagger docs</a
               >.
             </p>
@@ -940,15 +985,15 @@
             <div class="section-eyebrow">Coverage</div>
             <h2>Supported languages</h2>
             <p class="section-desc">
-              Scribe apps currently ship keyboards for 8+ languages. That's
-              just the start as 
+              Scribe apps currently ship keyboards for 8+ languages. That's just
+              the start as
               <a
                 href="https://github.com/scribe-org/Scribe-Data"
                 style="color: var(--scribe-blue-lighter)"
                 >Scribe-Data</a
               >
               already holds structured Wikidata for 40+ languages, ready to
-              become the next Scribe pack.
+              become the next Scribe language pack.
             </p>
           </div>
           <div class="lang-grid reveal" id="lang-grid">
@@ -958,13 +1003,9 @@
             <a
               href="https://scri.be/docs/server/available-data/"
               style="color: var(--scribe-blue-lighter); text-decoration: none"
-              >See all 8 languages in Scribe-Server </a
-            >
-
+              >See all 8 languages in Scribe-Server
+            </a>
           </p>
-
-          
-          
         </div>
       </section>
 
@@ -974,8 +1015,8 @@
             <div class="section-eyebrow">Data packs</div>
             <h2>Download the SQLite database</h2>
             <p class="section-desc">
-              Each file is a complete, versioned snapshot of Scribe's
-              language data — the same packs the apps download on-device.
+              Each file is a complete, versioned snapshot of Scribe's language
+              data — the same packs the apps download on-device.
             </p>
           </div>
           <div class="downloads-panel reveal">
@@ -994,19 +1035,27 @@
     <footer>
       <div class="wrap footer-grid">
         <div>
-          <a href="/" class="brand" style="margin-bottom: 12px; display: inline-flex">
-            <span class="brand-mark">S</span>
-            Scribe-Server
+          <a
+            href="/"
+            class="brand"
+            style="margin-bottom: 12px; display: inline-flex"
+          >
+            <img
+              src="/images/ScribeServerLogoWhite.png"
+              alt="The Scribe-Server logo."
+              width="120px"
+              height="30px"
+            />
           </a>
           <p class="footer-note">
             Backend service for Scribe data downloads.<br />
-            Scribe is part of the
+            Scribe is a
             <a
-              href="https://www.wikimedia.org/"
+              href="https://www.mediawiki.org/wiki/New_Developers#Scribe"
               style="color: var(--scribe-blue-lighter); text-decoration: none"
-              >Wikimedia</a
+              >Wikimedia project for new developers</a
             >
-            ecosystem.
+            .
           </p>
         </div>
         <div class="footer-links">
@@ -1023,7 +1072,9 @@
         </div>
       </div>
     </footer>
-
+    <!--
+    MARK: Script
+    -->
     <script>
       const ENDPOINTS = [
         {
@@ -1031,12 +1082,6 @@
           path: "/api/v1/languages",
           query: "",
           desc: "List available languages",
-        },
-        {
-          verb: "GET",
-          path: "/api/v1/contracts",
-          query: "?lang_iso=xx",
-          desc: "Get data contracts, optionally filtered",
         },
         {
           verb: "GET",
@@ -1049,6 +1094,12 @@
           path: "/api/v1/data-version/",
           query: ":lang_iso",
           desc: "Version info for a language",
+        },
+        {
+          verb: "GET",
+          path: "/api/v1/contracts",
+          query: "?lang_iso=xx",
+          desc: "Get data contracts, optionally filtered",
         },
         {
           verb: "GET",
@@ -1072,7 +1123,7 @@
               <span class="verb">${e.verb}</span>
               <span class="endpoint-path">${e.path}<span>${e.query}</span></span>
               <span class="endpoint-desc">${e.desc}</span>
-            </div>`
+            </div>`,
         ).join("");
       }
 
@@ -1114,13 +1165,13 @@
               cls = "json-null";
             }
             return `<span class="${cls}">${match}</span>`;
-          }
+          },
         );
       }
 
       let terminalRequestId = 0;
-      
-      // Store already fetched languages so we don't query the API twice
+
+      // Store already fetched languages so we don't query the API twice.
       const terminalCache = new Map();
 
       async function setTerminal(lang) {
@@ -1149,11 +1200,11 @@
         try {
           const res = await fetch(path, { signal: controller.signal });
           clearTimeout(timeout);
-          if (requestId !== terminalRequestId) return; 
+          if (requestId !== terminalRequestId) return;
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          
+
           const data = await res.json();
-          
+
           // Save to cache for future clicks
           terminalCache.set(iso, data);
 
@@ -1226,11 +1277,11 @@
           // Fallback to offline defaults
         }
         document.getElementById("stat-languages").textContent =
-          liveCount  ?? FALLBACK_LANGUAGE_COUNT;
+          liveCount ?? FALLBACK_LANGUAGE_COUNT;
 
         const chipLanguages = languages.filter((l) => LANGUAGE_CODES[l]);
         buildLangChips(
-          chipLanguages.length ? chipLanguages : FALLBACK_LANGUAGES
+          chipLanguages.length ? chipLanguages : FALLBACK_LANGUAGES,
         );
         buildLangGrid(languages, liveCount ?? FALLBACK_LANGUAGE_COUNT);
       }
@@ -1286,7 +1337,7 @@
               }
             });
           },
-          { threshold: 0.12 }
+          { threshold: 0.12 },
         );
         els.forEach((el) => io.observe(el));
       }
@@ -1296,6 +1347,5 @@
       loadDownloads();
       initReveal();
     </script>
-    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
   </body>
 </html>

@@ -160,7 +160,7 @@ After adding this line, remember to apply the changes by sourcing the file (e.g.
    # Migrate SQLite files from Scribe-Data to MariaDB for use in Scribe-Server:
    make build
    make migrate
-   # Start Scribe-Server on your local host:
+   # Start Scribe-Server on http://localhost:8080/:
    make run
    ```
 
