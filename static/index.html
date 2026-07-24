@@ -1,371 +1,1353 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Scribe-Server</title>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Scribe-Server — Language data API for Scribe</title>
+    <meta
+      name="description"
+      content="Scribe-Server is the backend API that makes Scribe's language data available for download — signaling new data and serving versioned language packs to Scribe apps."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@500;700;900&family=Red+Hat+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      :root {
+        --bg-0: #0b1220;
+        --bg-1: #121b2e;
+        --bg-2: #182541;
+        --text-primary: #e7ecf5;
+        --text-distinct: #93a1b8;
+        --scribe-blue: #3e8fd0;
+        --scribe-blue-lighter: #6fb2e8;
+        --scribe-blue-darker: #2c6ca0;
+        --accent-amber: #f0a035;
+        --section-div: #223252;
+        --success-green: #4fbe83;
+        --radius: 10px;
+        --mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+        --display: "Red Hat Display", -apple-system, sans-serif;
+        --sans: "Red Hat Text", -apple-system, sans-serif;
+      }
+
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
 
+      html {
+        scroll-behavior: smooth;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.001ms !important;
+          transition-duration: 0.001ms !important;
+        }
+      }
+
       body {
-        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Oxygen, Ubuntu, Cantarell, sans-serif;
+        font-family: var(--sans);
+        color: var(--text-primary);
+        background: var(--bg-0);
         line-height: 1.6;
-        color: #e0e0e0;
-        background: #0a0a0a;
-        min-height: 100vh;
-        padding: 20px;
+        -webkit-font-smoothing: antialiased;
       }
 
-      .container {
-        max-width: 1000px;
+      a {
+        color: inherit;
+      }
+
+      :focus-visible {
+        outline: none;
+        box-shadow:
+          0 0 0 2px var(--bg-0),
+          0 0 0 4px var(--accent-amber);
+        border-radius: 4px;
+      }
+
+      .wrap {
+        max-width: 1160px;
         margin: 0 auto;
-        background: #1a1a1a;
-        border-radius: 12px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        padding: 50px;
-        animation: fadeIn 0.6s ease-out;
+        padding: 0 28px;
       }
 
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
+      /*
+      MARK: Background Texture
+      */
+
+      .grid-glow {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background-image:
+          linear-gradient(180deg, rgba(62, 143, 208, 0.09), transparent 45%),
+          radial-gradient(
+            60vw 40vw at 82% -10%,
+            rgba(62, 143, 208, 0.16),
+            transparent 60%
+          ),
+          radial-gradient(
+            50vw 35vw at 10% 8%,
+            rgba(240, 160, 53, 0.08),
+            transparent 55%
+          );
+      }
+
+      /*
+      MARK: Header
+      */
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: rgba(11, 18, 32, 0.82);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--section-div);
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 28px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--display);
+        font-weight: 700;
+        font-size: 1.08rem;
+        text-decoration: none;
+        letter-spacing: -0.01em;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .nav-links a {
+        font-size: 0.92rem;
+        text-decoration: none;
+        color: var(--text-distinct);
+        padding: 8px 14px;
+        border-radius: 7px;
+        transition:
+          color 0.15s ease,
+          background 0.15s ease;
+      }
+
+      .nav-links a:hover {
+        color: var(--text-primary);
+        background: var(--bg-1);
+      }
+
+      .nav-links .cta {
+        color: var(--bg-0);
+        background: var(--scribe-blue);
+        font-weight: 600;
+      }
+
+      .nav-links .cta:hover {
+        background: var(--scribe-blue-lighter);
+        color: var(--bg-0);
+      }
+
+      @media (max-width: 720px) {
+        .nav-links span.hide-mobile,
+        .nav-links a.hide-mobile {
+          display: none;
         }
-        to {
-          opacity: 1;
-          transform: translateY(0);
+      }
+
+      /*
+      MARK: Status
+      */
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        color: var(--text-distinct);
+        background: var(--bg-1);
+        border: 1px solid var(--section-div);
+        padding: 6px 12px 6px 10px;
+        border-radius: 999px;
+      }
+
+      .pill .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--success-green);
+        box-shadow: 0 0 0 0 rgba(79, 190, 131, 0.6);
+        animation: pulse 2.4s ease-out infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(79, 190, 131, 0.55);
         }
+        70% {
+          box-shadow: 0 0 0 7px rgba(79, 190, 131, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(79, 190, 131, 0);
+        }
+      }
+
+      /*
+      MARK: Hero
+      */
+
+      .hero {
+        padding: 76px 0 60px;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.05fr 1fr;
+        gap: 56px;
+        align-items: start;
+      }
+
+      @media (max-width: 920px) {
+        .hero-grid {
+          grid-template-columns: 1fr;
+          gap: 40px;
+        }
+      }
+
+      .eyebrow {
+        margin-bottom: 20px;
       }
 
       h1 {
-        color: #3e95cc;
-        font-size: 3em;
-        margin-bottom: 10px;
+        font-family: var(--display);
+        font-weight: 900;
+        font-size: clamp(2.2rem, 4.6vw, 3.4rem);
+        line-height: 1.06;
+        letter-spacing: -0.02em;
+        margin-bottom: 20px;
+      }
+
+      h1 .accent {
+        color: var(--scribe-blue-lighter);
+      }
+
+      .lede {
+        font-size: 1.08rem;
+        color: var(--text-distinct);
+        max-width: 46ch;
+        margin-bottom: 30px;
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 38px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-decoration: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        transition:
+          transform 0.15s ease,
+          background 0.15s ease,
+          border-color 0.15s ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .btn-primary {
+        background: var(--scribe-blue);
+        color: #071019;
+      }
+
+      .btn-primary:hover {
+        background: var(--scribe-blue-lighter);
+      }
+
+      .btn-ghost {
+        background: transparent;
+        border: 1px solid var(--section-div);
+        color: var(--text-primary);
+      }
+
+      .btn-ghost:hover {
+        border-color: var(--scribe-blue);
+        background: var(--bg-1);
+      }
+
+      .hero-stats {
+        display: flex;
+        gap: 34px;
+        flex-wrap: wrap;
+      }
+
+      .stat b {
+        display: block;
+        font-family: var(--display);
+        font-size: 1.5rem;
         font-weight: 700;
       }
 
-      .tagline {
-        color: #999;
-        font-size: 1.2em;
-        margin-bottom: 30px;
+      .stat span {
+        font-size: 0.82rem;
+        color: var(--text-distinct);
+      }
+
+      /*
+      MARK: Terminal Signature
+      */
+
+      .terminal {
+        background: var(--bg-1);
+        border: 1px solid var(--section-div);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.6);
+      }
+
+      .terminal-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--section-div);
+        background: var(--bg-2);
+      }
+
+      .terminal-dots {
+        display: flex;
+        gap: 6px;
+      }
+
+      .terminal-dots span {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--section-div);
+      }
+
+      .terminal-label {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--text-distinct);
+      }
+
+      .lang-chips {
+        display: flex;
+        gap: 6px;
+        padding: 14px 16px 0;
+        flex-wrap: wrap;
+      }
+
+      .lang-chip {
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        background: var(--bg-2);
+        border: 1px solid var(--section-div);
+        color: var(--text-distinct);
+        padding: 6px 11px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+
+      .lang-chip:hover {
+        color: var(--text-primary);
+        border-color: var(--scribe-blue);
+      }
+
+      .lang-chip[aria-pressed="true"] {
+        background: var(--scribe-blue);
+        border-color: var(--scribe-blue);
+        color: #071019;
+        font-weight: 600;
+      }
+
+      .terminal-body {
+        padding: 18px 18px 22px;
+        font-family: var(--mono);
+        font-size: 0.83rem;
+        overflow-x: auto;
+      }
+
+      .terminal-line {
+        white-space: normal;
+        color: var(--text-distinct);
+        margin-bottom: 2px;
+      }
+
+      .terminal-prompt {
+        color: var(--success-green);
+      }
+
+      .terminal-cmd {
+        color: var(--text-primary);
+      }
+
+      .terminal-json {
+        margin-top: 12px;
+        color: var(--text-primary);
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .json-key {
+        color: var(--scribe-blue-lighter);
+      }
+      .json-str {
+        color: var(--accent-amber);
+      }
+
+      .json-num {
+        color: var(--success-green);
+      }
+
+      .json-bool,
+      .json-null {
+        color: var(--text-distinct);
+      }
+
+      .terminal-json.is-loading {
+        color: var(--text-distinct);
+      }
+
+      .terminal-json .comment {
+        color: var(--text-distinct);
         font-style: italic;
       }
 
-      .description {
-        font-size: 1.1em;
-        margin-bottom: 40px;
-        color: #ccc;
-        line-height: 1.8;
+      .cursor {
+        display: inline-block;
+        width: 7px;
+        height: 1em;
+        background: var(--success-green);
+        vertical-align: text-bottom;
+        margin-left: 2px;
+        margin-bottom: 3px;
+        animation: blink 1.1s steps(1) infinite;
       }
 
-      .section {
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /*
+      MARK: Section Shell
+      */
+
+      section {
+        padding: 64px 0;
+        border-top: 1px solid var(--section-div);
+      }
+
+      .section-head {
+        max-width: 60ch;
         margin-bottom: 40px;
+      }
+
+      .section-eyebrow {
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        color: var(--scribe-blue-lighter);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 10px;
       }
 
       h2 {
-        color: #3e95cc;
-        font-size: 1.8em;
-        margin-bottom: 15px;
-        border-bottom: 3px solid #3e95cc;
-        padding-bottom: 10px;
+        font-family: var(--display);
+        font-weight: 700;
+        font-size: clamp(1.5rem, 3vw, 2rem);
+        letter-spacing: -0.015em;
+        margin-bottom: 12px;
       }
 
-      .links {
+      .section-desc {
+        color: var(--text-distinct);
+        font-size: 1rem;
+      }
+
+      /*
+      MARK: Pipeline
+      */
+
+      .pipeline {
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+        overflow-x: auto;
+        padding-bottom: 6px;
+      }
+
+      .pipe-node {
+        flex: 1;
+        min-width: 190px;
+        background: var(--bg-1);
+        border: 1px solid var(--section-div);
+        border-radius: var(--radius);
+        padding: 20px;
+        position: relative;
+      }
+
+      .pipe-node + .pipe-node {
+        margin-left: 28px;
+      }
+
+      .pipe-node::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: -28px;
+        width: 28px;
+        height: 1px;
+        background: repeating-linear-gradient(
+          90deg,
+          var(--scribe-blue) 0 6px,
+          transparent 6px 11px
+        );
+      }
+
+      .pipe-node:first-child::before {
+        display: none;
+      }
+
+      .pipe-index {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        color: var(--text-distinct);
+        margin-bottom: 10px;
+      }
+
+      .pipe-title {
+        font-family: var(--display);
+        font-weight: 700;
+        font-size: 1.02rem;
+        margin-bottom: 6px;
+      }
+
+      .pipe-desc {
+        font-size: 0.86rem;
+        color: var(--text-distinct);
+      }
+
+      .pipe-node.is-here {
+        border-color: var(--scribe-blue);
+        background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+      }
+
+      .pipe-tag {
+        display: inline-block;
+        margin-top: 10px;
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        color: var(--bg-0);
+        background: var(--accent-amber);
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+      }
+
+      /*
+      MARK: Endpoints
+      */
+
+      .endpoints {
         display: grid;
-        gap: 15px;
-        margin-top: 20px;
+        gap: 10px;
       }
 
-      .link-button {
+      .endpoint {
+        display: grid;
+        grid-template-columns: 78px 1fr auto;
+        gap: 18px;
+        align-items: center;
+        background: var(--bg-1);
+        border: 1px solid var(--section-div);
+        border-radius: var(--radius);
+        padding: 16px 18px;
+        transition:
+          border-color 0.15s ease,
+          background 0.15s ease;
+      }
+
+      .endpoint:hover {
+        border-color: var(--scribe-blue);
+        background: var(--bg-2);
+      }
+
+      @media (max-width: 640px) {
+        .endpoint {
+          grid-template-columns: 1fr;
+          gap: 6px;
+        }
+      }
+
+      .verb {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--success-green);
+        background: rgba(79, 190, 131, 0.12);
+        border: 1px solid rgba(79, 190, 131, 0.3);
+        padding: 3px 0;
+        border-radius: 5px;
+        text-align: center;
+      }
+
+      .endpoint-path {
+        font-family: var(--mono);
+        font-size: 0.88rem;
+        color: var(--text-primary);
+      }
+
+      .endpoint-path span {
+        color: var(--scribe-blue-lighter);
+      }
+
+      .endpoint-desc {
+        font-size: 0.82rem;
+        color: var(--text-distinct);
+        justify-self: end;
+        text-align: right;
+      }
+
+      @media (max-width: 640px) {
+        .endpoint-desc {
+          justify-self: start;
+          text-align: left;
+        }
+      }
+
+      /*
+      MARK: Languages
+      */
+
+      .lang-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .lang-tag {
+        font-size: 0.86rem;
+        background: var(--bg-1);
+        border: 1px solid var(--section-div);
+        padding: 7px 14px;
+        border-radius: 999px;
+        color: var(--text-primary);
+      }
+
+      .lang-tag.more {
+        color: var(--text-distinct);
+        border-style: dashed;
+      }
+
+      /*
+      MARK: Downloads
+      */
+
+      .downloads-panel {
+        background: var(--bg-1);
+        border: 1px solid var(--section-div);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+
+      .downloads-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--section-div);
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        color: var(--text-distinct);
+      }
+
+      #download-list {
+        display: grid;
+      }
+
+      .download-row {
         display: flex;
         align-items: center;
-        padding: 18px 25px;
-        background: #3e95cc;
-        color: white;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 15px 20px;
         text-decoration: none;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 1.05em;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(62, 149, 204, 0.3);
+        color: var(--text-primary);
+        border-bottom: 1px solid var(--section-div);
+        transition: background 0.15s ease;
       }
 
-      .link-button:hover {
-        transform: translateX(5px);
-        box-shadow: 0 6px 20px rgba(62, 149, 204, 0.5);
-        background: #3a8dc2;
-      }
-
-      .link-button::before {
-        font-family: 'Material Symbols Outlined';
-        content: "arrow_forward";
-        font-variation-settings:
-          'FILL' 0,
-          'wght' 600,
-          'GRAD' 0,
-          'opsz' 24;
-        font-weight: 600;
-        margin-right: 12px;
-        font-size: 1.2em;
-        vertical-align: middle;
-      }
-
-      .secondary-link {
-        background: #2c7ba3;
-      }
-
-      .secondary-link:hover {
-        background: #27709a;
-      }
-
-      .endpoints-list {
-        background: #252525;
-        padding: 20px;
-        border-radius: 8px;
-        margin-top: 20px;
-        border-left: 4px solid #3e95cc;
-      }
-
-      .endpoints-list ul {
-        list-style: none;
-      }
-
-      .endpoints-list li {
-        padding: 12px 0;
-        border-bottom: 1px solid #333;
-        color: #ccc;
-        font-family: "Courier New", monospace;
-        font-size: 0.95em;
-      }
-
-      .endpoints-list li:last-child {
+      .download-row:last-child {
         border-bottom: none;
       }
 
-      .endpoints-list li::before {
-        font-family: 'Material Symbols Outlined';
-        content: "check_circle";
-        font-variation-settings:
-          'FILL' 0,
-          'wght' 400,
-          'GRAD' 0,
-          'opsz' 20;
-        font-weight: 400;
-        margin-right: 12px;
-        vertical-align: middle;
-        color: #1e9741;
+      .download-row:hover {
+        background: var(--bg-2);
       }
 
-      .icon-section {
+      .download-name {
+        font-family: var(--mono);
+        font-size: 0.88rem;
         display: flex;
-        justify-content: flex-end;
-        margin-bottom: -80px;
-        margin-top: -30px;
+        align-items: center;
+        gap: 10px;
       }
 
-      .icon {
-        width: 120px;
-        height: 120px;
-        opacity: 0.9;
-        filter: drop-shadow(0 0 12px rgba(62, 149, 204, 0.6));
+      .download-icon {
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        background: var(--bg-2);
+        border: 1px solid var(--section-div);
+        display: grid;
+        place-items: center;
+        font-size: 0.7rem;
+        color: var(--scribe-blue-lighter);
+        flex-shrink: 0;
       }
 
-      .footer {
-        margin-top: 50px;
-        padding-top: 30px;
-        border-top: 2px solid #333;
+      .download-action {
+        font-size: 0.78rem;
+        color: var(--text-distinct);
+      }
+
+      .empty-state {
+        padding: 34px 20px;
         text-align: center;
-        color: #666;
+        color: var(--text-distinct);
+        font-size: 0.9rem;
       }
 
-      .footer a {
-        color: #3e95cc;
+      /*
+      MARK: Footer
+      */
+
+      footer {
+        border-top: 1px solid var(--section-div);
+        padding: 44px 0 40px;
+      }
+
+      .footer-grid {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 30px;
+        flex-wrap: wrap;
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 22px;
+        flex-wrap: wrap;
+        font-size: 0.86rem;
+      }
+
+      .footer-links a {
         text-decoration: none;
-        font-weight: 600;
+        color: var(--text-distinct);
       }
 
-      .footer a:hover {
-        text-decoration: underline;
+      .footer-links a:hover {
+        color: var(--text-primary);
       }
 
-      @media (max-width: 768px) {
-        .container {
-          padding: 40px 20px;
-        }
+      .footer-note {
+        font-size: 0.8rem;
+        color: var(--text-distinct);
+        margin-top: 18px;
+      }
 
-        h1 {
-          font-size: 2.2em;
-          text-align: center;
-        }
+      /*
+      MARK: Reveal on Scroll
+      */
 
-        .tagline {
-          text-align: center;
-        }
+      .reveal {
+        opacity: 0;
+        transform: translateY(14px);
+        transition:
+          opacity 0.5s ease,
+          transform 0.5s ease;
+      }
 
-        .icon-section {
-          display: flex;
-          justify-content: center;
-          margin-top: 0;
-          margin-bottom: 20px;
-        }
-
-        .icon {
-          width: 80px;
-          height: 80px;
-        }
+      .reveal.is-visible {
+        opacity: 1;
+        transform: none;
       }
     </style>
   </head>
+  <!--
+  MARK: Body
+  -->
   <body>
-    <div class="container">
-      <div class="icon-section">
-        <svg
-          class="icon"
-          viewBox="0 0 100 100"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <linearGradient id="scribeGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#3E95CC" />
-              <stop offset="100%" stop-color="#63B3ED" />
-            </linearGradient>
-          </defs>
-          <rect
-            x="10"
-            y="10"
-            width="80"
-            height="80"
-            rx="8"
-            fill="none"
-            stroke="url(#scribeGradient)"
-            stroke-width="3"
-          />
-          <rect
-            x="25"
-            y="45"
-            width="12"
-            height="35"
-            rx="2"
-            fill="url(#scribeGradient)"
-          />
-          <rect
-            x="44"
-            y="35"
-            width="12"
-            height="45"
-            rx="2"
-            fill="url(#scribeGradient)"
-          />
-          <rect
-            x="63"
-            y="25"
-            width="12"
-            height="55"
-            rx="2"
-            fill="url(#scribeGradient)"
-          />
-          <circle
-            cx="50"
-            cy="20"
-            r="8"
-            stroke="url(#scribeGradient)"
-            stroke-width="2"
-            fill="none"
-          />
-        </svg>
-      </div>
+    <div class="grid-glow" aria-hidden="true"></div>
 
-      <h1>Scribe-Server</h1>
-      <p class="tagline">Backend API for Wikidata-powered language data</p>
-
-      <div class="description">
-        Scribe-Server is a backend service that provides the API by which data
-        is available for download within Scribe applications. The goal is to create
-        a Scribe-Data based regularly updating dataset that can signal new data
-        availability as well as allow for language pack downloads. The
-        Scribe-Server API can be used as a data source for pre-processed
-        language data.
-      </div>
-
-      <div class="section">
-        <h2>API Resources</h2>
-        <div class="links">
-          <a href="/docs/index.html" class="link-button">
-            API Documentation (Swagger UI)
-          </a>
-          <a
-            href="https://scri.be/docs/server/available-data"
-            class="link-button secondary-link"
+    <header>
+      <nav class="nav">
+        <a href="/" class="brand">
+          <img
+            src="/images/ScribeServerLogoWhite.png"
+            alt="The Scribe-Server logo."
+            width="144px"
+            height="36px"
+          />
+        </a>
+        <div class="nav-links">
+          <a href="#endpoints" class="hide-mobile">API</a>
+          <a href="#languages" class="hide-mobile">Languages</a>
+          <a href="#downloads">Downloads</a>
+          <a href="/docs/index.html" class="hide-mobile">Docs</a>
+          <a href="https://github.com/scribe-org/Scribe-Server" class="cta"
+            >GitHub</a
           >
-            Available Data
-          </a>
-          <a href="/packs/sqlite" class="link-button secondary-link">
-            Download SQLite Language Packs
-          </a>
         </div>
-      </div>
+      </nav>
+    </header>
 
-      <div class="section">
-        <h2>API Endpoints</h2>
-        <div class="endpoints-list">
-          <ul>
-            <li>GET /api/v1/languages - List available languages</li>
-            <li>GET /api/v1/contracts[?lang_iso=xx] - Get contracts (optional language filter)
-            </li>
-            <li>GET /api/v1/data/:lang_iso - Get full language data with schema
-            </li>
-            <li>GET /api/v1/data-version/:lang_iso - Get version info for a language
-            </li>
-            <li>GET /api/v1/language-stats?codes=fr,de - Get statistics for all or selected languages
-            </li>
-            <li>GET /api/v1/translations?source_lang=es&target_lang=en - Get translation data of target from source
-            </li>
-          </ul>
+    <main>
+      <section class="hero" style="border-top: none">
+        <div class="wrap hero-grid">
+          <div>
+            <div class="eyebrow">
+              <span class="pill"
+                ><span class="dot" aria-hidden="true"></span>Live on Wikimedia
+                Toolforge</span
+              >
+            </div>
+            <h1>
+              The API behind every
+              <span class="accent">Scribe language pack</span>
+            </h1>
+            <p class="lede">
+              Scribe-Server is the backend service that makes Scribe's language
+              data available for download. Built on regularly updating
+              <a
+                href="https://github.com/scribe-org/Scribe-Data"
+                style="color: var(--scribe-blue-lighter)"
+                >Scribe-Data</a
+              >
+              datasets, it signals when new data is ready and serves it as
+              versioned language packs to every Scribe application.
+            </p>
+            <div class="hero-actions">
+              <a href="/docs/index.html" class="btn btn-primary"
+                >API documentation</a
+              >
+              <a
+                href="https://github.com/scribe-org/Scribe-Server"
+                class="btn btn-ghost"
+                >View source</a
+              >
+            </div>
+            <div class="hero-stats">
+              <div class="stat">
+                <b id="stat-languages">—</b>
+                <span>languages served</span>
+              </div>
+              <div class="stat">
+                <b>GPL-3.0</b>
+                <span>open source</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="terminal reveal">
+            <div class="terminal-bar">
+              <div class="terminal-dots" aria-hidden="true">
+                <span></span><span></span><span></span>
+              </div>
+              <span class="terminal-label">scribe-server.toolforge.org</span>
+            </div>
+            <div
+              class="lang-chips"
+              id="lang-chips"
+              role="group"
+              aria-label="Choose a language to query GET /api/v1/language-stats"
+            >
+              <!-- populated by JS -->
+            </div>
+            <div class="terminal-body">
+              <div class="terminal-line">
+                <span class="terminal-prompt">$</span>
+                <span class="terminal-cmd" id="terminal-cmd"></span
+                ><span class="cursor" aria-hidden="true"></span>
+              </div>
+              <div class="terminal-json" id="terminal-json"></div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div class="section">
-        <div class="links">
+      <section id="pipeline">
+        <div class="wrap">
+          <div class="section-head reveal">
+            <div class="section-eyebrow">The data pipeline</div>
+            <h2>Where Scribe-Server fits</h2>
+            <p class="section-desc">
+              Scribe-Server is one link in a small, transparent data pipeline.
+              Each stage has its own repository and maintainers from the Scribe
+              community.
+            </p>
+          </div>
+          <div class="pipeline reveal">
+            <div class="pipe-node">
+              <div class="pipe-index">01</div>
+              <div class="pipe-title">Wikidata &amp; Wiktionary</div>
+              <div class="pipe-desc">
+                Community-sourced grammar, translations and open-data lexemes,
+                freely licensed.
+              </div>
+            </div>
+            <div class="pipe-node">
+              <div class="pipe-index">02</div>
+              <div class="pipe-title">Scribe-Data</div>
+              <div class="pipe-desc">
+                Ingests and formats raw Wikidata and Wiktionary data into
+                structured JSON or SQlite files.
+              </div>
+            </div>
+            <div class="pipe-node is-here">
+              <div class="pipe-index">03</div>
+              <div class="pipe-title">Scribe-Server</div>
+              <div class="pipe-desc">
+                Serves data packs and contracts via a REST API. These are
+                ingested into application SQLite databases.
+              </div>
+              <span class="pipe-tag">You are here</span>
+            </div>
+            <div class="pipe-node">
+              <div class="pipe-index">04</div>
+              <div class="pipe-title">Scribe applications</div>
+              <div class="pipe-desc">
+                Scribe keyboard and verb conjugation applications are available
+                on iOS, Android and Desktop (planned).
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="endpoints">
+        <div class="wrap">
+          <div class="section-head reveal">
+            <div class="section-eyebrow">Reference</div>
+            <h2>API endpoints</h2>
+            <p class="section-desc">
+              A small, predictable REST surface. Full request and response
+              schemas are available live in the
+              <a
+                href="/docs/index.html"
+                style="color: var(--scribe-blue-lighter)"
+                >Swagger docs</a
+              >.
+            </p>
+          </div>
+          <div class="endpoints reveal" id="endpoint-list"></div>
+        </div>
+      </section>
+      <section id="languages">
+        <div class="wrap">
+          <div class="section-head reveal">
+            <div class="section-eyebrow">Coverage</div>
+            <h2>Supported languages</h2>
+            <p class="section-desc">
+              Scribe apps currently ship keyboards for 8+ languages. That's just
+              the start as
+              <a
+                href="https://github.com/scribe-org/Scribe-Data"
+                style="color: var(--scribe-blue-lighter)"
+                >Scribe-Data</a
+              >
+              already holds structured Wikidata for 40+ languages, ready to
+              become the next Scribe language pack.
+            </p>
+          </div>
+          <div class="lang-grid reveal" id="lang-grid">
+            <!-- populated by JS, falls back to static list -->
+          </div>
+          <p class="footer-note reveal" style="margin-top: 14px">
+            <a
+              href="https://scri.be/docs/server/available-data/"
+              style="color: var(--scribe-blue-lighter); text-decoration: none"
+              >See all 8 languages in Scribe-Server
+            </a>
+          </p>
+        </div>
+      </section>
+
+      <section id="downloads">
+        <div class="wrap">
+          <div class="section-head reveal">
+            <div class="section-eyebrow">Data packs</div>
+            <h2>Download the SQLite database</h2>
+            <p class="section-desc">
+              Each file is a complete, versioned snapshot of Scribe's language
+              data — the same packs the apps download on-device.
+            </p>
+          </div>
+          <div class="downloads-panel reveal">
+            <div class="downloads-header">
+              <span>/packs/sqlite/</span>
+              <span id="download-count"></span>
+            </div>
+            <div id="download-list">
+              <div class="empty-state">Loading available packs…</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap footer-grid">
+        <div>
           <a
-            href="https://github.com/scribe-org/Scribe-Server"
-            class="link-button"
+            href="/"
+            class="brand"
+            style="margin-bottom: 6px; display: inline-flex"
           >
-          View on GitHub
+            <img
+              src="/images/ScribeServerLogoWhite.png"
+              alt="The Scribe-Server logo."
+              width="144px"
+              height="36px"
+            />
           </a>
-          <a href="https://scri.be" class="link-button secondary-link">
-            Visit Scribe Website
-          </a>
+          <p class="footer-note">
+            Backend service for Scribe data downloads.<br />
+            Scribe is a
+            <a
+              href="https://www.mediawiki.org/wiki/New_Developers#Scribe"
+              style="color: var(--scribe-blue-lighter); text-decoration: none"
+              >Wikimedia project for new developers</a
+            >
+            .
+          </p>
+        </div>
+        <div class="footer-links">
+          <a href="https://github.com/scribe-org/Scribe-Server">GitHub</a>
+          <a href="https://scri.be">scri.be</a>
+          <a href="/docs/index.html">API docs</a>
+          <a href="https://matrix.to/#/#scribe_community:matrix.org"
+            >Matrix chat</a
+          >
+          <a
+            href="https://github.com/scribe-org/Scribe-Server/blob/main/LICENSE.txt"
+            >GPL-3.0</a
+          >
         </div>
       </div>
+    </footer>
+    <!--
+    MARK: Script
+    -->
+    <script>
+      const ENDPOINTS = [
+        {
+          verb: "GET",
+          path: "/api/v1/languages",
+          query: "",
+          desc: "List available languages",
+        },
+        {
+          verb: "GET",
+          path: "/api/v1/data/",
+          query: ":lang_iso",
+          desc: "Full language data with schema",
+        },
+        {
+          verb: "GET",
+          path: "/api/v1/data-version/",
+          query: ":lang_iso",
+          desc: "Version info for a language",
+        },
+        {
+          verb: "GET",
+          path: "/api/v1/contracts",
+          query: "?lang_iso=xx",
+          desc: "Get data contracts, optionally filtered",
+        },
+        {
+          verb: "GET",
+          path: "/api/v1/language-stats",
+          query: "?codes=fr,de",
+          desc: "Statistics for one or multiple languages",
+        },
+        {
+          verb: "GET",
+          path: "/api/v1/translations",
+          query: "?source_lang=es&target_lang=en",
+          desc: "Translation data of target from source",
+        },
+      ];
 
-      <div class="footer">
-        <p>
-          Scribe is part of the
-          <a href="https://www.wikimedia.org/">Wikimedia</a> ecosystem
-        </p>
-        <p style="margin-top: 10px">
-          <a href="https://github.com/scribe-org/Scribe-Server/blob/main/LICENSE.txt">Licensed under GPL-3.0</a>
-            • Data from
-          <a href="https://www.wikidata.org/">Wikidata</a>
-        </p>
-        <p style="margin-top: 15px; font-size: 0.9em">
-          <a href="https://github.com/scribe-org">GitHub</a> •
-          <a href="https://scri.be">Website</a> •
-          <a href="https://github.com/scribe-org/Scribe-Data">Data CLI</a> •
-          <a href="https://github.com/scribe-org/Scribe-iOS">iOS App</a> •
-          <a href="https://github.com/scribe-org/Scribe-Android">Android App</a> •
-          <a href="https://github.com/scribe-org/Scribe-Desktop">Desktop App</a>
-        </p>
-      </div>
-    </div>
+      function renderEndpoints() {
+        const mount = document.getElementById("endpoint-list");
+        mount.innerHTML = ENDPOINTS.map(
+          (e) => `
+            <div class="endpoint">
+              <span class="verb">${e.verb}</span>
+              <span class="endpoint-path">${e.path}<span>${e.query}</span></span>
+              <span class="endpoint-desc">${e.desc}</span>
+            </div>`,
+        ).join("");
+      }
+
+      const LANGUAGE_CODES = {
+        French: "fr",
+        German: "de",
+        Italian: "it",
+        Portuguese: "pt",
+        Russian: "ru",
+        Spanish: "es",
+        Swedish: "sv",
+        English: "en",
+      };
+      const FALLBACK_LANGUAGES = [
+        "French",
+        "German",
+        "Italian",
+        "Portuguese",
+        "Russian",
+        "Spanish",
+        "Swedish",
+      ];
+      const FALLBACK_LANGUAGE_COUNT = 8;
+
+      function syntaxHighlight(value) {
+        const json = JSON.stringify(value, null, 2)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+        return json.replace(
+          /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\btrue\b|\bfalse\b|\bnull\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+          (match) => {
+            let cls = "json-num";
+            if (/^"/.test(match)) {
+              cls = /:$/.test(match) ? "json-key" : "json-str";
+            } else if (/true|false/.test(match)) {
+              cls = "json-bool";
+            } else if (/null/.test(match)) {
+              cls = "json-null";
+            }
+            return `<span class="${cls}">${match}</span>`;
+          },
+        );
+      }
+
+      let terminalRequestId = 0;
+
+      // Store already fetched languages so we don't query the API twice.
+      const terminalCache = new Map();
+
+      async function setTerminal(lang) {
+        const cmdEl = document.getElementById("terminal-cmd");
+        const jsonEl = document.getElementById("terminal-json");
+        const iso = LANGUAGE_CODES[lang] || lang.toLowerCase().slice(0, 2);
+        const path = `/api/v1/language-stats?codes=${iso}`;
+        const requestId = ++terminalRequestId;
+
+        cmdEl.textContent = `curl https://scribe-server.toolforge.org${path}`;
+
+        // Return from cache immediately if available
+        if (terminalCache.has(iso)) {
+          jsonEl.classList.remove("is-loading");
+          jsonEl.innerHTML = syntaxHighlight(terminalCache.get(iso));
+          return;
+        }
+
+        // Fetching fresh data
+        jsonEl.classList.add("is-loading");
+        jsonEl.textContent = "Fetching…";
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 6000);
+
+        try {
+          const res = await fetch(path, { signal: controller.signal });
+          clearTimeout(timeout);
+          if (requestId !== terminalRequestId) return;
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+          const data = await res.json();
+
+          // Save to cache for future clicks
+          terminalCache.set(iso, data);
+
+          jsonEl.classList.remove("is-loading");
+          jsonEl.innerHTML = syntaxHighlight(data);
+        } catch (err) {
+          clearTimeout(timeout);
+          if (requestId !== terminalRequestId) return;
+          jsonEl.classList.remove("is-loading");
+          jsonEl.innerHTML =
+            `<span class="comment">// live response unavailable right now` +
+            (err && err.name === "AbortError" ? " (request timed out)" : "") +
+            `\n// once deployed, this will ping scribe-server.toolforge.org</span>`;
+        }
+      }
+
+      function buildLangChips(languages) {
+        const container = document.getElementById("lang-chips");
+        container.innerHTML = "";
+        languages.forEach((lang, i) => {
+          const chip = document.createElement("button");
+          chip.type = "button";
+          chip.className = "lang-chip";
+          chip.textContent = lang;
+          chip.setAttribute("aria-pressed", i === 0 ? "true" : "false");
+          chip.addEventListener("click", () => {
+            container
+              .querySelectorAll(".lang-chip")
+              .forEach((c) => c.setAttribute("aria-pressed", "false"));
+            chip.setAttribute("aria-pressed", "true");
+            setTerminal(lang);
+          });
+          container.appendChild(chip);
+        });
+        if (languages[0]) setTerminal(languages[0]);
+      }
+
+      function buildLangGrid(languages, totalCount) {
+        const grid = document.getElementById("lang-grid");
+        grid.innerHTML = "";
+        languages.forEach((lang) => {
+          const tag = document.createElement("span");
+          tag.className = "lang-tag";
+          tag.textContent = lang;
+          grid.appendChild(tag);
+        });
+        if (totalCount > languages.length) {
+          const more = document.createElement("span");
+          more.className = "lang-tag more";
+          more.textContent = `+${totalCount - languages.length} more`;
+          grid.appendChild(more);
+        }
+      }
+
+      async function initLanguages() {
+        let languages = FALLBACK_LANGUAGES;
+        let liveCount = null;
+        try {
+          const res = await fetch("/api/v1/languages");
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) {
+              languages = data
+                .map((l) => (typeof l === "string" ? l : l.name || l.lang))
+                .filter(Boolean);
+              liveCount = languages.length;
+            }
+          }
+        } catch (e) {
+          // Fallback to offline defaults
+        }
+        document.getElementById("stat-languages").textContent =
+          liveCount ?? FALLBACK_LANGUAGE_COUNT;
+
+        const chipLanguages = languages.filter((l) => LANGUAGE_CODES[l]);
+        buildLangChips(
+          chipLanguages.length ? chipLanguages : FALLBACK_LANGUAGES,
+        );
+        buildLangGrid(languages, liveCount ?? FALLBACK_LANGUAGE_COUNT);
+      }
+
+      async function loadDownloads() {
+        const list = document.getElementById("download-list");
+        const count = document.getElementById("download-count");
+        try {
+          const response = await fetch("/packs/sqlite/list");
+          const files = await response.json();
+
+          if (files && files.length > 0) {
+            list.innerHTML = "";
+            count.textContent = `${files.length} file${
+              files.length === 1 ? "" : "s"
+            }`;
+            files.forEach((file) => {
+              const row = document.createElement("a");
+              row.href = `/packs/sqlite/${file}`;
+              row.className = "download-row";
+              row.download = file;
+              row.innerHTML = `
+                <span class="download-name">
+                  <span class="download-icon" aria-hidden="true">◆</span>
+                  ${file}
+                </span>
+                <span class="download-action">Download →</span>
+              `;
+              list.appendChild(row);
+            });
+          } else {
+            list.innerHTML =
+              '<div class="empty-state">No databases available at the moment.</div>';
+          }
+        } catch (error) {
+          list.innerHTML =
+            '<div class="empty-state">Could not load database files. Try refreshing.</div>';
+        }
+      }
+
+      function initReveal() {
+        const els = document.querySelectorAll(".reveal");
+        if (!("IntersectionObserver" in window)) {
+          els.forEach((el) => el.classList.add("is-visible"));
+          return;
+        }
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                io.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.12 },
+        );
+        els.forEach((el) => io.observe(el));
+      }
+
+      renderEndpoints();
+      initLanguages();
+      loadDownloads();
+      initReveal();
+    </script>
   </body>
 </html>
