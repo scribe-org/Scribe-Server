@@ -1,5 +1,7 @@
 <a id="top"></a>
 
+<!-- Comment -->
+
 <div align="center">
   <a href="https://github.com/scribe-org/Scribe-Server"><img src="https://raw.githubusercontent.com/scribe-org/Scribe-Server/main/.github/resources/images/ScribeServerGitHubOrgBanner.png" width=1024 alt="Scribe-Server Logo"></a>
 </div>
