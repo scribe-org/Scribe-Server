@@ -1,3 +1,5 @@
+<a id="top"></a>
+
 # Testing conventions
 
 Scribe-Server uses Go's standard `testing` package, with `testify` for assertions. These conventions keep the test suite consistent as coverage is added incrementally.
