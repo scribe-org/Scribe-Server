@@ -9,6 +9,21 @@ on:
       - synchronize
     paths:
       - "**/*.go"
+      - "go.mod"
+      - "go.sum"
+      - "Makefile"
+      - "TESTING.md"
+      - ".github/workflows/pr_ci.yaml"
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.go"
+      - "go.mod"
+      - "go.sum"
+      - "Makefile"
+      - "TESTING.md"
+      - ".github/workflows/pr_ci.yaml"
 
 permissions:
   contents: read
@@ -25,7 +40,7 @@ jobs:
           go-version-file: "go.mod"
 
       - name: Install dependencies
-        run: go get .
+        run: go mod download
 
       - name: Lint with golangci-lint
         uses: golangci/golangci-lint-action@v9
@@ -34,6 +49,4 @@ jobs:
           only-new-issues: true
 
       - name: Run tests and show coverage
-        run: |
-          go test ./... -coverprofile=coverage.out
-          go tool cover -func=coverage.out
+        run: make test-cover
