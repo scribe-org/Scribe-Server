@@ -2,6 +2,17 @@
 
 Scribe-Server uses Go's standard `testing` package, with `testify` for assertions. These conventions keep the test suite consistent as coverage is added incrementally.
 
+## Contents
+
+- [Organizing tests](#organizing-tests)
+- [Assertions and helpers](#assertions-and-helpers)
+- [Isolating global state](#isolating-global-state)
+- [HTTP handlers](#http-handlers)
+- [Databases and fixtures](#databases-and-fixtures)
+- [Running tests and coverage](#running-tests-and-coverage)
+- [Local verification before committing](#local-verification-before-committing)
+- [Pull request checklist](#pull-request-checklist)
+
 ## Organizing tests
 
 - Keep tests beside the code they cover in package-local `*_test.go` files. Do not create a separate top-level test directory.
@@ -49,6 +60,8 @@ func TestIsValidTranslationLangCode(t *testing.T) {
 }
 ```
 
+<sub><a href="#top">Back to top.</a></sub>
+
 ## Assertions and helpers
 
 - Use `require` when a failed check must stop the current test or subtest, such as failed setup, an unexpected error, or a required response body.
@@ -78,6 +91,8 @@ func TestErrorResponseFixture(t *testing.T) {
 	assert.Equal(t, "invalid language code", response.Error)
 }
 ```
+
+<sub><a href="#top">Back to top.</a></sub>
 
 ## Isolating global state
 
@@ -121,6 +136,8 @@ func TestConfigUsesTestEnvironment(t *testing.T) {
 }
 ```
 
+<sub><a href="#top">Back to top.</a></sub>
+
 ## HTTP handlers
 
 - Test Gin handlers with `net/http/httptest`; a running server is not required.
@@ -153,6 +170,8 @@ func TestHandleError(t *testing.T) {
 	assert.Equal(t, "invalid language code", response.Error)
 }
 ```
+
+<sub><a href="#top">Back to top.</a></sub>
 
 ## Databases and fixtures
 
@@ -232,6 +251,8 @@ Run explicitly tagged integration tests only after preparing an isolated databas
 go test -tags=integration ./database/...
 ```
 
+<sub><a href="#top">Back to top.</a></sub>
+
 ## Running tests and coverage
 
 Run all tests before opening a pull request:
@@ -251,6 +272,8 @@ For an HTML coverage report after running `make test-cover`:
 ```bash
 go tool cover -html=coverage.out
 ```
+
+<sub><a href="#top">Back to top.</a></sub>
 
 ## Local verification before committing
 
@@ -292,6 +315,8 @@ Pull requests that add tests should report the total coverage before and after t
 
 CI runs the same coverage target. A test must not rely on local configuration, network access, execution order, or files outside the repository.
 
+<sub><a href="#top">Back to top.</a></sub>
+
 ## Pull request checklist
 
 - Tests follow the package, naming, and table-driven conventions above.
@@ -300,3 +325,5 @@ CI runs the same coverage target. A test must not rely on local configuration, n
 - `make test` passes locally.
 - `make test-cover` passes locally.
 - The pull request includes the before and after total coverage.
+
+<sub><a href="#top">Back to top.</a></sub>
