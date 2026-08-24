@@ -16,6 +16,7 @@ If you have questions or would like to communicate with the team, please [join u
 - [Mentorship and Growth](#mentorship-and-growth)
 - [Learning the tech stack](#learning-the-tech)
 - [Development environment](#development-environment)
+- [Testing](#testing)
 - [Issues and projects](#issues-and-projects)
 - [Bug reports](#bug-reports)
 - [Feature requests](#feature-requests)
@@ -179,6 +180,26 @@ After adding this line, remember to apply the changes by sourcing the file (e.g.
 
 > [!NOTE]
 > Feel free to contact the team in the [Data room on Matrix](https://matrix.to/#/#ScribeData:matrix.org) if you're having problems getting your environment setup!
+
+<sub><a href="#top">Back to top.</a></sub>
+
+## Testing
+
+Run the complete test suite from the repository root before opening a pull request:
+
+```bash
+make test
+```
+
+To run the tests and show coverage by package and function, use:
+
+```bash
+make test-cover
+```
+
+This writes `coverage.out`, which is ignored by Git. Test pull requests should include the total coverage before and after the change, for example `Coverage: 0.4% -> 1.1%`. Coverage should increase as the test suite grows; if it does not, explain why in the pull request.
+
+See [TESTING.md](./TESTING.md) for the project's test organization, naming, isolation, and fixture conventions.
 
 <sub><a href="#top">Back to top.</a></sub>
 

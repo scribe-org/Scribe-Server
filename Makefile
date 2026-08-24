@@ -1,4 +1,4 @@
-.PHONY: clean build test run fmt tidy install-tools generate generate-api generate-db execute-binary dev docs docs-serve migrate build-migrate update-data install-hooks lint
+.PHONY: clean build test test-cover run fmt tidy install-tools generate generate-api generate-db execute-binary dev docs docs-serve migrate build-migrate update-data install-hooks lint
 
 BINARY_NAME=./bin/scribe-server
 MIGRATE_BINARY=./bin/migrate-scribe-data
@@ -19,6 +19,11 @@ build:
 # Run tests for the project.
 test:
 	go test ./... -v
+
+# Run tests and report coverage by function.
+test-cover:
+	go test ./... -coverprofile=coverage.out
+	go tool cover -func=coverage.out
 
 # Run the project (defaults to dev).
 run: run-dev
