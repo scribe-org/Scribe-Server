@@ -120,7 +120,7 @@ func BuildLanguageStatResponse(code string, stat map[string]any) models.Language
 	return models.LanguageStatisticsReponse{
 		Code:         strings.ToLower(langCode),
 		LanguageName: &langName,
-		Nouns:        ToIntPtr(stat["nouns"].(int)),
-		Verbs:        ToIntPtr(stat["verbs"].(int)),
+		Nouns:        ToIntPtr(stat["nouns"]),
+		Verbs:        ToIntPtr(stat["verbs"]),
 	}
 }
