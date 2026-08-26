@@ -1,22 +1,6 @@
 name: Update Scribe Data and Deploy to Toolforge
 
 on:
-  # Dispatch on push to main branch.
-  push:
-    branches:
-      - main
-    paths:
-      - "**/*.go"
-
-  # Will be used when contributor is trying to merge into main.
-  # pull_request:
-  #   branches: [main, feat/server-matrix-notification]
-
-  # Dispatch when there is a GitHub release.
-  release:
-    types:
-      - published
-
   # Manual dispatch.
   workflow_dispatch:
 
@@ -190,7 +174,13 @@ jobs:
           TYPES_LIST="${{ steps.run_script.outputs.TYPES_LIST }}"
           SQLITE_COUNT="${{ steps.run_script.outputs.SQLITE_COUNT }}"
           DURATION_SECONDS="${{ steps.run_script.outputs.DURATION_SECONDS }}"
-          DURATION_FMT=$(printf '%dm %02ds' $((DURATION_SECONDS / 60)) $((DURATION_SECONDS % 60)))
+          # An unset output expands to an empty string, which bash arithmetic
+          # would silently treat as 0 — report it as unknown instead.
+          if [ -z "$DURATION_SECONDS" ]; then
+            DURATION_FMT="unknown"
+          else
+            DURATION_FMT=$(printf '%dm %02ds' $((DURATION_SECONDS / 60)) $((DURATION_SECONDS % 60)))
+          fi
 
           # Format lists with commas.
           LANG_LIST_FORMATTED=$(echo "$LANG_LIST" | sed 's/ /, /g' | sed 's/"/\\"/g')
