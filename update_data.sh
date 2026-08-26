@@ -15,6 +15,9 @@ SKIP_MIGRATION=${1:-false}
 # Save project root.
 PROJECT_ROOT=$(pwd)
 
+# Record start time so the run duration can be reported.
+START_EPOCH=$(date +%s)
+
 # Define target languages and data types.
 TARGET_LANGUAGES=("english" "french" "german" "italian" "spanish" "portuguese" "russian" "swedish")
 DATA_TYPES=("nouns" "verbs" "emoji_keywords")
@@ -325,6 +328,7 @@ deactivate
 success "Virtual environment deactivated"
 
 END_TIME=$(date '+%Y-%m-%d %H:%M:%S')
+DURATION_SECONDS=$(( $(date +%s) - START_EPOCH ))
 success "✨ Scribe-Data update process completed successfully at $END_TIME"
 
 log "📊 Update Summary:"
@@ -339,6 +343,7 @@ log "  • Contracts: Exported fresh from Scribe-Data"
 log "  • SQLite Conversion: Completed"
 log "  • Files Copied: $SQLITE_FILES files"
 log "  • Migration: Completed"
+log "  • Duration: $((DURATION_SECONDS / 60))m $((DURATION_SECONDS % 60))s"
 log "  • Log file: $LOG_FILE"
 
 # MARK: Export Stats to GitHub Actions
@@ -351,6 +356,7 @@ if [ -n "$GITHUB_OUTPUT" ]; then
     echo "TYPES_COUNT=${#DATA_TYPES[@]}" >> "$GITHUB_OUTPUT"
     echo "TYPES_LIST=${DATA_TYPES[*]}" >> "$GITHUB_OUTPUT"
     echo "SQLITE_COUNT=$SQLITE_FILES" >> "$GITHUB_OUTPUT"
+    echo "DURATION_SECONDS=$DURATION_SECONDS" >> "$GITHUB_OUTPUT"
 fi
 
 echo
