@@ -16,7 +16,8 @@ func assertCORSHeaders(t *testing.T, headers http.Header) {
 	t.Helper()
 
 	assert.Equal(t, "*", headers.Get("Access-Control-Allow-Origin"))
-	assert.Equal(t, "true", headers.Get("Access-Control-Allow-Credentials"))
+	assert.Empty(t, headers.Get("Access-Control-Allow-Credentials"),
+		"Allow-Credentials must not be set alongside a wildcard Allow-Origin")
 	assert.Equal(
 		t,
 		"Content-Type, Content-Length, Accept-Encoding, "+
