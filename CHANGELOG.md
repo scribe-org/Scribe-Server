@@ -58,6 +58,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 
 - Basic health and CORS test scaffolding was added for the API ([#29](https://github.com/scribe-org/Scribe-Server/pull/29)).
 - The CI workflow was updated to select the Go version via `go-version-file` ([#8](https://github.com/scribe-org/Scribe-Server/issues/8)) and later improved further ([#30](https://github.com/scribe-org/Scribe-Server/issues/30)).
+- - Unit tests were added for the language validator functions ([#78](https://github.com/scribe-org/Scribe-Server/issues/78)).
 
 ### ♻️ Code Refactoring
 
