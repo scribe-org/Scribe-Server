@@ -33,6 +33,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - A translation data retrieval endpoint with validation logic was implemented ([#58](https://github.com/scribe-org/Scribe-Server/issues/58), [#59](https://github.com/scribe-org/Scribe-Server/issues/59)).
 - SQLite databases are available for download directly from the Scribe-Server UI ([#6](https://github.com/scribe-org/Scribe-Server/issues/6)).
 - A profanity table is also served alongside the other data from Wikidata to allow client applications to filter out these words ([#75](https://github.com/scribe-org/Scribe-Server/issues/75)).
+- Prepositions are served for German and Russian so client applications can show the grammatical case they require ([#98](https://github.com/scribe-org/Scribe-Server/issues/98)).
 
 ### 🐞 Bug Fixes
 
