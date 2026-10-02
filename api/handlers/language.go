@@ -24,6 +24,12 @@ import (
 
 // MARK: Languages Endpoints
 
+// Function variables allow mocking database queries in unit tests.
+var (
+	getAvailableLanguages = database.GetAvailableLanguages
+	getLanguageDataTypes  = database.GetLanguageDataTypes
+)
+
 // GetAvailableLanguages returns a list of all supported languages and their available data types.
 //
 // @Summary List all supported languages
@@ -35,7 +41,7 @@ import (
 // @Failure 500 {object} models.ErrorResponse "Internal server error occurred while fetching languages"
 // @Router /api/v1/languages [get]
 func GetAvailableLanguages(c *gin.Context) {
-	languages, err := database.GetAvailableLanguages()
+	languages, err := getAvailableLanguages()
 	if err != nil {
 		log.Printf("Error fetching available languages: %v", err)
 		HandleError(c, http.StatusInternalServerError, constants.ErrorFetchingLanguages)
@@ -44,7 +50,7 @@ func GetAvailableLanguages(c *gin.Context) {
 
 	var languageInfos []models.LanguageInfo
 	for _, lang := range languages {
-		dataTypes, err := database.GetLanguageDataTypes(lang)
+		dataTypes, err := getLanguageDataTypes(lang)
 		if err != nil {
 			log.Printf("Error fetching data types for %s: %v", lang, err)
 			continue
