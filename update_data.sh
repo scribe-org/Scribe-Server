@@ -20,7 +20,19 @@ START_EPOCH=$(date +%s)
 
 # Define target languages and data types.
 TARGET_LANGUAGES=("english" "french" "german" "italian" "spanish" "portuguese" "russian" "swedish")
+
+# Data types derived from the Wikidata lexeme dump and filtered by contracts.
 DATA_TYPES=("nouns" "verbs" "emoji_keywords")
+
+# Data types queried directly from Wikidata.
+# These queries only return the needed fields, so the results aren't filtered.
+PROFANITY_LANGUAGES=("${TARGET_LANGUAGES[@]}")
+PREPOSITION_LANGUAGES=("german" "russian")
+QUERY_DATA_TYPES=("profanity" "prepositions")
+QUERY_MAX_ATTEMPTS=3
+QUERY_RETRY_DELAY_SECONDS=30
+
+ALL_DATA_TYPES=("${DATA_TYPES[@]}" "${QUERY_DATA_TYPES[@]}")
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -268,10 +280,52 @@ success "JSON data filtered successfully"
 filtered_files=$(find "$FILTERED_EXPORT_DIR" -name "*.json" | wc -l)
 log "📊 Generated $filtered_files filtered JSON files"
 
+# MARK: Query Data
+
+# Query a data type for a language from Wikidata, retrying if the query fails.
+# Results are saved with the filtered data as they only include the needed fields.
+query_data_type() {
+    local lang=$1
+    local data_type=$2
+    local output_file="$FILTERED_EXPORT_DIR/$lang/$data_type.json"
+
+    for ((attempt=1; attempt<=QUERY_MAX_ATTEMPTS; attempt++)); do
+        log "Querying $lang $data_type (attempt $attempt/$QUERY_MAX_ATTEMPTS)..."
+        rm -f "$output_file"
+        scribe-data get -lang "$lang" -dt "$data_type" -od "$FILTERED_EXPORT_DIR" -o || true
+
+        # Note: Query errors are printed by Scribe-Data, so we check for the output file.
+        if [ -f "$output_file" ]; then
+            log "  ✅ $lang $data_type"
+            return 0
+        fi
+
+        if [ "$attempt" -lt "$QUERY_MAX_ATTEMPTS" ]; then
+            warning "No data returned for $lang $data_type, retrying in ${QUERY_RETRY_DELAY_SECONDS}s..."
+            sleep "$QUERY_RETRY_DELAY_SECONDS"
+        fi
+    done
+
+    error "Failed to query $lang $data_type after $QUERY_MAX_ATTEMPTS attempts"
+    exit 1
+}
+
+log "🔎 Querying profanity and prepositions from Wikidata..."
+
+for lang in "${PROFANITY_LANGUAGES[@]}"; do
+    query_data_type "$lang" "profanity"
+done
+
+for lang in "${PREPOSITION_LANGUAGES[@]}"; do
+    query_data_type "$lang" "prepositions"
+done
+
+success "Profanity and prepositions queried successfully"
+
 # MARK: Convert Filtered Data to SQLite
 
 log "🗄️  Converting filtered data to SQLite format..."
-scribe-data convert -if "$FILTERED_EXPORT_DIR" -lang $LANG_STRING -dt $DATA_TYPES_STRING -ot sqlite || {
+scribe-data convert -if "$FILTERED_EXPORT_DIR" -lang $LANG_STRING -dt ${ALL_DATA_TYPES[*]} -ot sqlite || {
     error "Failed to convert filtered data to SQLite format"
     exit 1
 }
@@ -336,8 +390,10 @@ log "  • Repository: Updated/Cloned"
 log "  • Virtual Environment: Reused or created at $VENV_DIR"
 log "  • Dependencies: Installed"
 log "  • Languages processed: ${#TARGET_LANGUAGES[@]} (${TARGET_LANGUAGES[*]})"
-log "  • Data types processed: ${#DATA_TYPES[@]}"
-log "  • Total combinations: $TOTAL_COMBINATIONS"
+log "  • Data types processed: ${#ALL_DATA_TYPES[@]} (${ALL_DATA_TYPES[*]})"
+log "  • Total dump combinations: $TOTAL_COMBINATIONS"
+log "  • Profanity languages: ${PROFANITY_LANGUAGES[*]}"
+log "  • Preposition languages: ${PREPOSITION_LANGUAGES[*]}"
 log "  • Data Generation: Completed"
 log "  • Contracts: Exported fresh from Scribe-Data"
 log "  • SQLite Conversion: Completed"
@@ -353,8 +409,8 @@ if [ -n "$GITHUB_OUTPUT" ]; then
     echo "Exporting stats to GitHub Output..."
     echo "LANG_COUNT=${#TARGET_LANGUAGES[@]}" >> "$GITHUB_OUTPUT"
     echo "LANG_LIST=${TARGET_LANGUAGES[*]}" >> "$GITHUB_OUTPUT"
-    echo "TYPES_COUNT=${#DATA_TYPES[@]}" >> "$GITHUB_OUTPUT"
-    echo "TYPES_LIST=${DATA_TYPES[*]}" >> "$GITHUB_OUTPUT"
+    echo "TYPES_COUNT=${#ALL_DATA_TYPES[@]}" >> "$GITHUB_OUTPUT"
+    echo "TYPES_LIST=${ALL_DATA_TYPES[*]}" >> "$GITHUB_OUTPUT"
     echo "SQLITE_COUNT=$SQLITE_FILES" >> "$GITHUB_OUTPUT"
     echo "DURATION_SECONDS=$DURATION_SECONDS" >> "$GITHUB_OUTPUT"
 fi
