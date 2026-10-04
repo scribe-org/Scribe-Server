@@ -11,6 +11,8 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/scribe-org/scribe-server/models"
 	"github.com/spf13/viper"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // MARK: Get Available Languages
@@ -89,7 +91,50 @@ func GetLanguageDataTypes(lang string) ([]string, error) {
 
 // MARK: Language Statistics
 
-// GetLanguageStat retrieves noun and verb statistics for a specific language.
+// statDataTypes are the data types counted in language statistics in the order they're queried.
+var statDataTypes = []string{"nouns", "verbs", "prepositions", "profanity"}
+
+// requiredStatDataTypes are the data types a language needs to be included in statistics.
+// Other data types such as prepositions are only available for some languages.
+var requiredStatDataTypes = []string{"nouns", "verbs"}
+
+// buildLanguageStatQuery builds a query that counts the entries of each statistics data type available for a language.
+// It returns the query and the data types it counts in order, or no data types if a required data type is missing.
+func buildLanguageStatQuery(lang string, availableDataTypes []string) (string, []string, error) {
+	available := make(map[string]bool, len(availableDataTypes))
+	for _, dataType := range availableDataTypes {
+		available[strings.ToLower(dataType)] = true
+	}
+
+	for _, dataType := range requiredStatDataTypes {
+		if !available[dataType] {
+			return "", nil, nil
+		}
+	}
+
+	caser := cases.Title(language.Und)
+	counts := make([]string, 0, len(statDataTypes))
+	countedDataTypes := make([]string, 0, len(statDataTypes))
+
+	for _, dataType := range statDataTypes {
+		if !available[dataType] {
+			continue
+		}
+
+		// Construct the table name format: ENLanguageDataNounsScribe.
+		tableName := strings.ToUpper(lang) + "LanguageData" + caser.String(dataType) + "Scribe"
+		if !IsValidTableName(tableName) {
+			return "", nil, fmt.Errorf("invalid table name for language: %s", lang)
+		}
+
+		counts = append(counts, fmt.Sprintf("(SELECT COUNT(*) FROM %s) AS %s", tableName, dataType))
+		countedDataTypes = append(countedDataTypes, dataType)
+	}
+
+	return "SELECT " + strings.Join(counts, ", "), countedDataTypes, nil
+}
+
+// GetLanguageStat retrieves statistics for the data types of a specific language.
 func GetLanguageStat(lan string) (map[string]any, error) {
 	// Normalize and validate language code (e.g., "EN", "FR").
 	lang := strings.ToUpper(strings.TrimSpace(lan))
@@ -97,24 +142,29 @@ func GetLanguageStat(lan string) (map[string]any, error) {
 		return nil, fmt.Errorf("invalid language code: %s", lang)
 	}
 
-	nounsTable := lang + "LanguageDataNounsScribe"
-	verbsTable := lang + "LanguageDataVerbsScribe"
-
-	if !IsValidTableName(nounsTable) || !IsValidTableName(verbsTable) {
-		return nil, fmt.Errorf("invalid table names for language: %s", lang)
+	dataTypes, err := GetLanguageDataTypes(lang)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching data types for %s: %w", lang, err)
 	}
 
-	query := fmt.Sprintf(`
-        SELECT
-            (SELECT COUNT(*) FROM %s) AS nouns,
-            (SELECT COUNT(*) FROM %s) AS verbs
-    `, nounsTable, verbsTable)
+	query, countedDataTypes, err := buildLanguageStatQuery(lang, dataTypes)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(countedDataTypes) == 0 {
+		log.Printf("⚠️ Skipping %s — missing nouns or verbs table", lang)
+		return nil, nil
+	}
 
 	// Execute the query.
-	row := DB.QueryRow(query)
+	counts := make([]int, len(countedDataTypes))
+	scanTargets := make([]any, len(counts))
+	for i := range counts {
+		scanTargets[i] = &counts[i]
+	}
 
-	var nouns, verbs int
-	err := row.Scan(&nouns, &verbs)
+	err = DB.QueryRow(query).Scan(scanTargets...)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok && mysqlErr.Number == 1146 {
 			log.Printf("⚠️ Skipping %s — missing table: %s", lang, mysqlErr.Message)
@@ -128,14 +178,15 @@ func GetLanguageStat(lan string) (map[string]any, error) {
 		return nil, fmt.Errorf("error scanning stats for %s: %w", lang, err)
 	}
 
-	return map[string]any{
-		"code":  strings.ToLower(lang),
-		"nouns": nouns,
-		"verbs": verbs,
-	}, nil
+	stat := map[string]any{"code": strings.ToLower(lang)}
+	for i, dataType := range countedDataTypes {
+		stat[dataType] = counts[i]
+	}
+
+	return stat, nil
 }
 
-// GetAllLanguageStats retrieves statistics for all available languages (only nouns and verbs).
+// GetAllLanguageStats retrieves statistics for all available languages that have nouns and verbs.
 func GetAllLanguageStats() ([]models.LanguageStatisticsReponse, error) {
 	availableLanguages, err := GetAvailableLanguages()
 	if err != nil {

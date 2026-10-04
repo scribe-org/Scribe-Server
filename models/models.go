@@ -116,4 +116,8 @@ type LanguageStatisticsReponse struct {
 	Nouns *int `json:"nouns"`
 	// Count of verb entries
 	Verbs *int `json:"verbs"`
+	// Count of preposition entries (null if the language has no prepositions)
+	Prepositions *int `json:"prepositions"`
+	// Count of profanity entries (null if the language has no profanity)
+	Profanity *int `json:"profanity"`
 }
