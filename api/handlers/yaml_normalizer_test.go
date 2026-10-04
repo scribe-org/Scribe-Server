@@ -192,4 +192,3 @@ func TestNormalizeMap(t *testing.T) {
 		})
 	}
 }
-
