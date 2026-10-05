@@ -16,7 +16,7 @@ import (
 
 // GetLanguageStats handles GET /language-stats?codes=en,fr.
 // @Summary Get statistics for one or multiple languages
-// @Description Returns the number of nouns and verbs for the specified language codes.
+// @Description Returns the number of nouns, verbs, prepositions and profanity entries for the given language codes (null if a language has none).
 // @Tags statistics
 // @Accept json
 // @Produce json

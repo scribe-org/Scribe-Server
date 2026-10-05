@@ -56,15 +56,32 @@ func TestBuildLanguageStatResponse(t *testing.T) {
 	if resp.LanguageName == nil || *resp.LanguageName != "English" {
 		t.Fatalf("name %+v", resp.LanguageName)
 	}
-	if resp.Nouns != nil || resp.Verbs != nil {
-		t.Fatalf("expected nil counts, nouns=%v verbs=%v", resp.Nouns, resp.Verbs)
+	if resp.Nouns != nil || resp.Verbs != nil || resp.Prepositions != nil || resp.Profanity != nil {
+		t.Fatalf(
+			"expected nil counts, nouns=%v verbs=%v prepositions=%v profanity=%v",
+			resp.Nouns, resp.Verbs, resp.Prepositions, resp.Profanity,
+		)
 	}
 
-	resp = BuildLanguageStatResponse("de", map[string]any{"nouns": 3, "verbs": int64(9)})
+	resp = BuildLanguageStatResponse("de", map[string]any{
+		"nouns": 3, "verbs": int64(9), "prepositions": 2, "profanity": 1,
+	})
 	if resp.Nouns == nil || *resp.Nouns != 3 {
 		t.Fatalf("nouns %+v", resp.Nouns)
 	}
 	if resp.Verbs == nil || *resp.Verbs != 9 {
 		t.Fatalf("verbs %+v", resp.Verbs)
+	}
+	if resp.Prepositions == nil || *resp.Prepositions != 2 {
+		t.Fatalf("prepositions %+v", resp.Prepositions)
+	}
+	if resp.Profanity == nil || *resp.Profanity != 1 {
+		t.Fatalf("profanity %+v", resp.Profanity)
+	}
+
+	// Languages without prepositions have a nil count.
+	resp = BuildLanguageStatResponse("en", map[string]any{"nouns": 3, "verbs": 9, "profanity": 1})
+	if resp.Prepositions != nil {
+		t.Fatalf("expected nil prepositions, got %v", *resp.Prepositions)
 	}
 }
