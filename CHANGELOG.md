@@ -19,6 +19,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
   - A repository check was added to the update workflow to warn if it's run from an incorrect repo ([#55](https://github.com/scribe-org/Scribe-Server/pull/55)).
   - Matrix notifications were added so the team is alerted on data update workflow runs ([#41](https://github.com/scribe-org/Scribe-Server/issues/41)).
 - The Toolforge build was fixed to compile PyICU with the correct Toolforge ICU paths ([#43](https://github.com/scribe-org/Scribe-Server/issues/43)).
+- Deployments only keep the two most recent backups of the SQLite data on Toolforge.
 
 ### ✨ Features
 
@@ -40,6 +41,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 
 - Large Go files were split up and marked for maintainability ([#46](https://github.com/scribe-org/Scribe-Server/issues/46)).
 - Data extraction and update script issues were fixed following the contract-based filtering rollout, including validation logic and deprecated test failures.
+- The `updated_at` date for language data is now the most recent last modified date of the data, matching `/data-version`, rather than the date of the request.
 - The `update_data.sh` download command was fixed to specify the correct dump snapshot location ([#65](https://github.com/scribe-org/Scribe-Server/pull/65)).
 - Trusted proxies are now explicitly configured for security.
 - German data contract fixes for missing `displayValue` fields on declensions, and fully indexed conjugations/declensions.

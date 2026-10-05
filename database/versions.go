@@ -5,6 +5,7 @@ package database
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -104,4 +105,41 @@ func GetLanguageVersions(lang string) (map[string]string, error) {
 	}
 
 	return versions, nil
+}
+
+// MARK: Get Update Date
+
+// noLastModifiedDate is the date GetLanguageVersions uses when a data type has no last modified date.
+const noLastModifiedDate = "1970-01-01"
+
+// datePrefixRegex matches values that start with a YYYY-MM-DD date.
+var datePrefixRegex = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}`)
+
+// latestVersionDate returns the most recent date (YYYY-MM-DD) from the last modified values of GetLanguageVersions.
+// It returns an empty string if none of the values have a date.
+func latestVersionDate(versions map[string]string) string {
+	latest := ""
+	for _, lastModified := range versions {
+		date := datePrefixRegex.FindString(lastModified)
+		if date == "" || date == noLastModifiedDate {
+			continue
+		}
+
+		if date > latest {
+			latest = date
+		}
+	}
+
+	return latest
+}
+
+// GetLanguageUpdatedAt returns the date (YYYY-MM-DD) that a language's data was last modified.
+// This is the most recent of the last modified dates of the language's data types.
+func GetLanguageUpdatedAt(lang string) (string, error) {
+	versions, err := GetLanguageVersions(lang)
+	if err != nil {
+		return "", fmt.Errorf("error fetching versions for %s: %w", lang, err)
+	}
+
+	return latestVersionDate(versions), nil
 }
