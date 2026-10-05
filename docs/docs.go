@@ -343,7 +343,7 @@ const docTemplate = `{
                     }
                 },
                 "updated_at": {
-                    "description": "Last update timestamp (RFC3339 format)",
+                    "description": "Most recent last modified date of the language's data (YYYY-MM-DD), matching /data-version",
                     "type": "string"
                 },
                 "version": {

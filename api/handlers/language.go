@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/scribe-org/scribe-server/api/dbqueries"
@@ -106,12 +105,17 @@ func GetLanguageData(c *gin.Context) {
 		return
 	}
 
+	updatedAt, err := database.GetLanguageUpdatedAt(lang)
+	if err != nil {
+		log.Printf("Error fetching update date for %s: %v", lang, err)
+	}
+
 	// Build the response.
 	response := models.LanguageDataResponse{
 		Language: lang,
 		Contract: models.Contract{
 			Version:   constants.APIVersion,
-			UpdatedAt: time.Now().Format(constants.DateFormat),
+			UpdatedAt: updatedAt,
 			Fields:    make(map[string]map[string]string),
 		},
 		Data: make(map[string]any),

@@ -21,7 +21,7 @@ type ErrorResponse struct {
 type Contract struct {
 	// Contract version identifier
 	Version string `json:"version"`
-	// Last update timestamp (RFC3339 format)
+	// Most recent last modified date of the language's data (YYYY-MM-DD), matching /data-version
 	UpdatedAt string `json:"updated_at"`
 	// Field definitions grouped by section and name
 	Fields map[string]map[string]string `json:"fields"`
