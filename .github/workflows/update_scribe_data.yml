@@ -144,6 +144,10 @@ jobs:
               echo "📦 Backed up existing data to $BACKUP_NAME"
             fi
 
+            # Keep only the two most recent backups (newest first by their timestamp names).
+            ls -d ./packs/sqlite.backup.* 2>/dev/null | sort -r | tail -n +3 | xargs -r rm -rf
+            echo "🧹 Removed backups older than the two most recent"
+
             # Create packs directory and extract the new data.
             mkdir -p ./packs/sqlite
             echo "📤 Extracting new data..."
