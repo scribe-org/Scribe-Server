@@ -172,7 +172,7 @@
         },
         "/api/v1/language-stats": {
             "get": {
-                "description": "Returns the number of nouns and verbs for the specified language codes.",
+                "description": "Returns the number of nouns, verbs, prepositions and profanity entries for the given language codes (null if a language has none).",
                 "consumes": [
                     "application/json"
                 ],
@@ -415,6 +415,14 @@
                 },
                 "nouns": {
                     "description": "Count of noun entries",
+                    "type": "integer"
+                },
+                "prepositions": {
+                    "description": "Count of preposition entries (null if the language has no prepositions)",
+                    "type": "integer"
+                },
+                "profanity": {
+                    "description": "Count of profanity entries (null if the language has no profanity)",
                     "type": "integer"
                 },
                 "verbs": {

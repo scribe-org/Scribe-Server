@@ -122,5 +122,7 @@ func BuildLanguageStatResponse(code string, stat map[string]any) models.Language
 		LanguageName: &langName,
 		Nouns:        ToIntPtr(stat["nouns"]),
 		Verbs:        ToIntPtr(stat["verbs"]),
+		Prepositions: ToIntPtr(stat["prepositions"]),
+		Profanity:    ToIntPtr(stat["profanity"]),
 	}
 }

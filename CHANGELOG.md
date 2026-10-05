@@ -29,6 +29,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - Scribe-Data data contracts are served via Scribe-Server to tell the client applications how to process the data ([#18](https://github.com/scribe-org/Scribe-Server/issues/18), [#57](https://github.com/scribe-org/Scribe-Server/issues/57)).
   - Data contracts were switched from JSON to YAML for easier maintenance ([#56](https://github.com/scribe-org/Scribe-Server/pull/56)).
 - Statistics for available languages are now shown via the API ([#44](https://github.com/scribe-org/Scribe-Server/issues/44)).
+  - Language statistics include counts of prepositions and profanity, which are null for languages without them.
 - An entry/landing page was set up for Scribe-Server ([#48](https://github.com/scribe-org/Scribe-Server/issues/48)), followed by a dedicated deployment and download page ([#52](https://github.com/scribe-org/Scribe-Server/pull/52)).
 - A translation data retrieval endpoint with validation logic was implemented ([#58](https://github.com/scribe-org/Scribe-Server/issues/58), [#59](https://github.com/scribe-org/Scribe-Server/issues/59)).
 - SQLite databases are available for download directly from the Scribe-Server UI ([#6](https://github.com/scribe-org/Scribe-Server/issues/6)).
@@ -61,6 +62,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - The CI workflow was updated to select the Go version via `go-version-file` ([#8](https://github.com/scribe-org/Scribe-Server/issues/8)) and later improved further ([#30](https://github.com/scribe-org/Scribe-Server/issues/30)).
 - Unit tests were added for the language validator functions ([#78](https://github.com/scribe-org/Scribe-Server/issues/78)).
 - Unit tests were added for the YAML normalizer function ([#81](https://github.com/scribe-org/Scribe-Server/issues/81)).
+- Unit tests were added for the available languages handler ([#84](https://github.com/scribe-org/Scribe-Server/issues/84)).
 
 ### ♻️ Code Refactoring
 
