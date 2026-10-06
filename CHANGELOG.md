@@ -65,6 +65,8 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - Unit tests were added for the language validator functions ([#78](https://github.com/scribe-org/Scribe-Server/issues/78)).
 - Unit tests were added for the YAML normalizer function ([#81](https://github.com/scribe-org/Scribe-Server/issues/81)).
 - Unit tests were added for the available languages handler ([#84](https://github.com/scribe-org/Scribe-Server/issues/84)).
+- Unit tests were added for the translation data retrieval endpoint handler ([#85](https://github.com/scribe-org/Scribe-Server/issues/85)).
+
 
 ### ♻️ Code Refactoring
 
