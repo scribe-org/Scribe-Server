@@ -103,7 +103,7 @@ func TestGetAvailableLanguages(t *testing.T) {
 			func() ([]string, error) {
 				return nil, errors.New("database connection failed")
 			},
-			func(lang string) ([]string, error) {
+			func(_ string) ([]string, error) {
 				return nil, nil
 			},
 		)
@@ -265,7 +265,7 @@ func TestGetTranslationData_SuccessResponseShape(t *testing.T) {
 	t.Run("empty translation data map", func(t *testing.T) {
 		emptyData := make(map[string]map[string]map[string]models.TranslationEntry)
 
-		setTranslationTableDataFunc(t, func(targetLang, sourceLang string) (map[string]map[string]map[string]models.TranslationEntry, error) {
+		setTranslationTableDataFunc(t, func(_, _ string) (map[string]map[string]map[string]models.TranslationEntry, error) {
 			return emptyData, nil
 		})
 
@@ -291,7 +291,7 @@ func TestGetTranslationData_EmptyTranslationCodeError(t *testing.T) {
 	router := setupTranslationTestRouter(t)
 
 	// Ensure db query is never reached on invalid input.
-	setTranslationTableDataFunc(t, func(targetLang, sourceLang string) (map[string]map[string]map[string]models.TranslationEntry, error) {
+	setTranslationTableDataFunc(t, func(_, _ string) (map[string]map[string]map[string]models.TranslationEntry, error) {
 		t.Fatal("getTranslationTableData must not be called when language code is empty or missing")
 		return nil, nil
 	})
@@ -348,7 +348,7 @@ func TestGetTranslationData_InvalidTranslationLangCodeError(t *testing.T) {
 	router := setupTranslationTestRouter(t)
 
 	// Ensure db query is never reached on invalid input.
-	setTranslationTableDataFunc(t, func(targetLang, sourceLang string) (map[string]map[string]map[string]models.TranslationEntry, error) {
+	setTranslationTableDataFunc(t, func(_, _ string) (map[string]map[string]map[string]models.TranslationEntry, error) {
 		t.Fatal("getTranslationTableData must not be called when language code format is invalid")
 		return nil, nil
 	})
@@ -526,7 +526,7 @@ func TestGetTranslationData_InternalServerError(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			setTranslationTableDataFunc(t, func(targetLang, sourceLang string) (map[string]map[string]map[string]models.TranslationEntry, error) {
+			setTranslationTableDataFunc(t, func(_, _ string) (map[string]map[string]map[string]models.TranslationEntry, error) {
 				return nil, tt.dbErr
 			})
 
