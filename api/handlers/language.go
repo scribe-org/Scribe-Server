@@ -269,6 +269,9 @@ func GetContracts(c *gin.Context) {
 
 // MARK: Translation Data Retrieval
 
+// getTranslationTableData fetches translation data. It is a package-level variable to allow mocking in unit tests.
+var getTranslationTableData = dbqueries.GetTranslationTableData
+
 // GetTranslationData returns translation data from a source language into a target language.
 //
 // @Summary Retrieve translation data
@@ -297,7 +300,7 @@ func GetTranslationData(c *gin.Context) {
 		return
 	}
 
-	data, err := dbqueries.GetTranslationTableData(targetLang, sourceLang)
+	data, err := getTranslationTableData(targetLang, sourceLang)
 	if err != nil {
 		log.Printf("Error fetching translation data for %s/%s: %v", targetLang, sourceLang, err)
 		if strings.Contains(err.Error(), "does not exist") {
