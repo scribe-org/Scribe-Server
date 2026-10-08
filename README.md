@@ -14,6 +14,8 @@
 
 ### Backend service for Scribe data downloads
 
+<!-- Change to readme. -->
+
 **Scribe-Server** is a backend service that provides the API by which data is available for download within Scribe apps. The goal is to create a [Scribe-Data](https://github.com/scribe-org/Scribe-Data) based regularly updating dataset that can signal new data availability as well as allow for language pack downloads. Scribe-Server can be accessed via [scribe-server.toolforge.org](https://scribe-server.toolforge.org/), with the SQLite data packs being available for download via [scribe-server.toolforge.org/packs/sqlite](https://scribe-server.toolforge.org/packs/sqlite/).
 
 > [!NOTE]\
