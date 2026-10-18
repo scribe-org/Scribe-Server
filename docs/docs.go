@@ -192,7 +192,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Comma-separated list of language codes to filter (e.g., ",
+                        "description": "Comma-separated list of language codes to filter (e.g., fr,de,es)",
                         "name": "codes",
                         "in": "query"
                     }
@@ -276,7 +276,7 @@ const docTemplate = `{
                         "example": "de",
                         "description": "Source language code (ISO 639-1)",
                         "name": "source_lang",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -284,7 +284,7 @@ const docTemplate = `{
                         "example": "bn",
                         "description": "Target language code (ISO 639-1)",
                         "name": "target_lang",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     }
                 ],
