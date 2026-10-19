@@ -14,6 +14,12 @@ import (
 	"github.com/scribe-org/scribe-server/models"
 )
 
+// Function variables to mock database queries in unit tests.
+var (
+	getAllLanguageStats = database.GetAllLanguageStats
+	getLanguageStat     = database.GetLanguageStat
+)
+
 // GetLanguageStats handles GET /language-stats?codes=en,fr.
 // @Summary Get statistics for one or multiple languages
 // @Description Returns the number of nouns, verbs, prepositions and profanity entries for the given language codes (null if a language has none).
@@ -30,7 +36,7 @@ func GetLanguageStats(c *gin.Context) {
 	codesParam := c.Query("codes")
 
 	if codesParam == "" {
-		allStats, err := database.GetAllLanguageStats()
+		allStats, err := getAllLanguageStats()
 		if err != nil {
 			log.Printf("Error fetching all stats: %v", err)
 			HandleError(c, http.StatusInternalServerError, "Failed to fetch all language statistics")
@@ -45,7 +51,7 @@ func GetLanguageStats(c *gin.Context) {
 		requestedCodes[i] = strings.TrimSpace(requestedCodes[i])
 	}
 
-	availableLanguages, err := database.GetAvailableLanguages()
+	availableLanguages, err := getAvailableLanguages()
 	if err != nil {
 		log.Printf("Error checking available languages: %v", err)
 		HandleError(c, http.StatusInternalServerError, "Failed to check available languages")
@@ -61,7 +67,7 @@ func GetLanguageStats(c *gin.Context) {
 
 	statsList := make([]models.LanguageStatisticsReponse, 0)
 	for _, code := range supported {
-		stat, err := database.GetLanguageStat(code)
+		stat, err := getLanguageStat(code)
 		if err != nil {
 			log.Printf("Error fetching stats for %s: %v", code, err)
 			continue
