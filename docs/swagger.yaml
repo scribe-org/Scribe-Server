@@ -155,6 +155,11 @@ paths:
       responses:
         "200":
           description: Successfully retrieved contracts
+          headers:
+            Content-Disposition:
+              description: attachment; filename=contracts_{lang}.yaml, or contracts.yaml
+                for all languages
+              type: string
           schema:
             $ref: '#/definitions/models.ContractsResponse'
         "400":
@@ -167,6 +172,10 @@ paths:
             $ref: '#/definitions/models.ErrorResponse'
         "500":
           description: Failed to load contract files
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "503":
+          description: Data contracts are not available
           schema:
             $ref: '#/definitions/models.ErrorResponse'
       summary: Retrieve schema contracts

@@ -51,6 +51,12 @@ const docTemplate = `{
                         "description": "Successfully retrieved contracts",
                         "schema": {
                             "$ref": "#/definitions/models.ContractsResponse"
+                        },
+                        "headers": {
+                            "Content-Disposition": {
+                                "type": "string",
+                                "description": "attachment; filename=contracts_{lang}.yaml, or contracts.yaml for all languages"
+                            }
                         }
                     },
                     "400": {
@@ -67,6 +73,12 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to load contract files",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Data contracts are not available",
                         "schema": {
                             "$ref": "#/definitions/models.ErrorResponse"
                         }
