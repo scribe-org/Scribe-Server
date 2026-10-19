@@ -78,6 +78,31 @@ func TestLoadAllContracts(t *testing.T) {
 		require.Error(t, err)
 		assert.ErrorIs(t, err, fs.ErrNotExist)
 	})
+
+	t.Run("skips directories and contracts that can't be read or parsed", func(t *testing.T) {
+		dir := writeContractFiles(t, map[string]string{
+			"en.yaml": "nouns:\n  genders:\n    canonical: [gender]\n",
+			"fr.yaml": "nouns: [unclosed\n",
+		})
+		require.NoError(t, os.Mkdir(filepath.Join(dir, "nested.yaml"), 0o700))
+
+		// Note: A broken symlink can't be read regardless of the user running the tests.
+		require.NoError(t, os.Symlink(filepath.Join(dir, "missing.yaml"), filepath.Join(dir, "de.yaml")))
+
+		contracts, err := loadAllContracts(dir)
+		require.NoError(t, err)
+		assert.Equal(t, []string{"en"}, mapKeys(contracts))
+	})
+}
+
+// mapKeys returns the keys of a contracts map.
+func mapKeys(contracts map[string]any) []string {
+	keys := make([]string, 0, len(contracts))
+	for key := range contracts {
+		keys = append(keys, key)
+	}
+
+	return keys
 }
 
 func TestLoadSingleContract(t *testing.T) {
@@ -101,6 +126,15 @@ func TestLoadSingleContract(t *testing.T) {
 		_, err := loadSingleContract(t.TempDir(), "en")
 		require.Error(t, err)
 		assert.ErrorIs(t, err, fs.ErrNotExist)
+	})
+
+	t.Run("contract that can't be parsed", func(t *testing.T) {
+		dir := writeContractFiles(t, map[string]string{"en.yaml": "nouns: [unclosed\n"})
+
+		_, err := loadSingleContract(dir, "en")
+		require.Error(t, err)
+		assert.NotErrorIs(t, err, fs.ErrNotExist)
+		assert.Contains(t, err.Error(), "could not unmarshal contract for en")
 	})
 }
 
