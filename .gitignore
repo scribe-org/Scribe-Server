@@ -32,3 +32,8 @@ tmp/
 
 # Scribe-Data SQLite Files
 *.sqlite
+
+# Scribe-Data Contracts (exported by update_data.sh)
+contracts/*.yaml
+contracts/*.yml
+contracts.new/

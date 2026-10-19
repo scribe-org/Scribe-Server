@@ -4,7 +4,9 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -218,9 +220,11 @@ func GetLanguageVersion(c *gin.Context) {
 // @Produce  json
 // @Param lang query string false "Language code (ISO 639-1)" example(es)
 // @Success 200 {object} models.ContractsResponse "Successfully retrieved contracts"
+// @Header 200 {string} Content-Disposition "attachment; filename=contracts_{lang}.yaml, or contracts.yaml for all languages"
 // @Failure 400 {object} models.ErrorResponse "Invalid language code provided"
 // @Failure 404 {object} models.ErrorResponse "Language not supported"
 // @Failure 500 {object} models.ErrorResponse "Failed to load contract files"
+// @Failure 503 {object} models.ErrorResponse "Data contracts are not available"
 // @Router /api/v1/contracts [get]
 func GetContracts(c *gin.Context) {
 	lang := c.Query("lang")
@@ -232,7 +236,7 @@ func GetContracts(c *gin.Context) {
 			return
 		}
 
-		availableLanguages, err := database.GetAvailableLanguages()
+		availableLanguages, err := getAvailableLanguages()
 		if err != nil {
 			log.Printf("Error checking available languages: %v", err)
 			HandleError(c, http.StatusInternalServerError, "Failed to check language availability")
@@ -243,6 +247,12 @@ func GetContracts(c *gin.Context) {
 			HandleError(c, http.StatusNotFound, fmt.Sprintf("Language '%s' not supported", lang))
 			return
 		}
+	}
+
+	// Name downloads by language, e.g. contracts_en.yaml (lang is validated above).
+	fileName := "contracts.yaml"
+	if lang != "" {
+		fileName = fmt.Sprintf("contracts_%s.yaml", lang)
 	}
 
 	var contracts map[string]any
@@ -258,11 +268,15 @@ func GetContracts(c *gin.Context) {
 
 	if err != nil {
 		log.Printf("Error loading contracts: %v", err)
+		if errors.Is(err, fs.ErrNotExist) {
+			HandleError(c, http.StatusServiceUnavailable, constants.ContractsNotAvailableError)
+			return
+		}
 		HandleError(c, http.StatusInternalServerError, "Failed to load contracts")
 		return
 	}
 
-	HandleYAMLSuccess(c, gin.H{
+	HandleYAMLSuccess(c, fileName, gin.H{
 		"contracts": contracts,
 	})
 }
@@ -345,7 +359,8 @@ func loadSingleContract(contractsDir, lang string) (map[string]any, error) {
 	return map[string]any{lang: contract}, nil
 }
 
-// loadAllContracts reads and unmarshals all .json files in a directory.
+// loadAllContracts reads and unmarshals all .yaml and .yml files in a directory.
+// It returns an error wrapping fs.ErrNotExist if the directory is missing or has no contracts.
 func loadAllContracts(contractsDir string) (map[string]any, error) {
 	contracts := make(map[string]any)
 
@@ -380,6 +395,10 @@ func loadAllContracts(contractsDir string) (map[string]any, error) {
 		}
 
 		contracts[langCode] = normalizeMap(contract)
+	}
+
+	if len(contracts) == 0 {
+		return nil, fmt.Errorf("no contract files found in %s: %w", contractsDir, fs.ErrNotExist)
 	}
 
 	return contracts, nil
