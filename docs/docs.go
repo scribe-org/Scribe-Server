@@ -26,17 +26,18 @@ const docTemplate = `{
     "paths": {
         "/api/v1/contracts": {
             "get": {
-                "description": "If a 'lang' query parameter is provided, returns the contract for that specific language. Otherwise, returns all contracts.",
+                "description": "Returns a language's contract as JSON ({lang}.json), or a zip of all contracts (data_contracts.zip) without 'lang'.",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
-                    "application/json"
+                    "application/json",
+                    "application/zip"
                 ],
                 "tags": [
                     "Contracts"
                 ],
-                "summary": "Retrieve schema contracts",
+                "summary": "Retrieve data contracts",
                 "parameters": [
                     {
                         "type": "string",
@@ -48,14 +49,14 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully retrieved contracts",
+                        "description": "The language's contract as JSON, or a zip archive of all contracts",
                         "schema": {
-                            "$ref": "#/definitions/models.ContractsResponse"
+                            "type": "file"
                         },
                         "headers": {
                             "Content-Disposition": {
                                 "type": "string",
-                                "description": "attachment; filename=contracts_{lang}.yaml, or contracts.yaml for all languages"
+                                "description": "attachment; filename={lang}.json, or data_contracts.zip for all languages"
                             }
                         }
                     },
@@ -361,15 +362,6 @@ const docTemplate = `{
                 "version": {
                     "description": "Contract version identifier",
                     "type": "string"
-                }
-            }
-        },
-        "models.ContractsResponse": {
-            "type": "object",
-            "properties": {
-                "contracts": {
-                    "type": "object",
-                    "additionalProperties": {}
                 }
             }
         },

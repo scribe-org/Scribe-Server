@@ -24,12 +24,6 @@ definitions:
         description: Contract version identifier
         type: string
     type: object
-  models.ContractsResponse:
-    properties:
-      contracts:
-        additionalProperties: {}
-        type: object
-    type: object
   models.ErrorResponse:
     properties:
       error:
@@ -142,8 +136,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: If a 'lang' query parameter is provided, returns the contract for
-        that specific language. Otherwise, returns all contracts.
+      description: Returns a language's contract as JSON ({lang}.json), or a zip of
+        all contracts (data_contracts.zip) without 'lang'.
       parameters:
       - description: Language code (ISO 639-1)
         example: es
@@ -152,16 +146,17 @@ paths:
         type: string
       produces:
       - application/json
+      - application/zip
       responses:
         "200":
-          description: Successfully retrieved contracts
+          description: The language's contract as JSON, or a zip archive of all contracts
           headers:
             Content-Disposition:
-              description: attachment; filename=contracts_{lang}.yaml, or contracts.yaml
+              description: attachment; filename={lang}.json, or data_contracts.zip
                 for all languages
               type: string
           schema:
-            $ref: '#/definitions/models.ContractsResponse'
+            type: file
         "400":
           description: Invalid language code provided
           schema:
@@ -178,7 +173,7 @@ paths:
           description: Data contracts are not available
           schema:
             $ref: '#/definitions/models.ErrorResponse'
-      summary: Retrieve schema contracts
+      summary: Retrieve data contracts
       tags:
       - Contracts
   /api/v1/data-version/{lang}:
