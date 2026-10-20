@@ -56,7 +56,7 @@ const docTemplate = `{
                         "headers": {
                             "Content-Disposition": {
                                 "type": "string",
-                                "description": "attachment; filename={lang}.json, or data_contracts.zip for all languages"
+                                "description": "inline; filename={lang}.json, or attachment; filename=data_contracts.zip for all languages"
                             }
                         }
                     },

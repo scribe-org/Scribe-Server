@@ -23,9 +23,19 @@ func HandleSuccess(c *gin.Context, data any) {
 	c.JSON(http.StatusOK, data)
 }
 
-// HandleFileDownload sends data as a file with the given name and content type.
+// HandleFileDownload sends data as an attachment with the given file name and content type.
 func HandleFileDownload(c *gin.Context, fileName, contentType string, data []byte) {
-	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%q", fileName))
+	sendFile(c, "attachment", fileName, contentType, data)
+}
+
+// HandleFileInline sends data inline with the given file name and content type.
+func HandleFileInline(c *gin.Context, fileName, contentType string, data []byte) {
+	sendFile(c, "inline", fileName, contentType, data)
+}
+
+// sendFile sends data with a Content-Disposition header of the given type and file name.
+func sendFile(c *gin.Context, disposition, fileName, contentType string, data []byte) {
+	c.Header("Content-Disposition", fmt.Sprintf("%s; filename=%q", disposition, fileName))
 	c.Data(http.StatusOK, contentType, data)
 }
 

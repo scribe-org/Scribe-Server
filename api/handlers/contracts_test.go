@@ -353,7 +353,7 @@ func TestGetContracts(t *testing.T) {
 
 		require.Equal(t, http.StatusOK, rec.Code)
 		assert.Equal(t, "application/json; charset=utf-8", rec.Header().Get("Content-Type"))
-		assert.Equal(t, `attachment; filename="en.json"`, rec.Header().Get("Content-Disposition"))
+		assert.Equal(t, `inline; filename="en.json"`, rec.Header().Get("Content-Disposition"))
 
 		// The response is only the contract, without a wrapper such as contracts: en: ...
 		assert.JSONEq(t, `{"nouns": {"genders": {"canonical": ["gender"]}}}`, rec.Body.String())

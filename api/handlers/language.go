@@ -218,7 +218,7 @@ func GetLanguageVersion(c *gin.Context) {
 // @Produce  json,application/zip
 // @Param lang query string false "Language code (ISO 639-1)" example(es)
 // @Success 200 {file} file "The language's contract as JSON, or a zip archive of all contracts"
-// @Header 200 {string} Content-Disposition "attachment; filename={lang}.json, or data_contracts.zip for all languages"
+// @Header 200 {string} Content-Disposition "inline; filename={lang}.json, or attachment; filename=data_contracts.zip for all languages"
 // @Failure 400 {object} models.ErrorResponse "Invalid language code provided"
 // @Failure 404 {object} models.ErrorResponse "Language not supported"
 // @Failure 500 {object} models.ErrorResponse "Failed to load contract files"
@@ -268,8 +268,7 @@ func GetContracts(c *gin.Context) {
 		return
 	}
 
-	// Note: lang is validated above, so it's safe to use in the file name.
-	HandleFileDownload(c, lang+".json", "application/json; charset=utf-8", contract.json)
+	HandleFileInline(c, lang+".json", "application/json; charset=utf-8", contract.json)
 }
 
 // handleContractsError sends a 503 if the contracts are missing and a 500 for other errors.

@@ -152,7 +152,7 @@ paths:
           description: The language's contract as JSON, or a zip archive of all contracts
           headers:
             Content-Disposition:
-              description: attachment; filename={lang}.json, or data_contracts.zip
+              description: inline; filename={lang}.json, or attachment; filename=data_contracts.zip
                 for all languages
               type: string
           schema:
