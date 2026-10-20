@@ -293,8 +293,8 @@ var getTranslationTableData = dbqueries.GetTranslationTableData
 // @Tags Translations
 // @Accept  json
 // @Produce  json
-// @Param source_lang path string true "Source language code (ISO 639-1)" example(de)
-// @Param target_lang path string true "Target language code (ISO 639-1)" example(bn)
+// @Param source_lang query string true "Source language code (ISO 639-1)" example(de)
+// @Param target_lang query string true "Target language code (ISO 639-1)" example(bn)
 // @Success 200 {object} models.TranslationDataResponse "Successfully retrieved translation data"
 // @Failure 400 {object} models.ErrorResponse "Invalid language code"
 // @Failure 404 {object} models.ErrorResponse "Translation data not found"

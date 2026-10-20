@@ -258,7 +258,7 @@ paths:
       description: Returns the number of nouns, verbs, prepositions and profanity
         entries for the given language codes (null if a language has none).
       parameters:
-      - description: 'Comma-separated list of language codes to filter (e.g., '
+      - description: Comma-separated list of language codes to filter (e.g., fr,de,es)
         in: query
         name: codes
         type: string
@@ -315,13 +315,13 @@ paths:
       parameters:
       - description: Source language code (ISO 639-1)
         example: de
-        in: path
+        in: query
         name: source_lang
         required: true
         type: string
       - description: Target language code (ISO 639-1)
         example: bn
-        in: path
+        in: query
         name: target_lang
         required: true
         type: string
