@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// creates a minimal Gin engine configured in test mode for testing the language-stats endpoint.
+// Creates a minimal Gin engine configured in test mode for testing the language-stats endpoint.
 func setupStatisticsTestRouter(t *testing.T) *gin.Engine {
 	t.Helper()
 
@@ -29,7 +29,7 @@ func setupStatisticsTestRouter(t *testing.T) *gin.Engine {
 	return router
 }
 
-// temporarily swaps package-level database function pointers for isolated unit testing.
+// Temporarily swaps package-level database function pointers for isolated unit testing.
 func stubStatisticsDatabase(
 	t *testing.T,
 	allStatsFn func() ([]models.LanguageStatisticsReponse, error),
@@ -67,7 +67,7 @@ func strPtr(s string) *string {
 	return &s
 }
 
-// tests GET /api/v1/language-stats when no codes parameter is passed or when it is empty.
+// Tests GET /api/v1/language-stats when no codes parameter is passed or when it is empty.
 func TestGetLanguageStats_AllLanguages(t *testing.T) {
 	router := setupStatisticsTestRouter(t)
 
@@ -157,7 +157,7 @@ func TestGetLanguageStats_AllLanguages(t *testing.T) {
 	})
 }
 
-// tests filtering with valid comma-separated codes.
+// Tests filtering with valid comma-separated codes.
 func TestGetLanguageStats_CommaSeparatedCodes(t *testing.T) {
 	router := setupStatisticsTestRouter(t)
 
@@ -224,7 +224,7 @@ func TestGetLanguageStats_CommaSeparatedCodes(t *testing.T) {
 	})
 }
 
-// verifies that leading, trailing, and internal whitespace around codes is trimmed.
+// Verifies that leading, trailing, and internal whitespace around codes is trimmed.
 func TestGetLanguageStats_WhitespaceTrimming(t *testing.T) {
 	router := setupStatisticsTestRouter(t)
 
@@ -288,7 +288,7 @@ func TestGetLanguageStats_WhitespaceTrimming(t *testing.T) {
 	}
 }
 
-// verifies that empty segments between commas are skipped.
+// Verifies that empty segments between commas are skipped.
 func TestGetLanguageStats_EmptySegments(t *testing.T) {
 	router := setupStatisticsTestRouter(t)
 
@@ -360,7 +360,7 @@ func TestGetLanguageStats_EmptySegments(t *testing.T) {
 	})
 }
 
-// verifies that duplicate language codes are deduplicated.
+// Verifies that duplicate language codes are deduplicated.
 func TestGetLanguageStats_Duplicates(t *testing.T) {
 	router := setupStatisticsTestRouter(t)
 
@@ -407,7 +407,7 @@ func TestGetLanguageStats_Duplicates(t *testing.T) {
 	})
 }
 
-// verifies unsupported codes are silently dropped.
+// Verifies unsupported codes are silently dropped.
 func TestGetLanguageStats_SilentDroppingUnsupportedCodes(t *testing.T) {
 	router := setupStatisticsTestRouter(t)
 
@@ -453,7 +453,7 @@ func TestGetLanguageStats_SilentDroppingUnsupportedCodes(t *testing.T) {
 	})
 }
 
-// verifies that 404 fires only when all requested codes are dropped or have no stats.
+// Verifies that 404 fires only when all requested codes are dropped or have no stats.
 func TestGetLanguageStats_NotFound(t *testing.T) {
 	router := setupStatisticsTestRouter(t)
 
@@ -554,7 +554,7 @@ func TestGetLanguageStats_NotFound(t *testing.T) {
 	})
 }
 
-// verifies error handling when database operations fail.
+// Verifies error handling when database operations fail.
 func TestGetLanguageStats_DatabaseErrors(t *testing.T) {
 	router := setupStatisticsTestRouter(t)
 
