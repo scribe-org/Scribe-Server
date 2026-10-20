@@ -75,11 +75,24 @@ jobs:
             exit 1
           fi
 
-      - name: Upload SQLite files as artifact
+          # Package the data contracts that are served by the API.
+          CONTRACT_FILES=$(find ./contracts -name "*.yaml" 2>/dev/null | wc -l)
+          if [ "$CONTRACT_FILES" -eq 0 ]; then
+            echo "❌ No data contracts found"
+            exit 1
+          fi
+
+          echo "✅ Found $CONTRACT_FILES data contracts"
+          tar -czf scribe-data-contracts.tar.gz -C ./contracts .
+          echo "✅ Contracts package created successfully: $(ls -lh scribe-data-contracts.tar.gz)"
+
+      - name: Upload SQLite files and contracts as artifact
         uses: actions/upload-artifact@v7
         with:
           name: scribe-data-sqlite-${{ github.run_number }}
-          path: ./scribe-data-sqlite.tar.gz
+          path: |
+            ./scribe-data-sqlite.tar.gz
+            ./scribe-data-contracts.tar.gz
           retention-days: 30
 
       - name: Debug - Check if secret exists
@@ -101,15 +114,15 @@ jobs:
         run: |
           ssh-keyscan -H login.toolforge.org >> ~/.ssh/known_hosts
 
-          echo "📤 Transferring package to Toolforge..."
-          scp -o ConnectTimeout=60 ./scribe-data-sqlite.tar.gz \
-            ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org:/data/project/scribe-server/scribe-data-sqlite.tar.gz
+          echo "📤 Transferring packages to Toolforge..."
+          scp -o ConnectTimeout=60 ./scribe-data-sqlite.tar.gz ./scribe-data-contracts.tar.gz \
+            ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org:/data/project/scribe-server/
 
           if [ $? -ne 0 ]; then
             echo "❌ SCP file transfer failed."
             exit 1
           fi
-          echo "✅ Package transferred successfully."
+          echo "✅ Packages transferred successfully."
 
           echo "🚀 Starting remote deployment process..."
           ssh -o ConnectTimeout=60 \
@@ -121,16 +134,16 @@ jobs:
             # Running as the tool user (e.g., scribe-server).
             # Current Directory: /data/project/scribe-server
 
-            # Move the package into the Scribe-Server directory.
-            if [ ! -f "./scribe-data-sqlite.tar.gz" ]; then
-              echo "❌ Package not found in project directory."
+            # Move the packages into the Scribe-Server directory.
+            if [ ! -f "./scribe-data-sqlite.tar.gz" ] || [ ! -f "./scribe-data-contracts.tar.gz" ]; then
+              echo "❌ Packages not found in project directory."
               exit 1
             fi
-            echo "✅ Package verified in project directory."
+            echo "✅ Packages verified in project directory."
 
-            mv ./scribe-data-sqlite.tar.gz ./Scribe-Server/
+            mv ./scribe-data-sqlite.tar.gz ./scribe-data-contracts.tar.gz ./Scribe-Server/
             if [ $? -ne 0 ]; then
-              echo "❌ Failed to move package into Scribe-Server."
+              echo "❌ Failed to move packages into Scribe-Server."
               exit 1
             fi
 
@@ -153,6 +166,20 @@ jobs:
             echo "📤 Extracting new data..."
             tar -xzf scribe-data-sqlite.tar.gz -C ./packs/sqlite/
 
+            # Replace the data contracts that are served by the API.
+            # Note: Contracts are extracted to a new directory first so a failed extraction keeps the current ones.
+            echo "📜 Extracting new data contracts..."
+            rm -rf ./contracts.new
+            mkdir -p ./contracts.new
+            if tar -xzf scribe-data-contracts.tar.gz -C ./contracts.new/; then
+              rm -rf ./contracts
+              mv ./contracts.new ./contracts
+              echo "✅ Data contracts updated: $(ls ./contracts | tr '\n' ' ')"
+            else
+              rm -rf ./contracts.new
+              echo "⚠️ Failed to extract data contracts, keeping the current ones."
+            fi
+
             # Run database migration.
             echo "🔄 Building migration tool..."
             go build -o ./bin/migrate-scribe-data ./cmd/migrate
@@ -160,8 +187,8 @@ jobs:
             echo "🔄 Running migration tool..."
             ./bin/migrate-scribe-data
 
-            # Clean up the deployment package.
-            rm ./scribe-data-sqlite.tar.gz
+            # Clean up the deployment packages.
+            rm ./scribe-data-sqlite.tar.gz ./scribe-data-contracts.tar.gz
 
             echo "🎉 Deployment completed successfully!"
 

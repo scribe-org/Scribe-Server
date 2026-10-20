@@ -27,12 +27,6 @@ type Contract struct {
 	Fields map[string]map[string]string `json:"fields"`
 }
 
-// ContractsResponse represents all contract metadata available for supported languages.
-// swagger:model ContractsResponse
-type ContractsResponse struct {
-	Contracts map[string]any `json:"contracts"`
-}
-
 // MARK: Language Data Models
 
 // LanguageDataResponse represents the complete response when fetching a language’s data.

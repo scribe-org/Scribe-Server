@@ -4,11 +4,12 @@
 package handlers
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -18,7 +19,6 @@ import (
 	"github.com/scribe-org/scribe-server/internal/constants"
 	"github.com/scribe-org/scribe-server/models"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
 )
 
 // MARK: Languages Endpoints
@@ -209,62 +209,77 @@ func GetLanguageVersion(c *gin.Context) {
 
 // MARK: Contracts Retrieval
 
-// GetContracts returns schema contracts for all languages or a specific one if a query parameter is provided.
+// GetContracts returns the data contract for a language as JSON, or a zip archive of all contracts.
 //
-// @Summary Retrieve schema contracts
-// @Description If a 'lang' query parameter is provided, returns the contract for that specific language. Otherwise, returns all contracts.
+// @Summary Retrieve data contracts
+// @Description Returns a language's contract as JSON ({lang}.json), or a zip of all contracts (data_contracts.zip) without 'lang'.
 // @Tags Contracts
 // @Accept  json
-// @Produce  json
+// @Produce  json,application/zip
 // @Param lang query string false "Language code (ISO 639-1)" example(es)
-// @Success 200 {object} models.ContractsResponse "Successfully retrieved contracts"
+// @Success 200 {file} file "The language's contract as JSON, or a zip archive of all contracts"
+// @Header 200 {string} Content-Disposition "inline; filename={lang}.json, or attachment; filename=data_contracts.zip for all languages"
 // @Failure 400 {object} models.ErrorResponse "Invalid language code provided"
 // @Failure 404 {object} models.ErrorResponse "Language not supported"
 // @Failure 500 {object} models.ErrorResponse "Failed to load contract files"
+// @Failure 503 {object} models.ErrorResponse "Data contracts are not available"
 // @Router /api/v1/contracts [get]
 func GetContracts(c *gin.Context) {
 	lang := c.Query("lang")
 	contractsDir := viper.GetString("contractsDir")
 
-	if lang != "" {
-		if !validators.IsValidLanguageCode(lang) {
-			HandleError(c, http.StatusBadRequest, constants.InvalidLanguageCodeError)
-			return
-		}
-
-		availableLanguages, err := database.GetAvailableLanguages()
+	if lang == "" {
+		contracts, err := loadAllContracts(contractsDir)
 		if err != nil {
-			log.Printf("Error checking available languages: %v", err)
-			HandleError(c, http.StatusInternalServerError, "Failed to check language availability")
+			handleContractsError(c, err)
 			return
 		}
 
-		if !validators.IsLanguageSupported(lang, availableLanguages) {
-			HandleError(c, http.StatusNotFound, fmt.Sprintf("Language '%s' not supported", lang))
+		var archive bytes.Buffer
+		if err := writeContractsZip(&archive, contracts); err != nil {
+			handleContractsError(c, fmt.Errorf("could not create contracts archive: %w", err))
 			return
 		}
-	}
 
-	var contracts map[string]any
-	var err error
-
-	if lang != "" {
-		// Load a single language.
-		contracts, err = loadSingleContract(contractsDir, lang)
-	} else {
-		// Load all languages.
-		contracts, err = loadAllContracts(contractsDir)
-	}
-
-	if err != nil {
-		log.Printf("Error loading contracts: %v", err)
-		HandleError(c, http.StatusInternalServerError, "Failed to load contracts")
+		HandleFileDownload(c, contractsArchiveDir+".zip", "application/zip", archive.Bytes())
 		return
 	}
 
-	HandleYAMLSuccess(c, gin.H{
-		"contracts": contracts,
-	})
+	if !validators.IsValidLanguageCode(lang) {
+		HandleError(c, http.StatusBadRequest, constants.InvalidLanguageCodeError)
+		return
+	}
+
+	availableLanguages, err := getAvailableLanguages()
+	if err != nil {
+		log.Printf("Error checking available languages: %v", err)
+		HandleError(c, http.StatusInternalServerError, "Failed to check language availability")
+		return
+	}
+
+	if !validators.IsLanguageSupported(lang, availableLanguages) {
+		HandleError(c, http.StatusNotFound, fmt.Sprintf("Language '%s' not supported", lang))
+		return
+	}
+
+	contract, err := loadContract(contractsDir, lang)
+	if err != nil {
+		handleContractsError(c, err)
+		return
+	}
+
+	HandleFileInline(c, lang+".json", "application/json; charset=utf-8", contract.json)
+}
+
+// handleContractsError sends a 503 if the contracts are missing and a 500 for other errors.
+func handleContractsError(c *gin.Context, err error) {
+	log.Printf("Error loading contracts: %v", err)
+	if errors.Is(err, fs.ErrNotExist) {
+		HandleError(c, http.StatusServiceUnavailable, constants.ContractsNotAvailableError)
+		return
+	}
+
+	HandleError(c, http.StatusInternalServerError, "Failed to load contracts")
 }
 
 // MARK: Translation Data Retrieval
@@ -316,71 +331,4 @@ func GetTranslationData(c *gin.Context) {
 		SourceLang: sourceLang,
 		Data:       data,
 	})
-}
-
-// MARK: Contract Loading Helpers
-
-// loadSingleContract reads and unmarshals a single contract file.
-func loadSingleContract(contractsDir, lang string) (map[string]any, error) {
-	filePathYaml := filepath.Join(contractsDir, lang+".yaml")
-	filePathYml := filepath.Join(contractsDir, lang+".yml")
-
-	filePath := filePathYaml
-	if _, err := os.Stat(filePathYaml); os.IsNotExist(err) {
-		filePath = filePathYml
-	}
-
-	data, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("could not read contract file for %s: %w", lang, err)
-	}
-
-	var contract any
-	if err := yaml.Unmarshal(data, &contract); err != nil {
-		return nil, fmt.Errorf("could not unmarshal contract for %s: %w", lang, err)
-	}
-
-	contract = normalizeMap(contract)
-
-	return map[string]any{lang: contract}, nil
-}
-
-// loadAllContracts reads and unmarshals all .json files in a directory.
-func loadAllContracts(contractsDir string) (map[string]any, error) {
-	contracts := make(map[string]any)
-
-	files, err := os.ReadDir(contractsDir)
-	if err != nil {
-		return nil, fmt.Errorf("could not read contracts directory: %w", err)
-	}
-
-	for _, file := range files {
-		if file.IsDir() {
-			continue
-		}
-
-		ext := filepath.Ext(file.Name())
-		if ext != ".yaml" && ext != ".yml" {
-			continue
-		}
-
-		langCode := strings.TrimSuffix(file.Name(), ext)
-		filePath := filepath.Join(contractsDir, file.Name())
-
-		data, err := os.ReadFile(filePath)
-		if err != nil {
-			log.Printf("Warning: could not read contract file %s: %v", file.Name(), err)
-			continue
-		}
-
-		var contract any
-		if err := yaml.Unmarshal(data, &contract); err != nil {
-			log.Printf("Warning: could not unmarshal contract file %s: %v", file.Name(), err)
-			continue
-		}
-
-		contracts[langCode] = normalizeMap(contract)
-	}
-
-	return contracts, nil
 }

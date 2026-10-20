@@ -21,4 +21,7 @@ const (
 
 	// EmptyTranslationCodeError indicates a failure when language code is not passed.
 	EmptyTranslationCodeError = "Empty translation code detected. Ensure you pass in valid source and target language code"
+
+	// ContractsNotAvailableError indicates that the data contract files are missing on the server.
+	ContractsNotAvailableError = "Data contracts are not available"
 )

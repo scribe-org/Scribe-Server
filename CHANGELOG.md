@@ -42,6 +42,9 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - Large Go files were split up and marked for maintainability ([#46](https://github.com/scribe-org/Scribe-Server/issues/46)).
 - Data extraction and update script issues were fixed following the contract-based filtering rollout, including validation logic and deprecated test failures.
 - The `updated_at` date for language data is now the most recent last modified date of the data, matching `/data-version`, rather than the date of the request.
+- Data contracts exported from Scribe-Data are now copied to the server and deployed to Toolforge with the data so that `/contracts` returns them, and a clear error is returned if they're not available ([#113](https://github.com/scribe-org/Scribe-Server/issues/113)).
+  - `/contracts?lang={lang}` returns only that language's contract exactly as exported by Scribe-Data as JSON (e.g. `en.json`), keeping the order of the contract's keys.
+  - `/contracts` returns a `data_contracts.zip` archive with a `data_contracts` directory of JSON contracts for all languages.
 - The `update_data.sh` download command was fixed to specify the correct dump snapshot location ([#65](https://github.com/scribe-org/Scribe-Server/pull/65)).
 - Trusted proxies are now explicitly configured for security.
 - German data contract fixes for missing `displayValue` fields on declensions, and fully indexed conjugations/declensions.
@@ -69,7 +72,6 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - Unit tests were added for the table name validators ([#80](https://github.com/scribe-org/Scribe-Server/issues/80)).
 - A CI check was added to verify that generated Swagger docs are up to date ([#82](https://github.com/scribe-org/Scribe-Server/issues/82)).
 - Unit tests were added for the language statistics retrieval endpoint handler ([#86](https://github.com/scribe-org/Scribe-Server/issues/86)).
-
 
 ### ♻️ Code Refactoring
 

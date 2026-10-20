@@ -362,6 +362,25 @@ ls -la "$PACKS_DIR"/*.sqlite | while read -r line; do
 done
 success "SQLite files copied successfully"
 
+# MARK: To Contracts
+
+# The API serves the contracts, so the exported contracts replace the server's contracts.
+# Note: Contracts are copied to a new directory first so a failed copy doesn't remove the current ones.
+SERVER_CONTRACTS_DIR="./contracts"
+log "📜 Copying data contracts to server..."
+rm -rf "$SERVER_CONTRACTS_DIR.new"
+mkdir -p "$SERVER_CONTRACTS_DIR.new"
+cp -f "$TEMP_DIR/$SCRIBE_DATA_DIR/$CONTRACTS_DIR"/*.yaml "$SERVER_CONTRACTS_DIR.new/" || {
+    error "Failed to copy data contracts to $SERVER_CONTRACTS_DIR"
+    rm -rf "$SERVER_CONTRACTS_DIR.new"
+    exit 1
+}
+rm -rf "$SERVER_CONTRACTS_DIR"
+mv "$SERVER_CONTRACTS_DIR.new" "$SERVER_CONTRACTS_DIR"
+
+CONTRACT_FILES=$(find "$SERVER_CONTRACTS_DIR" -name "*.yaml" | wc -l | tr -d ' ')
+success "Copied $CONTRACT_FILES data contracts to $SERVER_CONTRACTS_DIR"
+
 # MARK: Migration
 
 if [ "$SKIP_MIGRATION" != "true" ]; then
@@ -395,7 +414,7 @@ log "  • Total dump combinations: $TOTAL_COMBINATIONS"
 log "  • Profanity languages: ${PROFANITY_LANGUAGES[*]}"
 log "  • Preposition languages: ${PREPOSITION_LANGUAGES[*]}"
 log "  • Data Generation: Completed"
-log "  • Contracts: Exported fresh from Scribe-Data"
+log "  • Contracts: Exported fresh from Scribe-Data ($CONTRACT_FILES copied to $SERVER_CONTRACTS_DIR)"
 log "  • SQLite Conversion: Completed"
 log "  • Files Copied: $SQLITE_FILES files"
 log "  • Migration: Completed"
