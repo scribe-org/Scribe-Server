@@ -83,6 +83,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - The SQLite driver was switched from `mattn/go-sqlite3` to `glebarez/sqlite`.
 - CI linting was consolidated into the existing workflow ([#14](https://github.com/scribe-org/Scribe-Server/pull/14)), [revive](https://github.com/mgechev/revive) linting was integrated for local development ([#32](https://github.com/scribe-org/Scribe-Server/issues/32)), and a pre-commit `gofmt` hook was added ([#25](https://github.com/scribe-org/Scribe-Server/issues/25)).
 - Unneeded `sqlc` and OpenAPI generation libraries were removed in favor of a simplified stack.
+- The table name validators use precompiled patterns, and checks that the patterns already enforce were removed.
 
 ### ⚖️ Legal
 

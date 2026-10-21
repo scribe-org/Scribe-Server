@@ -4,6 +4,8 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -86,6 +88,17 @@ func get(router *gin.Engine, path string) *httptest.ResponseRecorder {
 // MARK: Startup
 
 func TestSetupStaticFilesStartup(t *testing.T) {
+	t.Run("fatal error when the packs path can't be resolved", func(t *testing.T) {
+		replace(t, &resolveAbsPath, func(string) (string, error) { return "", errors.New("getwd failed") })
+		var fatal string
+		replace(t, &fatalf, func(format string, v ...any) { fatal = fmt.Sprintf(format, v...) })
+
+		router := setupStaticTestRouter(t, "packs")
+
+		assert.Equal(t, "Error resolving absolute path for packs: getwd failed", fatal)
+		assert.Equal(t, http.StatusNotFound, get(router, "/packs/sqlite/list").Code)
+	})
+
 	t.Run("no packs routes when the packs directory is missing", func(t *testing.T) {
 		router := setupStaticTestRouter(t, filepath.Join(t.TempDir(), "missing"))
 

@@ -22,11 +22,12 @@ import (
 
 // MARK: Server Initialization
 
-// Function variables allow mocking the database, server and fatal errors in unit tests.
+// Function variables allow mocking the database, server, file paths and fatal errors in unit tests.
 var (
 	initDatabase          = database.InitDatabase
 	getAvailableLanguages = database.GetAvailableLanguages
 	runServer             = func(r *gin.Engine, addr string) error { return r.Run(addr) }
+	resolveAbsPath        = filepath.Abs
 	fatalf                = log.Fatalf
 )
 
@@ -126,9 +127,10 @@ func setupStaticFiles(r *gin.Engine) {
 		fileSystem = "./packs"
 	}
 
-	absPath, err := filepath.Abs(fileSystem)
+	absPath, err := resolveAbsPath(fileSystem)
 	if err != nil {
-		log.Fatalf("Error resolving absolute path for %s: %v", fileSystem, err)
+		fatalf("Error resolving absolute path for %s: %v", fileSystem, err)
+		return
 	}
 
 	log.Printf("Serving files from: %s", absPath)

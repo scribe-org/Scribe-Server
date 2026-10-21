@@ -66,6 +66,20 @@ func TestBuildLanguageStatQueryRequiredDataTypeMissing(t *testing.T) {
 	}
 }
 
+func TestBuildLanguageStatQueryInvalidLanguage(t *testing.T) {
+	t.Parallel()
+	// Table names for invalid language codes are rejected before a query is built.
+	for _, lang := range []string{"e1", "eng", "e;", ""} {
+		query, dataTypes, err := buildLanguageStatQuery(lang, []string{"nouns", "verbs"})
+		if err == nil {
+			t.Fatalf("expected an error for %q, got %q %v", lang, query, dataTypes)
+		}
+		if query != "" || dataTypes != nil {
+			t.Fatalf("expected no query for %q, got %q %v", lang, query, dataTypes)
+		}
+	}
+}
+
 func TestBuildLanguageStatQueryIgnoresOtherDataTypes(t *testing.T) {
 	t.Parallel()
 	_, dataTypes, err := buildLanguageStatQuery("sv", []string{"emojikeywords", "nouns", "verbs"})

@@ -145,6 +145,18 @@ func TestHandleRequests(t *testing.T) {
 	})
 }
 
+func TestRunServer(t *testing.T) {
+	previousMode := gin.Mode()
+	gin.SetMode(gin.TestMode)
+	t.Cleanup(func() { gin.SetMode(previousMode) })
+
+	// Note: An invalid port makes the server fail straight away instead of running until it's stopped.
+	err := runServer(gin.New(), ":-1")
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid port")
+}
+
 // MARK: Router
 
 func TestNewRouterGinMode(t *testing.T) {
