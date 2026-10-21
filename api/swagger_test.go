@@ -30,6 +30,16 @@ func TestSetupSwagger(t *testing.T) {
 		}
 	})
 
+	t.Run("serves Swagger UI files from both routes", func(t *testing.T) {
+		// Note: gin-swagger sets the URL prefix of a handler on its first request, so both routes need their own handler.
+		// With one shared handler, the second route changes the prefix and files for the first route aren't found.
+		for range 2 {
+			for _, path := range []string{"/swagger/swagger-ui.css", "/docs/swagger-ui.css"} {
+				assert.Equal(t, http.StatusOK, get(router, path).Code, path)
+			}
+		}
+	})
+
 	t.Run("serves the generated API docs", func(t *testing.T) {
 		rec := get(router, "/swagger/doc.json")
 
