@@ -1,4 +1,4 @@
-.PHONY: clean build test test-cover run fmt tidy install-tools generate generate-api generate-db execute-binary dev docs docs-serve migrate build-migrate update-data install-hooks lint
+.PHONY: clean build test test-cover check-coverage run fmt tidy install-tools generate generate-api generate-db execute-binary dev docs docs-serve migrate build-migrate update-data install-hooks lint
 
 BINARY_NAME=./bin/scribe-server
 MIGRATE_BINARY=./bin/migrate-scribe-data
@@ -6,6 +6,10 @@ MIGRATE_BINARY=./bin/migrate-scribe-data
 # Default values
 ENV ?= dev
 GIN_MODE ?= debug
+
+# Minimum total test coverage (%) required by CI.
+# Note: Raise this as tests are added so that coverage can only go up.
+MIN_COVERAGE ?= 30
 
 # Clean any build artifacts.
 clean:
@@ -21,9 +25,23 @@ test:
 	go test ./... -v
 
 # Run tests and report coverage by function.
+# Note: The generated Swagger docs are excluded from coverage.
 test-cover:
-	go test ./... -coverprofile=coverage.out
+	go test $$(go list ./... | grep -v '/docs$$') -coverprofile=coverage.out
 	go tool cover -func=coverage.out
+
+# Run tests and fail if the total coverage is below MIN_COVERAGE.
+check-coverage: test-cover
+	@total=$$(go tool cover -func=coverage.out | awk '/^total:/ { sub("%", "", $$NF); print $$NF }'); \
+	if [ -n "$$GITHUB_STEP_SUMMARY" ]; then \
+		echo "### Test coverage: $$total% (minimum $(MIN_COVERAGE)%)" >> "$$GITHUB_STEP_SUMMARY"; \
+	fi; \
+	awk -v total="$$total" -v min="$(MIN_COVERAGE)" 'BEGIN { \
+		if (total == "" || total + 0 < min + 0) { \
+			printf "Test coverage %s%% is below the minimum of %s%%. Add tests to raise it.\n", total, min; exit 1 \
+		} \
+		printf "Test coverage %s%% meets the minimum of %s%%.\n", total, min \
+	}'
 
 # Run the project (defaults to dev).
 run: run-dev
