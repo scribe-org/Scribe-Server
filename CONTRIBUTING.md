@@ -199,6 +199,8 @@ make test-cover
 
 This writes `coverage.out`, which is ignored by Git. Test pull requests should include the total coverage before and after the change, for example `Coverage: 0.4% -> 1.1%`. Coverage should increase as the test suite grows; if it does not, explain why in the pull request.
 
+CI fails if the total coverage is below the minimum set by `MIN_COVERAGE` in the [Makefile](./Makefile). Check it locally with `make check-coverage`, and see [Minimum coverage](./TESTING.md#minimum-coverage) for when to raise it.
+
 See [TESTING.md](./TESTING.md) for the project's test organization, naming, isolation, and fixture conventions.
 
 <sub><a href="#top">Back to top.</a></sub>
