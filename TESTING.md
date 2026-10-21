@@ -275,6 +275,20 @@ For an HTML coverage report after running `make test-cover`:
 go tool cover -html=coverage.out
 ```
 
+The generated Swagger docs in `docs/` aren't included in coverage.
+
+### Minimum coverage
+
+CI fails if the total test coverage is below `MIN_COVERAGE` in the [Makefile](Makefile). Run the same check locally with:
+
+```bash
+make check-coverage
+```
+
+This runs the tests like `make test-cover` and then compares the total coverage to the minimum. To check against a different value, pass it to the target, e.g. `make check-coverage MIN_COVERAGE=50`.
+
+When a pull request raises the total coverage, raise `MIN_COVERAGE` in the Makefile to just below the new total in the same pull request so that coverage can only go up.
+
 <sub><a href="#top">Back to top.</a></sub>
 
 ## Local verification before committing
@@ -304,7 +318,7 @@ git status
 
 make fmt
 make test
-make test-cover
+make check-coverage
 make lint
 
 go tool cover -func=coverage.out | tail -1
@@ -315,7 +329,7 @@ git diff
 
 Pull requests that add tests should report the total coverage before and after the change, for example `Coverage: 3.4% -> 5.1%`. Coverage should increase incrementally. If it does not, explain why in the pull request.
 
-CI runs the same coverage target. A test must not rely on local configuration, network access, execution order, or files outside the repository.
+CI runs `make check-coverage`, which fails if the total coverage is below the [minimum](#minimum-coverage). A test must not rely on local configuration, network access, execution order, or files outside the repository.
 
 <sub><a href="#top">Back to top.</a></sub>
 
@@ -325,7 +339,8 @@ CI runs the same coverage target. A test must not rely on local configuration, n
 - Success, failure, and relevant edge cases are covered.
 - Test state and resources are isolated and cleaned up.
 - `make test` passes locally.
-- `make test-cover` passes locally.
+- `make check-coverage` passes locally.
 - The pull request includes the before and after total coverage.
+- If the total coverage increased, `MIN_COVERAGE` in the Makefile is raised to just below the new total.
 
 <sub><a href="#top">Back to top.</a></sub>

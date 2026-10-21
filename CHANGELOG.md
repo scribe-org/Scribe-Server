@@ -71,6 +71,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - Unit tests were added for the translation data retrieval endpoint handler ([#85](https://github.com/scribe-org/Scribe-Server/issues/85)).
 - Unit tests were added for the table name validators ([#80](https://github.com/scribe-org/Scribe-Server/issues/80)).
 - A CI check was added to verify that generated Swagger docs are up to date ([#82](https://github.com/scribe-org/Scribe-Server/issues/82)).
+- A CI check was added that fails if the total test coverage is below a minimum, which is raised as tests are added ([#117](https://github.com/scribe-org/Scribe-Server/issues/117)).
 - Unit tests were added for the language statistics retrieval endpoint handler ([#86](https://github.com/scribe-org/Scribe-Server/issues/86)).
 
 ### ♻️ Code Refactoring

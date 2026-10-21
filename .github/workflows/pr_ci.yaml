@@ -56,5 +56,6 @@ jobs:
           make docs
           git diff --exit-code docs/
 
-      - name: Run tests and show coverage
-        run: make test-cover
+      # Note: The minimum coverage is MIN_COVERAGE in the Makefile.
+      - name: Run tests and check minimum coverage
+        run: make check-coverage
