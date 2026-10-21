@@ -27,6 +27,8 @@ import (
 var (
 	getAvailableLanguages = database.GetAvailableLanguages
 	getLanguageDataTypes  = database.GetLanguageDataTypes
+	getLanguageUpdatedAt  = database.GetLanguageUpdatedAt
+	getLanguageTableData  = dbqueries.GetLanguageTableData
 )
 
 // GetAvailableLanguages returns a list of all supported languages and their available data types.
@@ -91,7 +93,7 @@ func GetLanguageData(c *gin.Context) {
 	}
 
 	// Check if language exists in database.
-	availableLanguages, err := database.GetAvailableLanguages()
+	availableLanguages, err := getAvailableLanguages()
 	if err != nil {
 		log.Printf("Error checking available languages: %v", err)
 		HandleError(c, http.StatusInternalServerError, "Failed to check language availability")
@@ -104,14 +106,14 @@ func GetLanguageData(c *gin.Context) {
 	}
 
 	// Get data types for the language.
-	dataTypes, err := database.GetLanguageDataTypes(lang)
+	dataTypes, err := getLanguageDataTypes(lang)
 	if err != nil {
 		log.Printf("Error fetching data types for %s: %v", lang, err)
 		HandleError(c, http.StatusInternalServerError, "Failed to fetch language data types")
 		return
 	}
 
-	updatedAt, err := database.GetLanguageUpdatedAt(lang)
+	updatedAt, err := getLanguageUpdatedAt(lang)
 	if err != nil {
 		log.Printf("Error fetching update date for %s: %v", lang, err)
 	}
@@ -136,7 +138,7 @@ func GetLanguageData(c *gin.Context) {
 			continue
 		}
 
-		tableData, err := dbqueries.GetLanguageTableData(lang, dataType)
+		tableData, err := getLanguageTableData(lang, dataType)
 		if err != nil {
 			log.Printf("Error fetching table data for %s/%s: %v", lang, dataType, err)
 			continue
