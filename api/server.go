@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -119,13 +120,19 @@ func setupStaticFiles(r *gin.Engine) {
 	r.GET("/packs/*filepath", func(c *gin.Context) {
 		path := c.Param("filepath")
 
+		// Prevent directory traversal, which would also show whether directories outside of packs exist.
+		if slices.Contains(strings.Split(path, "/"), "..") {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid path"})
+			return
+		}
+
 		if path == "/sqlite/list" {
 			files, err := os.ReadDir(sqlitePath)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not read directory"})
 				return
 			}
-			var sqliteFiles []string
+			sqliteFiles := []string{}
 			for _, file := range files {
 				if !file.IsDir() && strings.HasSuffix(file.Name(), ".sqlite") {
 					sqliteFiles = append(sqliteFiles, file.Name())
@@ -151,7 +158,7 @@ func setupStaticFiles(r *gin.Engine) {
 			// Set headers to force download.
 			c.Header("Content-Description", "File Transfer")
 			c.Header("Content-Transfer-Encoding", "binary")
-			c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+			c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%q", filename))
 			c.Header("Content-Type", "application/x-sqlite3")
 			c.File(filePath)
 			return
