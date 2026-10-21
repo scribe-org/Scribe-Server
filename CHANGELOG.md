@@ -47,6 +47,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
   - `/contracts` returns a `data_contracts.zip` archive with a `data_contracts` directory of JSON contracts for all languages.
 - The `update_data.sh` download command was fixed to specify the correct dump snapshot location ([#65](https://github.com/scribe-org/Scribe-Server/pull/65)).
 - Trusted proxies are now explicitly configured for security.
+- `/packs` requests with `..` in the path are rejected so they can't show whether directories outside of the packs directory exist, `/packs/sqlite/list` returns `[]` instead of `null` when there are no SQLite files, and SQLite download file names are quoted ([#91](https://github.com/scribe-org/Scribe-Server/issues/91)).
 - German data contract fixes for missing `displayValue` fields on declensions, and fully indexed conjugations/declensions.
 
 ### 📝 Documentation
@@ -73,6 +74,8 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - A CI check was added to verify that generated Swagger docs are up to date ([#82](https://github.com/scribe-org/Scribe-Server/issues/82)).
 - A CI check was added that fails if the total test coverage is below a minimum, which is raised as tests are added ([#117](https://github.com/scribe-org/Scribe-Server/issues/117)).
 - Unit tests were added for the language statistics retrieval endpoint handler ([#86](https://github.com/scribe-org/Scribe-Server/issues/86)).
+- Unit tests were added for the `/packs` static file and SQLite download handler, including directory traversal attempts, and for the Swagger documentation routes ([#91](https://github.com/scribe-org/Scribe-Server/issues/91)).
+- Unit tests were added for API route registration, the home page, server startup and configuration loading ([#90](https://github.com/scribe-org/Scribe-Server/issues/90)).
 
 ### ♻️ Code Refactoring
 
@@ -81,6 +84,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - The SQLite driver was switched from `mattn/go-sqlite3` to `glebarez/sqlite`.
 - CI linting was consolidated into the existing workflow ([#14](https://github.com/scribe-org/Scribe-Server/pull/14)), [revive](https://github.com/mgechev/revive) linting was integrated for local development ([#32](https://github.com/scribe-org/Scribe-Server/issues/32)), and a pre-commit `gofmt` hook was added ([#25](https://github.com/scribe-org/Scribe-Server/issues/25)).
 - Unneeded `sqlc` and OpenAPI generation libraries were removed in favor of a simplified stack.
+- The table name validators use precompiled patterns, and checks that the patterns already enforce were removed.
 
 ### ⚖️ Legal
 

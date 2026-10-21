@@ -3,6 +3,7 @@
 package database
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -116,6 +117,10 @@ func TestIsValidTableName(t *testing.T) {
 		{name: "sql injection quotes", tableName: "ENLanguageDataNounsScribe' OR '1'='1", want: false},
 		{name: "sql injection space", tableName: "ENLanguageDataNounsScribe ", want: false},
 		{name: "invalid special chars", tableName: "ENLanguageData-NounsScribe", want: false},
+		{name: "invalid non-ASCII letter", tableName: "ENLanguageDataNöunsScribe", want: false},
+		{name: "sql injection newline", tableName: "ENLanguageDataNounsScribe\n", want: false},
+		{name: "valid at the maximum length", tableName: "ENLanguageData" + strings.Repeat("A", 80) + "Scribe", want: true},
+		{name: "invalid longer than the maximum length", tableName: "ENLanguageData" + strings.Repeat("A", 81) + "Scribe", want: false},
 	}
 
 	for _, tt := range tests {
@@ -151,6 +156,9 @@ func TestIsValidTranslationTableName(t *testing.T) {
 		{name: "sql injection quotes", tableName: "TranslationDataENFromDE' OR '1'='1", want: false},
 		{name: "sql injection space", tableName: "TranslationDataENFromDE ", want: false},
 		{name: "invalid special chars", tableName: "TranslationDataEN-FromDE", want: false},
+		{name: "invalid 1-letter target code", tableName: "TranslationDataEFromDE", want: false},
+		{name: "invalid 5-letter source code", tableName: "TranslationDataENFromGERMA", want: false},
+		{name: "invalid non-ASCII letter", tableName: "TranslationDataÉNFromDE", want: false},
 	}
 
 	for _, tt := range tests {

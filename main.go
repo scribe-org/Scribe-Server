@@ -51,14 +51,10 @@ func logEnvironment() {
 // @externalDocs.description  GitHub Repository
 // @externalDocs.url          https://github.com/scribe-org/Scribe-Server
 
-// MARK: Main Entry Point
+// MARK: Config Setup
 
-func main() {
-	logEnvironment()
-
-	// MARK: Config Setup
-
-	// Read configuration from file or environment variables.
+// loadConfig reads the configuration from config.yaml, or from environment variables if there's no config file.
+func loadConfig() error {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
@@ -73,16 +69,32 @@ func main() {
 
 			// Environment variables also not set.
 			if !viper.IsSet("hostPort") || !viper.IsSet("fileSystem") {
-				panic(fmt.Errorf("fatal error config environment: %w", err))
+				return fmt.Errorf("fatal error config environment: %w", err)
 			}
 		} else {
 			// Config file was found, but another error occurred.
-			panic(fmt.Errorf("fatal error config file: %w", err))
+			return fmt.Errorf("fatal error config file: %w", err)
 		}
 	}
 	viper.SetDefault("contractsDir", "./contracts")
 
+	return nil
+}
+
+// MARK: Main Entry Point
+
+// handleRequests starts the server. It's a package-level variable to allow mocking in unit tests.
+var handleRequests = api.HandleRequests
+
+func main() {
+	logEnvironment()
+
+	// Read configuration from file or environment variables.
+	if err := loadConfig(); err != nil {
+		panic(err)
+	}
+
 	// MARK: Start Server
 
-	api.HandleRequests()
+	handleRequests()
 }
