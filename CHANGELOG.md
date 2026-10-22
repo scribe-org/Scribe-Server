@@ -48,6 +48,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - The `update_data.sh` download command was fixed to specify the correct dump snapshot location ([#65](https://github.com/scribe-org/Scribe-Server/pull/65)).
 - Trusted proxies are now explicitly configured for security.
 - `/packs` requests with `..` in the path are rejected so they can't show whether directories outside of the packs directory exist, `/packs/sqlite/list` returns `[]` instead of `null` when there are no SQLite files, and SQLite download file names are quoted ([#91](https://github.com/scribe-org/Scribe-Server/issues/91)).
+- Database queries for languages, data types, table schemas and table data return an error instead of partial results if reading rows fails partway through ([#92](https://github.com/scribe-org/Scribe-Server/issues/92)).
 - German data contract fixes for missing `displayValue` fields on declensions, and fully indexed conjugations/declensions.
 
 ### 📝 Documentation

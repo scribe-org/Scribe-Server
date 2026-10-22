@@ -42,6 +42,11 @@ func GetAvailableLanguages() ([]string, error) {
 		languages = append(languages, strings.ToLower(lang))
 	}
 
+	// check to not return partial results.
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error reading languages: %w", err)
+	}
+
 	return languages, nil
 }
 
@@ -84,6 +89,10 @@ func GetLanguageDataTypes(lang string) ([]string, error) {
 			dataType := strings.ToLower(matches[1]) // convert to lowercase (nouns, verbs)
 			dataTypes = append(dataTypes, dataType)
 		}
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error reading data types: %w", err)
 	}
 
 	return dataTypes, nil
