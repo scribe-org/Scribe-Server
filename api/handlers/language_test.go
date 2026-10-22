@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/scribe-org/scribe-server/api/validators"
 	"github.com/scribe-org/scribe-server/internal/constants"
 	"github.com/scribe-org/scribe-server/models"
 	"github.com/stretchr/testify/assert"
@@ -153,6 +154,348 @@ func TestGetAvailableLanguages(t *testing.T) {
 			},
 		}
 		assert.Equal(t, expected, response)
+	})
+}
+
+// MARK: Language Data Retrieval Tests
+
+// setupLanguageDataTestRouter creates a minimal Gin engine configured in test mode for testing GetLanguageData.
+func setupLanguageDataTestRouter(t *testing.T) *gin.Engine {
+	t.Helper()
+
+	previousMode := gin.Mode()
+	gin.SetMode(gin.TestMode)
+	t.Cleanup(func() { gin.SetMode(previousMode) })
+
+	router := gin.New()
+	router.GET("/api/v1/data/:lang", GetLanguageData)
+	return router
+}
+
+// stubLanguageData temporarily swaps package-level function pointers used by GetLanguageData.
+func stubLanguageData(
+	t *testing.T,
+	languagesFn func() ([]string, error),
+	dataTypesFn func(lang string) ([]string, error),
+	updatedAtFn func(lang string) (string, error),
+	tableDataFn func(lang, dataType string) (map[string]any, error),
+) {
+	t.Helper()
+
+	origLanguages := getAvailableLanguages
+	origDataTypes := getLanguageDataTypes
+	origUpdatedAt := getLanguageUpdatedAt
+	origTableData := getLanguageTableData
+
+	if languagesFn != nil {
+		getAvailableLanguages = languagesFn
+	}
+	if dataTypesFn != nil {
+		getLanguageDataTypes = dataTypesFn
+	}
+	if updatedAtFn != nil {
+		getLanguageUpdatedAt = updatedAtFn
+	}
+	if tableDataFn != nil {
+		getLanguageTableData = tableDataFn
+	}
+
+	t.Cleanup(func() {
+		getAvailableLanguages = origLanguages
+		getLanguageDataTypes = origDataTypes
+		getLanguageUpdatedAt = origUpdatedAt
+		getLanguageTableData = origTableData
+	})
+}
+
+// initLanguageValidator sets supported languages and registers cleanup to reset it.
+func initLanguageValidator(t *testing.T, langs []string) {
+	t.Helper()
+
+	validators.InitLanguageValidator(langs)
+	t.Cleanup(func() { validators.InitLanguageValidator(nil) })
+}
+
+// TestGetLanguageData_Success tests the successful retrieval of full language data.
+func TestGetLanguageData_Success(t *testing.T) {
+	router := setupLanguageDataTestRouter(t)
+	initLanguageValidator(t, []string{"en", "de"})
+
+	nounsSchema := map[string]string{"singular": "string", "plural": "string"}
+	nounsData := []any{map[string]any{"singular": "book", "plural": "books"}}
+	verbsSchema := map[string]string{"infinitive": "string", "past": "string"}
+	verbsData := []any{map[string]any{"infinitive": "run", "past": "ran"}}
+
+	stubLanguageData(
+		t,
+		func() ([]string, error) { return []string{"en", "de"}, nil },
+		func(lang string) ([]string, error) {
+			if lang == "en" {
+				return []string{"nouns", "verbs"}, nil
+			}
+			return nil, fmt.Errorf("unexpected language: %s", lang)
+		},
+		func(lang string) (string, error) {
+			assert.Equal(t, "en", lang)
+			return "2026-10-20", nil
+		},
+		func(lang, dataType string) (map[string]any, error) {
+			assert.Equal(t, "en", lang)
+			if dataType == "nouns" {
+				return map[string]any{"schema": nounsSchema, "data": nounsData}, nil
+			}
+			return map[string]any{"schema": verbsSchema, "data": verbsData}, nil
+		},
+	)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/data/en", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "application/json; charset=utf-8", rec.Header().Get("Content-Type"))
+
+	var resp models.LanguageDataResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, "en", resp.Language)
+	assert.Equal(t, constants.APIVersion, resp.Contract.Version)
+	assert.Equal(t, "2026-10-20", resp.Contract.UpdatedAt)
+	assert.Equal(t, nounsSchema, resp.Contract.Fields["nouns"])
+	assert.Equal(t, verbsSchema, resp.Contract.Fields["verbs"])
+	assert.NotEmpty(t, resp.Data["nouns"])
+	assert.NotEmpty(t, resp.Data["verbs"])
+}
+
+// TestGetLanguageData_UpdatedAtError tests that a failure fetching updatedAt still returns 200 with empty updatedAt.
+func TestGetLanguageData_UpdatedAtError(t *testing.T) {
+	router := setupLanguageDataTestRouter(t)
+	initLanguageValidator(t, []string{"en"})
+
+	stubLanguageData(
+		t,
+		func() ([]string, error) { return []string{"en"}, nil },
+		func(_ string) ([]string, error) { return []string{"nouns"}, nil },
+		func(_ string) (string, error) { return "", errors.New("failed to fetch updated_at") },
+		func(_, _ string) (map[string]any, error) {
+			return map[string]any{
+				"schema": map[string]string{"singular": "string"},
+				"data":   []any{map[string]any{"singular": "cat"}},
+			}, nil
+		},
+	)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/data/en", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "application/json; charset=utf-8", rec.Header().Get("Content-Type"))
+
+	var resp models.LanguageDataResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, "en", resp.Language)
+	assert.Empty(t, resp.Contract.UpdatedAt)
+	assert.Equal(t, map[string]string{"singular": "string"}, resp.Contract.Fields["nouns"])
+	assert.NotEmpty(t, resp.Data["nouns"])
+}
+
+// TestGetLanguageData_PartialFailure tests that a failure in one data type's table fetch is skipped while others succeed.
+func TestGetLanguageData_PartialFailure(t *testing.T) {
+	router := setupLanguageDataTestRouter(t)
+	initLanguageValidator(t, []string{"en"})
+
+	stubLanguageData(
+		t,
+		func() ([]string, error) { return []string{"en"}, nil },
+		func(_ string) ([]string, error) { return []string{"nouns", "verbs"}, nil },
+		func(_ string) (string, error) { return "2026-10-20", nil },
+		func(_, dataType string) (map[string]any, error) {
+			if dataType == "verbs" {
+				return nil, errors.New("failed to query verbs table")
+			}
+			return map[string]any{
+				"schema": map[string]string{"singular": "string"},
+				"data":   []any{map[string]any{"singular": "dog"}},
+			}, nil
+		},
+	)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/data/en", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "application/json; charset=utf-8", rec.Header().Get("Content-Type"))
+
+	var resp models.LanguageDataResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, "en", resp.Language)
+	assert.Contains(t, resp.Contract.Fields, "nouns")
+	assert.NotContains(t, resp.Contract.Fields, "verbs")
+	assert.Contains(t, resp.Data, "nouns")
+	assert.NotContains(t, resp.Data, "verbs")
+}
+
+// TestGetLanguageData_IncompleteTableData tests that missing schema or data keys in tableData do not cause panics.
+func TestGetLanguageData_IncompleteTableData(t *testing.T) {
+	router := setupLanguageDataTestRouter(t)
+	initLanguageValidator(t, []string{"en"})
+
+	stubLanguageData(
+		t,
+		func() ([]string, error) { return []string{"en"}, nil },
+		func(_ string) ([]string, error) { return []string{"nouns"}, nil },
+		func(_ string) (string, error) { return "2026-10-20", nil },
+		func(_, _ string) (map[string]any, error) {
+			return map[string]any{"schema": "invalid-schema-type"}, nil
+		},
+	)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/data/en", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+	var resp models.LanguageDataResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Empty(t, resp.Contract.Fields["nouns"])
+	assert.NotContains(t, resp.Data, "nouns")
+}
+
+// TestGetLanguageData_SanitizeLanguageCodeFails tests the defensive branch where sanitization fails during the loop.
+func TestGetLanguageData_SanitizeLanguageCodeFails(t *testing.T) {
+	router := setupLanguageDataTestRouter(t)
+	initLanguageValidator(t, []string{"en"})
+
+	stubLanguageData(
+		t,
+		func() ([]string, error) { return []string{"en"}, nil },
+		func(_ string) ([]string, error) {
+			validators.InitLanguageValidator(nil)
+			return []string{"nouns"}, nil
+		},
+		func(_ string) (string, error) { return "2026-10-20", nil },
+		func(_, _ string) (map[string]any, error) {
+			return map[string]any{"schema": map[string]string{"singular": "string"}}, nil
+		},
+	)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/data/en", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+	var resp models.LanguageDataResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, "en", resp.Language)
+	assert.Empty(t, resp.Contract.Fields["nouns"])
+	assert.Empty(t, resp.Data["nouns"])
+}
+
+// TestGetLanguageData_InvalidLanguageCode tests that invalid language code formats return 400 Bad Request.
+func TestGetLanguageData_InvalidLanguageCode(t *testing.T) {
+	router := setupLanguageDataTestRouter(t)
+	initLanguageValidator(t, []string{"en", "de"})
+
+	tests := []struct {
+		name string
+		lang string
+	}{
+		{name: "uppercase code", lang: "EN"},
+		{name: "single character", lang: "e"},
+		{name: "three characters", lang: "eng"},
+		{name: "numeric code", lang: "12"},
+		{name: "alphanumeric code", lang: "e1"},
+		{name: "special characters", lang: "e!"},
+		{name: "unsupported format code not in validator", lang: "zz"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/api/v1/data/"+tt.lang, nil)
+			rec := httptest.NewRecorder()
+			router.ServeHTTP(rec, req)
+
+			require.Equal(t, http.StatusBadRequest, rec.Code)
+			assert.Equal(t, "application/json; charset=utf-8", rec.Header().Get("Content-Type"))
+
+			var resp models.ErrorResponse
+			require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+			assert.Equal(t, constants.InvalidLanguageCodeError, resp.Error)
+		})
+	}
+}
+
+// TestGetLanguageData_UnsupportedLanguage tests that valid code format unsupported in DB returns 404 Not Found.
+func TestGetLanguageData_UnsupportedLanguage(t *testing.T) {
+	router := setupLanguageDataTestRouter(t)
+	initLanguageValidator(t, []string{"en", "de"})
+
+	stubLanguageData(
+		t,
+		func() ([]string, error) { return []string{"en"}, nil },
+		nil,
+		nil,
+		nil,
+	)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/data/de", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusNotFound, rec.Code)
+	assert.Equal(t, "application/json; charset=utf-8", rec.Header().Get("Content-Type"))
+
+	var resp models.ErrorResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, "Language 'de' not supported", resp.Error)
+}
+
+// TestGetLanguageData_DatabaseErrors tests 500 responses when DB queries error.
+func TestGetLanguageData_DatabaseErrors(t *testing.T) {
+	router := setupLanguageDataTestRouter(t)
+	initLanguageValidator(t, []string{"en"})
+
+	t.Run("500 when checking available languages fails", func(t *testing.T) {
+		stubLanguageData(
+			t,
+			func() ([]string, error) { return nil, errors.New("db connection failure") },
+			nil,
+			nil,
+			nil,
+		)
+
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/data/en", nil)
+		rec := httptest.NewRecorder()
+		router.ServeHTTP(rec, req)
+
+		require.Equal(t, http.StatusInternalServerError, rec.Code)
+		assert.Equal(t, "application/json; charset=utf-8", rec.Header().Get("Content-Type"))
+
+		var resp models.ErrorResponse
+		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+		assert.Equal(t, "Failed to check language availability", resp.Error)
+	})
+
+	t.Run("500 when fetching language data types fails", func(t *testing.T) {
+		stubLanguageData(
+			t,
+			func() ([]string, error) { return []string{"en"}, nil },
+			func(_ string) ([]string, error) { return nil, errors.New("query data types error") },
+			nil,
+			nil,
+		)
+
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/data/en", nil)
+		rec := httptest.NewRecorder()
+		router.ServeHTTP(rec, req)
+
+		require.Equal(t, http.StatusInternalServerError, rec.Code)
+		assert.Equal(t, "application/json; charset=utf-8", rec.Header().Get("Content-Type"))
+
+		var resp models.ErrorResponse
+		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+		assert.Equal(t, "Failed to fetch language data types", resp.Error)
 	})
 }
 
