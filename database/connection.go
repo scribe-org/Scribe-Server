@@ -17,6 +17,8 @@ import (
 // It should be initialized via InitDatabase before use.
 var DB *sql.DB
 
+var openDatabase = sql.Open
+
 // InitDatabase initializes the database connection.
 func InitDatabase() error {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
@@ -28,7 +30,7 @@ func InitDatabase() error {
 	)
 
 	var err error
-	DB, err = sql.Open("mysql", dsn)
+	DB, err = openDatabase("mysql", dsn)
 	if err != nil {
 		return fmt.Errorf("error opening database: %w", err)
 	}
