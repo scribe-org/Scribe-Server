@@ -77,6 +77,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - Unit tests were added for the language statistics retrieval endpoint handler ([#86](https://github.com/scribe-org/Scribe-Server/issues/86)).
 - Unit tests were added for the `/packs` static file and SQLite download handler, including directory traversal attempts, and for the Swagger documentation routes ([#91](https://github.com/scribe-org/Scribe-Server/issues/91)).
 - Unit tests were added for API route registration, the home page, server startup and configuration loading ([#90](https://github.com/scribe-org/Scribe-Server/issues/90)).
+- Unit tests were added for the database package using [go-sqlmock](https://github.com/DATA-DOG/go-sqlmock) ([#92](https://github.com/scribe-org/Scribe-Server/issues/92)).
 
 ### ♻️ Code Refactoring
 
