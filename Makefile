@@ -8,7 +8,7 @@ ENV ?= dev
 GIN_MODE ?= debug
 
 # Minimum total test coverage (%) required by CI.
-MIN_COVERAGE ?=50
+MIN_COVERAGE ?=70
 
 # Clean any build artifacts.
 clean:
