@@ -20,6 +20,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
   - Matrix notifications were added so the team is alerted on data update workflow runs ([#41](https://github.com/scribe-org/Scribe-Server/issues/41)).
 - The Toolforge build was fixed to compile PyICU with the correct Toolforge ICU paths ([#43](https://github.com/scribe-org/Scribe-Server/issues/43)).
 - Deployments only keep the two most recent backups of the SQLite data on Toolforge.
+- The Toolforge webservice was switched from the deprecated `jdk17` image to the `trixie` image, and the server is built with `CGO_ENABLED=0` so that it doesn't depend on the image's system libraries ([#107](https://github.com/scribe-org/Scribe-Server/issues/107)).
 
 ### ✨ Features
 
