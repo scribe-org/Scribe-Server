@@ -12,6 +12,7 @@
   - [Configure Database](#configure-database)
   - [Create Start Script](#create-start-script)
   - [Build and Run the Server](#build-and-run-the-server)
+    - [Building Locally](#building-locally)
   - [Python Tooling Setup](#python-tooling-setup)
   - [Install PyICU](#install-pyicu)
 
@@ -30,6 +31,9 @@ Once inside, switch to the Scribe tool account so all subsequent commands run in
 ```bash
 become testserver-scribe
 ```
+
+> [!NOTE]
+> The production tool is `scribe-server`. Replace `testserver-scribe` in this guide with the name of the tool you're deploying to.
 
 Then clone the repository into your project directory:
 
@@ -135,7 +139,7 @@ mysql --defaults-file=~/replica.my.cnf \
 > The following only needs to be ran once.
 
 ```bash
-~/Scribe-Server/start-script.sh << 'EOF'
+cat > ~/Scribe-Server/start-script.sh << 'EOF'
 #!/bin/bash
 cd /data/project/testserver-scribe/Scribe-Server
 export PORT=8000
@@ -159,8 +163,8 @@ Each time you deploy an update, stop the running service, pull the latest code, 
 chmod +x start-script.sh
 toolforge webservice stop
 git pull origin main
-go build -o Scribe-Server .
-toolforge webservice --mem 4Gi --cpu 2 jdk17 start \
+CGO_ENABLED=0 go build -o Scribe-Server .
+toolforge webservice --mem 4Gi --cpu 2 trixie start \
   /data/project/testserver-scribe/Scribe-Server/start-script.sh
 
 kubectl --namespace=tool-scribe-server get ingress  # check for URL
@@ -170,8 +174,35 @@ kubectl logs -l toolforge=tool --tail=50 # see logs; last 50
 Why this sequence:
 
 - `toolforge webservice stop` ensures the old binary is not locked when you overwrite it.
-- `go build -o Scribe-Server .` produces a statically-linked binary that Toolforge can execute directly.
+- `CGO_ENABLED=0 go build -o Scribe-Server .` produces a statically-linked binary that doesn't depend on the system libraries of the webservice image.
+- `trixie` is the plain Debian image. Scribe-Server is a Go binary, so it doesn't need a language runtime image such as the deprecated `jdk17`.
 - The `--mem 4Gi --cpu 2` flags allocate enough headroom for data loading on startup.
+
+#### Building Locally
+
+Building on Toolforge can be slow as Go's build cache and modules are stored on network storage. You can instead build the Linux binary on your own machine and upload it:
+
+```bash
+# On your machine from an up to date main branch.
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o Scribe-Server.linux .
+scp Scribe-Server.linux {user_id}@login.toolforge.org:/data/project/testserver-scribe/Scribe-Server.new
+```
+
+Then on Toolforge:
+
+```bash
+become testserver-scribe
+cd ~/Scribe-Server
+git pull origin main
+cp Scribe-Server Scribe-Server.old  # backup to roll back to
+cp ../Scribe-Server.new Scribe-Server.tmp && mv Scribe-Server.tmp Scribe-Server && rm ../Scribe-Server.new
+toolforge webservice stop
+toolforge webservice --mem 4Gi --cpu 2 trixie start \
+  /data/project/testserver-scribe/Scribe-Server/start-script.sh
+```
+
+- The uploaded file is owned by your user, so it's copied as the tool user to make the tool its owner.
+- Build from the same commit that's checked out on Toolforge so that the binary matches the `static` files that are served.
 
 <sub><a href="#top">Back to top.</a></sub>
 

@@ -20,6 +20,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
   - Matrix notifications were added so the team is alerted on data update workflow runs ([#41](https://github.com/scribe-org/Scribe-Server/issues/41)).
 - The Toolforge build was fixed to compile PyICU with the correct Toolforge ICU paths ([#43](https://github.com/scribe-org/Scribe-Server/issues/43)).
 - Deployments only keep the two most recent backups of the SQLite data on Toolforge.
+- The Toolforge webservice was switched from the deprecated `jdk17` image to the `trixie` image, and the server is built with `CGO_ENABLED=0` so that it doesn't depend on the image's system libraries ([#107](https://github.com/scribe-org/Scribe-Server/issues/107)).
 
 ### ✨ Features
 
@@ -48,6 +49,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - The `update_data.sh` download command was fixed to specify the correct dump snapshot location ([#65](https://github.com/scribe-org/Scribe-Server/pull/65)).
 - Trusted proxies are now explicitly configured for security.
 - `/packs` requests with `..` in the path are rejected so they can't show whether directories outside of the packs directory exist, `/packs/sqlite/list` returns `[]` instead of `null` when there are no SQLite files, and SQLite download file names are quoted ([#91](https://github.com/scribe-org/Scribe-Server/issues/91)).
+- Database queries for languages, data types, table schemas and table data return an error instead of partial results if reading rows fails partway through ([#92](https://github.com/scribe-org/Scribe-Server/issues/92)).
 - German data contract fixes for missing `displayValue` fields on declensions, and fully indexed conjugations/declensions.
 
 ### 📝 Documentation
@@ -76,6 +78,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - Unit tests were added for the language statistics retrieval endpoint handler ([#86](https://github.com/scribe-org/Scribe-Server/issues/86)).
 - Unit tests were added for the `/packs` static file and SQLite download handler, including directory traversal attempts, and for the Swagger documentation routes ([#91](https://github.com/scribe-org/Scribe-Server/issues/91)).
 - Unit tests were added for API route registration, the home page, server startup and configuration loading ([#90](https://github.com/scribe-org/Scribe-Server/issues/90)).
+- Unit tests were added for the database package using [go-sqlmock](https://github.com/DATA-DOG/go-sqlmock) ([#92](https://github.com/scribe-org/Scribe-Server/issues/92)).
 - Unit tests were added for the language data retrieval endpoint handler ([#87](https://github.com/scribe-org/Scribe-Server/issues/87)).
 - Unit tests were added for the language version retrieval endpoint handler ([#89](https://github.com/scribe-org/Scribe-Server/issues/89)).
 
