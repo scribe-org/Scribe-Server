@@ -6,56 +6,33 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/scribe-org/scribe-server/internal/constants"
 	"github.com/scribe-org/scribe-server/models"
 )
 
 // MARK: Validation Helpers
 
+// Note: The patterns only allow letters, so table names can't include characters that could be used for SQL injection.
+var (
+	// tableNameRegex matches language data table names such as ENLanguageDataNounsScribe.
+	tableNameRegex = regexp.MustCompile(`^[A-Z]{2}LanguageData[A-Za-z]+Scribe$`)
+
+	// translationTableNameRegex matches translation table names such as TranslationDataBNFromDE.
+	translationTableNameRegex = regexp.MustCompile(`^TranslationData[A-Z]{2,4}From[A-Z]{2,4}$`)
+)
+
+// maxTableNameLength is the maximum length of a language data table name.
+const maxTableNameLength = 100
+
 // IsValidTableName validates table names to prevent SQL injection.
 func IsValidTableName(tableName string) bool {
-	// Pattern to match the new table structure: ENLanguageDataNounsScribe.
-	pattern := `^[A-Z]{2}LanguageData[A-Za-z]+Scribe$`
-	matched, err := regexp.MatchString(pattern, tableName)
-	if err != nil {
-		return false
-	}
-
-	// Additional length check.
-	if len(tableName) > 100 || len(tableName) < 10 {
-		return false
-	}
-
-	// Check for only alphanumeric characters (no special chars that could be used for injection).
-	for _, char := range tableName {
-		if !constants.IsAlphaNumeric(char) {
-			return false
-		}
-	}
-
-	return matched
+	return len(tableName) <= maxTableNameLength && tableNameRegex.MatchString(tableName)
 }
 
 // IsValidTranslationTableName validates TranslationData table names.
 // Pattern: TranslationData{TARGET}From{SOURCE} e.g. TranslationDataBNFromDE.
+// Note: The pattern limits table names to 23-27 characters.
 func IsValidTranslationTableName(tableName string) bool {
-	pattern := `^TranslationData[A-Z]{2,4}From[A-Z]{2,4}$`
-	matched, err := regexp.MatchString(pattern, tableName)
-	if err != nil || !matched {
-		return false
-	}
-
-	if len(tableName) > 60 || len(tableName) < 23 {
-		return false
-	}
-
-	for _, char := range tableName {
-		if !constants.IsAlphaNumeric(char) {
-			return false
-		}
-	}
-
-	return true
+	return translationTableNameRegex.MatchString(tableName)
 }
 
 // MARK: Pointer Conversion

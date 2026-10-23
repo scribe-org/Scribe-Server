@@ -14,6 +14,7 @@ on:
       - "Makefile"
       - "TESTING.md"
       - ".github/workflows/pr_ci.yaml"
+      - "docs/**"
   push:
     branches:
       - main
@@ -24,6 +25,7 @@ on:
       - "Makefile"
       - "TESTING.md"
       - ".github/workflows/pr_ci.yaml"
+      - "docs/**"
 
 permissions:
   contents: read
@@ -48,5 +50,12 @@ jobs:
           version: v2.12
           only-new-issues: true
 
-      - name: Run tests and show coverage
-        run: make test-cover
+      - name: Check Swagger docs are up to date
+        run: |
+          go install github.com/swaggo/swag/cmd/swag@v1.16.5
+          make docs
+          git diff --exit-code docs/
+
+      # Note: The minimum coverage is MIN_COVERAGE in the Makefile.
+      - name: Run tests and check minimum coverage
+        run: make check-coverage

@@ -59,6 +59,11 @@ func GetTableSchema(tableName string) (map[string]string, error) {
 		schema[columnName] = columnType
 	}
 
+	// check to not return partial results.
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error reading column info: %w", err)
+	}
+
 	return schema, nil
 }
 
@@ -108,6 +113,10 @@ func GetTableData(tableName string) ([]map[string]any, error) {
 			}
 		}
 		results = append(results, rowMap)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error reading rows: %w", err)
 	}
 
 	return results, nil

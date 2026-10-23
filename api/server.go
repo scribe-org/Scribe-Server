@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -21,15 +22,37 @@ import (
 
 // MARK: Server Initialization
 
+// Function variables allow mocking the database, server, file paths and fatal errors in unit tests.
+var (
+	initDatabase          = database.InitDatabase
+	getAvailableLanguages = database.GetAvailableLanguages
+	runServer             = func(r *gin.Engine, addr string) error { return r.Run(addr) }
+	resolveAbsPath        = filepath.Abs
+	fatalf                = log.Fatalf
+)
+
 // HandleRequests sets up and starts the server.
 func HandleRequests() {
 	viper.AutomaticEnv()
 
 	// Initialize database connection.
-	if err := database.InitDatabase(); err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
+	if err := initDatabase(); err != nil {
+		fatalf("Failed to initialize database: %v", err)
+		return
 	}
 
+	r, err := newRouter()
+	if err != nil {
+		fatalf("Failed to set up the router: %v", err)
+		return
+	}
+
+	// Start the server.
+	startServer(r)
+}
+
+// newRouter creates the Gin router with its middleware, API routes, documentation and static files.
+func newRouter() (*gin.Engine, error) {
 	// Set Gin mode based on environment.
 	switch viper.GetString("GIN_MODE") {
 	case "release":
@@ -43,27 +66,8 @@ func HandleRequests() {
 	// Create Gin router with default middleware (logger and recovery).
 	r := gin.Default()
 
-	// MARK: Proxy Configuration
-
-	// Proxies trust security warning.
-	trustedProxies := []string{} // default empty (trusts nothing)
-	if os.Getenv("ENV") == "prod" {
-		// Trust RFC 1918 private network ranges commonly used by cloud providers and load balancers.
-		trustedProxies = []string{
-			"10.0.0.0/8", // Class A private range (10.0.0.0 - 10.255.255.255)
-			// Note: Used by AWS VPC, Google Cloud, Kubernetes clusters, most cloud providers.
-			"172.16.0.0/12", // Class B private range (172.16.0.0 - 172.31.255.255)
-			// Note: Used by Docker default bridge networks, some enterprise networks.
-			"192.168.0.0/16", // Class C private range (192.168.0.0 - 192.168.255.255)
-			// Note: Used by Home routers, small office networks, some internal services.
-		}
-		log.Printf("🔒 Production mode: trusting proxy networks")
-	} else {
-		log.Printf("🔒 Development mode: trusting no proxies")
-	}
-
-	if err := r.SetTrustedProxies(trustedProxies); err != nil {
-		log.Fatal(err)
+	if err := r.SetTrustedProxies(trustedProxies()); err != nil {
+		return nil, err
 	}
 
 	// Add custom middleware.
@@ -78,8 +82,30 @@ func HandleRequests() {
 	// Setup static file serving for existing functionality.
 	setupStaticFiles(r)
 
-	// Start the server.
-	startServer(r)
+	return r, nil
+}
+
+// MARK: Proxy Configuration
+
+// prodTrustedProxies are the RFC 1918 private network ranges commonly used by cloud providers and load balancers.
+var prodTrustedProxies = []string{
+	"10.0.0.0/8", // Class A private range (10.0.0.0 - 10.255.255.255)
+	// Note: Used by AWS VPC, Google Cloud, Kubernetes clusters, most cloud providers.
+	"172.16.0.0/12", // Class B private range (172.16.0.0 - 172.31.255.255)
+	// Note: Used by Docker default bridge networks, some enterprise networks.
+	"192.168.0.0/16", // Class C private range (192.168.0.0 - 192.168.255.255)
+	// Note: Used by Home routers, small office networks, some internal services.
+}
+
+// trustedProxies returns the proxy networks to trust: private networks in production and none otherwise.
+func trustedProxies() []string {
+	if os.Getenv("ENV") == "prod" {
+		log.Printf("🔒 Production mode: trusting proxy networks")
+		return prodTrustedProxies
+	}
+
+	log.Printf("🔒 Development mode: trusting no proxies")
+	return []string{}
 }
 
 // MARK: Swagger Documentation
@@ -101,9 +127,10 @@ func setupStaticFiles(r *gin.Engine) {
 		fileSystem = "./packs"
 	}
 
-	absPath, err := filepath.Abs(fileSystem)
+	absPath, err := resolveAbsPath(fileSystem)
 	if err != nil {
-		log.Fatalf("Error resolving absolute path for %s: %v", fileSystem, err)
+		fatalf("Error resolving absolute path for %s: %v", fileSystem, err)
+		return
 	}
 
 	log.Printf("Serving files from: %s", absPath)
@@ -119,13 +146,19 @@ func setupStaticFiles(r *gin.Engine) {
 	r.GET("/packs/*filepath", func(c *gin.Context) {
 		path := c.Param("filepath")
 
+		// Prevent directory traversal, which would also show whether directories outside of packs exist.
+		if slices.Contains(strings.Split(path, "/"), "..") {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid path"})
+			return
+		}
+
 		if path == "/sqlite/list" {
 			files, err := os.ReadDir(sqlitePath)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not read directory"})
 				return
 			}
-			var sqliteFiles []string
+			sqliteFiles := []string{}
 			for _, file := range files {
 				if !file.IsDir() && strings.HasSuffix(file.Name(), ".sqlite") {
 					sqliteFiles = append(sqliteFiles, file.Name())
@@ -151,7 +184,7 @@ func setupStaticFiles(r *gin.Engine) {
 			// Set headers to force download.
 			c.Header("Content-Description", "File Transfer")
 			c.Header("Content-Transfer-Encoding", "binary")
-			c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+			c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%q", filename))
 			c.Header("Content-Type", "application/x-sqlite3")
 			c.File(filePath)
 			return
@@ -186,7 +219,7 @@ func startServer(r *gin.Engine) {
 	hostPort := fmt.Sprintf(":%s", viper.GetString("hostPort"))
 
 	// Get available languages for startup message.
-	availableLanguages, err := database.GetAvailableLanguages()
+	availableLanguages, err := getAvailableLanguages()
 	if err != nil {
 		log.Printf("Warning: Could not fetch available languages: %v", err)
 		availableLanguages = []string{"unknown"}
@@ -205,5 +238,7 @@ func startServer(r *gin.Engine) {
 	log.Println("  ✅ GET /api/v1/translations?source_lang=es&target_lang=en  	- Get translation data of target from source")
 	log.Printf("📊 Available languages: %v", availableLanguages)
 
-	log.Fatal(r.Run(hostPort))
+	if err := runServer(r, hostPort); err != nil {
+		fatalf("Failed to run the server: %v", err)
+	}
 }
