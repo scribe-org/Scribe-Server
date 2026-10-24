@@ -298,7 +298,7 @@ type failingWriter struct{}
 func (failingWriter) Write(_ []byte) (int, error) { return 0, errors.New("write failed") }
 
 func TestWriteContractsZip(t *testing.T) {
-	t.Run("writes a data_contracts directory of JSON contracts", func(t *testing.T) {
+	t.Run("writes a scribe_data_contracts directory of JSON contracts", func(t *testing.T) {
 		modified := time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)
 		contracts := []contractFile{
 			{lang: "de", json: []byte(`{"prepositions": {}}`), modified: modified},
@@ -313,7 +313,7 @@ func TestWriteContractsZip(t *testing.T) {
 		require.Len(t, reader.File, 2)
 
 		for i, file := range reader.File {
-			assert.Equal(t, "data_contracts/"+contracts[i].lang+".json", file.Name)
+			assert.Equal(t, "scribe_data_contracts/"+contracts[i].lang+".json", file.Name)
 			assert.True(t, file.Modified.Equal(modified))
 
 			content, err := file.Open()
@@ -368,7 +368,7 @@ func TestGetContracts(t *testing.T) {
 
 		require.Equal(t, http.StatusOK, rec.Code)
 		assert.Equal(t, "application/zip", rec.Header().Get("Content-Type"))
-		assert.Equal(t, `attachment; filename="data_contracts.zip"`, rec.Header().Get("Content-Disposition"))
+		assert.Equal(t, `attachment; filename="scribe_data_contracts.zip"`, rec.Header().Get("Content-Disposition"))
 
 		reader, err := zip.NewReader(bytes.NewReader(rec.Body.Bytes()), int64(rec.Body.Len()))
 		require.NoError(t, err)
@@ -386,7 +386,7 @@ func TestGetContracts(t *testing.T) {
 			lang := strings.TrimSuffix(filepath.Base(file.Name), ".json")
 			assert.Equal(t, getContracts(router, "?lang="+lang).Body.Bytes(), data)
 		}
-		assert.Equal(t, []string{"data_contracts/de.json", "data_contracts/en.json"}, names)
+		assert.Equal(t, []string{"scribe_data_contracts/de.json", "scribe_data_contracts/en.json"}, names)
 	})
 
 	t.Run("400 for an invalid language code", func(t *testing.T) {

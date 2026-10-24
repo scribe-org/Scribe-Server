@@ -26,7 +26,7 @@ const docTemplate = `{
     "paths": {
         "/api/v1/contracts": {
             "get": {
-                "description": "Returns a language's contract as JSON ({lang}.json), or a zip of all contracts (data_contracts.zip) without 'lang'.",
+                "description": "Returns a language's contract as JSON ({lang}.json), or a zip of all contracts (scribe_data_contracts.zip) without 'lang'.",
                 "consumes": [
                     "application/json"
                 ],
@@ -56,7 +56,7 @@ const docTemplate = `{
                         "headers": {
                             "Content-Disposition": {
                                 "type": "string",
-                                "description": "inline; filename={lang}.json, or attachment; filename=data_contracts.zip for all languages"
+                                "description": "inline; filename={lang}.json, or attachment; filename=scribe_data_contracts.zip for all languages"
                             }
                         }
                     },
