@@ -29,6 +29,7 @@ var (
 	getLanguageDataTypes  = database.GetLanguageDataTypes
 	getLanguageUpdatedAt  = database.GetLanguageUpdatedAt
 	getLanguageTableData  = dbqueries.GetLanguageTableData
+	getLanguageVersions   = database.GetLanguageVersions
 )
 
 // GetAvailableLanguages returns a list of all supported languages and their available data types.
@@ -181,7 +182,7 @@ func GetLanguageVersion(c *gin.Context) {
 	}
 
 	// Check if language exists in database.
-	availableLanguages, err := database.GetAvailableLanguages()
+	availableLanguages, err := getAvailableLanguages()
 	if err != nil {
 		log.Printf("Error checking available languages: %v", err)
 		HandleError(c, http.StatusInternalServerError, "Failed to check language availability")
@@ -194,7 +195,7 @@ func GetLanguageVersion(c *gin.Context) {
 	}
 
 	// Get version information.
-	versions, err := database.GetLanguageVersions(lang)
+	versions, err := getLanguageVersions(lang)
 	if err != nil {
 		log.Printf("Error fetching versions for %s: %v", lang, err)
 		HandleError(c, http.StatusInternalServerError, constants.ErrorFetchingLanguageVersions)
