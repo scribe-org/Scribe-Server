@@ -177,44 +177,6 @@
       }
 
       /*
-      MARK: Status
-      */
-
-      .pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-family: var(--mono);
-        font-size: 0.78rem;
-        color: var(--text-distinct);
-        background: var(--bg-1);
-        border: 1px solid var(--section-div);
-        padding: 6px 12px 6px 10px;
-        border-radius: 999px;
-      }
-
-      .pill .dot {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: var(--success-green);
-        box-shadow: 0 0 0 0 rgba(79, 190, 131, 0.6);
-        animation: pulse 2.4s ease-out infinite;
-      }
-
-      @keyframes pulse {
-        0% {
-          box-shadow: 0 0 0 0 rgba(79, 190, 131, 0.55);
-        }
-        70% {
-          box-shadow: 0 0 0 7px rgba(79, 190, 131, 0);
-        }
-        100% {
-          box-shadow: 0 0 0 0 rgba(79, 190, 131, 0);
-        }
-      }
-
-      /*
       MARK: Hero
       */
 
@@ -844,12 +806,6 @@
       <section class="hero" style="border-top: none">
         <div class="wrap hero-grid">
           <div>
-            <div class="eyebrow">
-              <span class="pill"
-                ><span class="dot" aria-hidden="true"></span>Live on Wikimedia
-                Toolforge</span
-              >
-            </div>
             <h1>
               The API behind every
               <span class="accent">Scribe language pack</span>
