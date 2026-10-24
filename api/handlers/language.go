@@ -214,13 +214,13 @@ func GetLanguageVersion(c *gin.Context) {
 // GetContracts returns the data contract for a language as JSON, or a zip archive of all contracts.
 //
 // @Summary Retrieve data contracts
-// @Description Returns a language's contract as JSON ({lang}.json), or a zip of all contracts (data_contracts.zip) without 'lang'.
+// @Description Returns a language's contract as JSON ({lang}.json), or a zip of all contracts (scribe_data_contracts.zip) without 'lang'.
 // @Tags Contracts
 // @Accept  json
 // @Produce  json,application/zip
 // @Param lang query string false "Language code (ISO 639-1)" example(es)
 // @Success 200 {file} file "The language's contract as JSON, or a zip archive of all contracts"
-// @Header 200 {string} Content-Disposition "inline; filename={lang}.json, or attachment; filename=data_contracts.zip for all languages"
+// @Header 200 {string} Content-Disposition "inline; filename={lang}.json, or attachment; filename=scribe_data_contracts.zip for all languages"
 // @Failure 400 {object} models.ErrorResponse "Invalid language code provided"
 // @Failure 404 {object} models.ErrorResponse "Language not supported"
 // @Failure 500 {object} models.ErrorResponse "Failed to load contract files"

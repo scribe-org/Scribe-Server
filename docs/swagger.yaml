@@ -137,7 +137,7 @@ paths:
       consumes:
       - application/json
       description: Returns a language's contract as JSON ({lang}.json), or a zip of
-        all contracts (data_contracts.zip) without 'lang'.
+        all contracts (scribe_data_contracts.zip) without 'lang'.
       parameters:
       - description: Language code (ISO 639-1)
         example: es
@@ -152,7 +152,7 @@ paths:
           description: The language's contract as JSON, or a zip archive of all contracts
           headers:
             Content-Disposition:
-              description: inline; filename={lang}.json, or attachment; filename=data_contracts.zip
+              description: inline; filename={lang}.json, or attachment; filename=scribe_data_contracts.zip
                 for all languages
               type: string
           schema:

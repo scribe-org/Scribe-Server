@@ -45,7 +45,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - The `updated_at` date for language data is now the most recent last modified date of the data, matching `/data-version`, rather than the date of the request.
 - Data contracts exported from Scribe-Data are now copied to the server and deployed to Toolforge with the data so that `/contracts` returns them, and a clear error is returned if they're not available ([#113](https://github.com/scribe-org/Scribe-Server/issues/113)).
   - `/contracts?lang={lang}` returns only that language's contract exactly as exported by Scribe-Data as JSON (e.g. `en.json`), keeping the order of the contract's keys.
-  - `/contracts` returns a `data_contracts.zip` archive with a `data_contracts` directory of JSON contracts for all languages.
+  - `/contracts` returns a `scribe_data_contracts.zip` archive with a `scribe_data_contracts` directory of JSON contracts for all languages.
 - The `update_data.sh` download command was fixed to specify the correct dump snapshot location ([#65](https://github.com/scribe-org/Scribe-Server/pull/65)).
 - Trusted proxies are now explicitly configured for security.
 - `/packs` requests with `..` in the path are rejected so they can't show whether directories outside of the packs directory exist, `/packs/sqlite/list` returns `[]` instead of `null` when there are no SQLite files, and SQLite download file names are quoted ([#91](https://github.com/scribe-org/Scribe-Server/issues/91)).
