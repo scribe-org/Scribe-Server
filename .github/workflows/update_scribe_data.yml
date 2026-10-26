@@ -182,10 +182,10 @@ jobs:
 
             # Run database migration.
             echo "🔄 Building migration tool..."
-            go build -o ./bin/migrate-scribe-data ./cmd/migrate
+            go build -o ./bin/migrate-scribe-data ./cmd/migrate || { echo "❌ Failed to build migration tool."; exit 1; }
 
             echo "🔄 Running migration tool..."
-            ./bin/migrate-scribe-data
+            ./bin/migrate-scribe-data || { echo "❌ Migration failed."; exit 1; }
 
             # Clean up the deployment packages.
             rm ./scribe-data-sqlite.tar.gz ./scribe-data-contracts.tar.gz
