@@ -19,7 +19,7 @@ import (
 )
 
 // contractsArchiveDir is the directory in the zip archive of all contracts.
-const contractsArchiveDir = "data_contracts"
+const contractsArchiveDir = "scribe_data_contracts"
 
 // contractExtensions are the file extensions of contracts in order of preference.
 var contractExtensions = []string{".yaml", ".yml"}
@@ -218,7 +218,7 @@ func loadAllContracts(contractsDir string) ([]contractFile, error) {
 
 // MARK: Contracts Archive
 
-// writeContractsZip writes a zip archive with a data_contracts directory of JSON contracts.
+// writeContractsZip writes a zip archive with a scribe_data_contracts directory of JSON contracts.
 // It's a package-level variable to allow mocking in unit tests.
 var writeContractsZip = func(w io.Writer, contracts []contractFile) error {
 	archive := zip.NewWriter(w)
