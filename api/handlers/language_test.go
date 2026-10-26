@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -496,6 +497,356 @@ func TestGetLanguageData_DatabaseErrors(t *testing.T) {
 		var resp models.ErrorResponse
 		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
 		assert.Equal(t, "Failed to fetch language data types", resp.Error)
+	})
+}
+
+// MARK: Language Version Tests
+
+// setupLanguageVersionTestRouter creates a minimal Gin engine configured in test mode for testing GetLanguageVersion.
+func setupLanguageVersionTestRouter(t *testing.T) *gin.Engine {
+	t.Helper()
+
+	previousMode := gin.Mode()
+	gin.SetMode(gin.TestMode)
+	t.Cleanup(func() { gin.SetMode(previousMode) })
+
+	router := gin.New()
+	router.GET("/api/v1/data-version/:lang", GetLanguageVersion)
+	return router
+}
+
+// stubLanguageVersion temporarily swaps package-level function pointers used by GetLanguageVersion.
+func stubLanguageVersion(
+	t *testing.T,
+	languagesFn func() ([]string, error),
+	versionsFn func(lang string) (map[string]string, error),
+) {
+	t.Helper()
+
+	origLanguages := getAvailableLanguages
+	origVersions := getLanguageVersions
+
+	if languagesFn != nil {
+		getAvailableLanguages = languagesFn
+	}
+	if versionsFn != nil {
+		getLanguageVersions = versionsFn
+	}
+
+	t.Cleanup(func() {
+		getAvailableLanguages = origLanguages
+		getLanguageVersions = origVersions
+	})
+}
+
+// TestGetLanguageVersion_SuccessMapShape tests that GetLanguageVersion returns 200 with the <datatype>_last_modified map shape.
+func TestGetLanguageVersion_SuccessMapShape(t *testing.T) {
+	router := setupLanguageVersionTestRouter(t)
+	initLanguageValidator(t, []string{"en", "fr"})
+
+	expectedVersions := map[string]string{
+		"nouns_last_modified":        "2026-10-20 14:32:00",
+		"verbs_last_modified":        "2026-10-18 09:15:30",
+		"prepositions_last_modified": "2026-09-01 00:00:00",
+		"profanity_last_modified":    "2026-10-22 18:45:12",
+	}
+
+	var capturedLang string
+	stubLanguageVersion(
+		t,
+		func() ([]string, error) {
+			return []string{"en", "fr"}, nil
+		},
+		func(lang string) (map[string]string, error) {
+			capturedLang = lang
+			return expectedVersions, nil
+		},
+	)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/data-version/en", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "application/json; charset=utf-8", rec.Header().Get("Content-Type"))
+
+	var resp models.LanguageVersionResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+
+	assert.Equal(t, "en", capturedLang)
+	assert.Equal(t, "en", resp.Language)
+	assert.Equal(t, expectedVersions, resp.Versions)
+
+	// Verify the <datatype>_last_modified map shape.
+	for key, value := range resp.Versions {
+		assert.True(t, strings.HasSuffix(key, "_last_modified"), "expected key %q to end with _last_modified", key)
+		dataType := strings.TrimSuffix(key, "_last_modified")
+		assert.NotEmpty(t, dataType, "datatype prefix must not be empty")
+		assert.Contains(t, []string{"nouns", "verbs", "prepositions", "profanity"}, dataType)
+		assert.Equal(t, expectedVersions[key], value)
+	}
+}
+
+// TestGetLanguageVersion_FallbackDate tests the 1970-01-01 fallback date when a table has no lastModified column.
+func TestGetLanguageVersion_FallbackDate(t *testing.T) {
+	router := setupLanguageVersionTestRouter(t)
+	initLanguageValidator(t, []string{"en"})
+
+	t.Run("table without lastModified column uses 1970-01-01 fallback while others retain dates", func(t *testing.T) {
+		fallbackVersions := map[string]string{
+			"nouns_last_modified":        "2026-10-20 14:32:00",
+			"verbs_last_modified":        "1970-01-01",
+			"prepositions_last_modified": "1970-01-01",
+		}
+
+		stubLanguageVersion(
+			t,
+			func() ([]string, error) { return []string{"en"}, nil },
+			func(lang string) (map[string]string, error) {
+				assert.Equal(t, "en", lang)
+				return fallbackVersions, nil
+			},
+		)
+
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/data-version/en", nil)
+		rec := httptest.NewRecorder()
+		router.ServeHTTP(rec, req)
+
+		require.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, "application/json; charset=utf-8", rec.Header().Get("Content-Type"))
+
+		var resp models.LanguageVersionResponse
+		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+
+		assert.Equal(t, "en", resp.Language)
+		assert.Equal(t, fallbackVersions, resp.Versions)
+		assert.Equal(t, "2026-10-20 14:32:00", resp.Versions["nouns_last_modified"])
+		assert.Equal(t, "1970-01-01", resp.Versions["verbs_last_modified"])
+		assert.Equal(t, "1970-01-01", resp.Versions["prepositions_last_modified"])
+	})
+
+	t.Run("all tables missing lastModified column fall back to 1970-01-01", func(t *testing.T) {
+		fallbackVersions := map[string]string{
+			"nouns_last_modified": "1970-01-01",
+		}
+
+		stubLanguageVersion(
+			t,
+			func() ([]string, error) { return []string{"en"}, nil },
+			func(lang string) (map[string]string, error) {
+				return fallbackVersions, nil
+			},
+		)
+
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/data-version/en", nil)
+		rec := httptest.NewRecorder()
+		router.ServeHTTP(rec, req)
+
+		require.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, "application/json; charset=utf-8", rec.Header().Get("Content-Type"))
+
+		var resp models.LanguageVersionResponse
+		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+
+		assert.Equal(t, "en", resp.Language)
+		assert.Equal(t, "1970-01-01", resp.Versions["nouns_last_modified"])
+	})
+}
+
+// TestGetLanguageVersion_EmptyMap tests that a language with zero data types returns an empty map in versions.
+func TestGetLanguageVersion_EmptyMap(t *testing.T) {
+	router := setupLanguageVersionTestRouter(t)
+	initLanguageValidator(t, []string{"de"})
+
+	stubLanguageVersion(
+		t,
+		func() ([]string, error) { return []string{"de"}, nil },
+		func(lang string) (map[string]string, error) {
+			assert.Equal(t, "de", lang)
+			return map[string]string{}, nil
+		},
+	)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/data-version/de", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "application/json; charset=utf-8", rec.Header().Get("Content-Type"))
+
+	var resp models.LanguageVersionResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+
+	assert.Equal(t, "de", resp.Language)
+	assert.NotNil(t, resp.Versions)
+	assert.Empty(t, resp.Versions)
+
+	var raw map[string]any
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &raw))
+	assert.Equal(t, "de", raw["language"])
+	assert.Equal(t, map[string]any{}, raw["versions"])
+}
+
+// TestGetLanguageVersion_InvalidLanguageCode tests 400 Bad Request responses for malformed or invalid language codes.
+func TestGetLanguageVersion_InvalidLanguageCode(t *testing.T) {
+	router := setupLanguageVersionTestRouter(t)
+	initLanguageValidator(t, []string{"en", "de"})
+
+	// Ensure database functions are never called when the language code is invalid.
+	stubLanguageVersion(
+		t,
+		func() ([]string, error) {
+			t.Fatal("getAvailableLanguages must not be called when language code is invalid")
+			return nil, nil
+		},
+		func(_ string) (map[string]string, error) {
+			t.Fatal("getLanguageVersions must not be called when language code is invalid")
+			return nil, nil
+		},
+	)
+
+	tests := []struct {
+		name string
+		url  string
+	}{
+		{
+			name: "uppercase ISO code",
+			url:  "/api/v1/data-version/EN",
+		},
+		{
+			name: "mixed case ISO code",
+			url:  "/api/v1/data-version/En",
+		},
+		{
+			name: "single letter code (too short)",
+			url:  "/api/v1/data-version/e",
+		},
+		{
+			name: "three letter ISO code (too long for ISO 639-1)",
+			url:  "/api/v1/data-version/eng",
+		},
+		{
+			name: "full language name",
+			url:  "/api/v1/data-version/english",
+		},
+		{
+			name: "numeric code",
+			url:  "/api/v1/data-version/12",
+		},
+		{
+			name: "code with digit",
+			url:  "/api/v1/data-version/e1",
+		},
+		{
+			name: "code with hyphen",
+			url:  "/api/v1/data-version/en-us",
+		},
+		{
+			name: "code with special character",
+			url:  "/api/v1/data-version/e$",
+		},
+		{
+			name: "unsupported valid-length code not in supported languages map",
+			url:  "/api/v1/data-version/xx",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, tt.url, nil)
+			rec := httptest.NewRecorder()
+			router.ServeHTTP(rec, req)
+
+			require.Equal(t, http.StatusBadRequest, rec.Code)
+			assert.Equal(t, "application/json; charset=utf-8", rec.Header().Get("Content-Type"))
+
+			var resp models.ErrorResponse
+			require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+			assert.Equal(t, constants.InvalidLanguageCodeError, resp.Error)
+		})
+	}
+}
+
+// TestGetLanguageVersion_NotFound tests 404 Not Found responses when the language code is valid format but unsupported in the database.
+func TestGetLanguageVersion_NotFound(t *testing.T) {
+	router := setupLanguageVersionTestRouter(t)
+	initLanguageValidator(t, []string{"en", "fr", "es"})
+
+	stubLanguageVersion(
+		t,
+		func() ([]string, error) {
+			// Available languages in database does not include "es".
+			return []string{"en", "fr"}, nil
+		},
+		func(_ string) (map[string]string, error) {
+			t.Fatal("getLanguageVersions must not be called when language is not supported")
+			return nil, nil
+		},
+	)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/data-version/es", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusNotFound, rec.Code)
+	assert.Equal(t, "application/json; charset=utf-8", rec.Header().Get("Content-Type"))
+
+	var resp models.ErrorResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Equal(t, "Language 'es' not supported", resp.Error)
+}
+
+// TestGetLanguageVersion_DatabaseErrors tests 500 Internal Server Error responses when database operations fail.
+func TestGetLanguageVersion_DatabaseErrors(t *testing.T) {
+	router := setupLanguageVersionTestRouter(t)
+	initLanguageValidator(t, []string{"en"})
+
+	t.Run("500 when checking available languages fails", func(t *testing.T) {
+		stubLanguageVersion(
+			t,
+			func() ([]string, error) {
+				return nil, errors.New("database connection refused")
+			},
+			func(_ string) (map[string]string, error) {
+				t.Fatal("getLanguageVersions must not be called when available languages check fails")
+				return nil, nil
+			},
+		)
+
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/data-version/en", nil)
+		rec := httptest.NewRecorder()
+		router.ServeHTTP(rec, req)
+
+		require.Equal(t, http.StatusInternalServerError, rec.Code)
+		assert.Equal(t, "application/json; charset=utf-8", rec.Header().Get("Content-Type"))
+
+		var resp models.ErrorResponse
+		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+		assert.Equal(t, "Failed to check language availability", resp.Error)
+	})
+
+	t.Run("500 when fetching language versions fails", func(t *testing.T) {
+		stubLanguageVersion(
+			t,
+			func() ([]string, error) {
+				return []string{"en"}, nil
+			},
+			func(lang string) (map[string]string, error) {
+				assert.Equal(t, "en", lang)
+				return nil, errors.New("database error querying version timestamps")
+			},
+		)
+
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/data-version/en", nil)
+		rec := httptest.NewRecorder()
+		router.ServeHTTP(rec, req)
+
+		require.Equal(t, http.StatusInternalServerError, rec.Code)
+		assert.Equal(t, "application/json; charset=utf-8", rec.Header().Get("Content-Type"))
+
+		var resp models.ErrorResponse
+		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+		assert.Equal(t, constants.ErrorFetchingLanguageVersions, resp.Error)
 	})
 }
 
