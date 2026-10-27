@@ -83,6 +83,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - Unit tests were added for the SQLite to MariaDB migration tool, reading test SQLite databases and checking the MariaDB queries with go-sqlmock ([#119](https://github.com/scribe-org/Scribe-Server/issues/119)).
 - Unit tests were added for the language data retrieval endpoint handler ([#87](https://github.com/scribe-org/Scribe-Server/issues/87)).
 - Unit tests were added for the language version retrieval endpoint handler ([#89](https://github.com/scribe-org/Scribe-Server/issues/89)).
+- Unit tests were added for the dbqueries package using [go-sqlmock](https://github.com/DATA-DOG/go-sqlmock) ([#130](https://github.com/scribe-org/Scribe-Server/issues/130)).
 
 ### ♻️ Code Refactoring
 
