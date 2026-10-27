@@ -31,6 +31,12 @@ func GetTables(db *sql.DB) ([]string, error) {
 		}
 		tables = append(tables, name)
 	}
+
+	// Check to not return partial results.
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return tables, nil
 }
 
@@ -61,6 +67,10 @@ func GetTableSchema(db *sql.DB, tableName string) (*types.TableSchema, error) {
 		}
 		schema.ColumnNames = append(schema.ColumnNames, name)
 		schema.ColumnTypes = append(schema.ColumnTypes, utils.MapColumnTypeToMariaDB(name, typ))
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return schema, nil

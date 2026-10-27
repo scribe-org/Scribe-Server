@@ -13,6 +13,8 @@ import (
 	"github.com/scribe-org/scribe-server/cmd/migrate/types"
 )
 
+var openDatabase = sql.Open
+
 // SetupMariaDB initializes a MariaDB connection with the given configuration.
 func SetupMariaDB(dbConfig types.DatabaseConfig) (*sql.DB, error) {
 	// Build connection string with database name directly.
@@ -25,7 +27,7 @@ func SetupMariaDB(dbConfig types.DatabaseConfig) (*sql.DB, error) {
 	)
 
 	// Connect to the database.
-	mariaDB, err := sql.Open("mysql", dsn)
+	mariaDB, err := openDatabase("mysql", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to %s database: %v", dbConfig.Name, err)
 	}

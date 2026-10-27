@@ -50,6 +50,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - Trusted proxies are now explicitly configured for security.
 - `/packs` requests with `..` in the path are rejected so they can't show whether directories outside of the packs directory exist, `/packs/sqlite/list` returns `[]` instead of `null` when there are no SQLite files, and SQLite download file names are quoted ([#91](https://github.com/scribe-org/Scribe-Server/issues/91)).
 - Database queries for languages, data types, table schemas and table data return an error instead of partial results if reading rows fails partway through ([#92](https://github.com/scribe-org/Scribe-Server/issues/92)).
+- The SQLite to MariaDB migration tool exits with an error if any table fails to migrate rather than exiting successfully so that the data update workflow fails, and reading SQLite tables and schemas returns an error instead of partial results if reading rows fails partway through ([#119](https://github.com/scribe-org/Scribe-Server/issues/119)).
 - German data contract fixes for missing `displayValue` fields on declensions, and fully indexed conjugations/declensions.
 
 ### 📝 Documentation
@@ -79,6 +80,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - Unit tests were added for the `/packs` static file and SQLite download handler, including directory traversal attempts, and for the Swagger documentation routes ([#91](https://github.com/scribe-org/Scribe-Server/issues/91)).
 - Unit tests were added for API route registration, the home page, server startup and configuration loading ([#90](https://github.com/scribe-org/Scribe-Server/issues/90)).
 - Unit tests were added for the database package using [go-sqlmock](https://github.com/DATA-DOG/go-sqlmock) ([#92](https://github.com/scribe-org/Scribe-Server/issues/92)).
+- Unit tests were added for the SQLite to MariaDB migration tool, reading test SQLite databases and checking the MariaDB queries with go-sqlmock ([#119](https://github.com/scribe-org/Scribe-Server/issues/119)).
 - Unit tests were added for the language data retrieval endpoint handler ([#87](https://github.com/scribe-org/Scribe-Server/issues/87)).
 - Unit tests were added for the language version retrieval endpoint handler ([#89](https://github.com/scribe-org/Scribe-Server/issues/89)).
 

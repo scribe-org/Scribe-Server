@@ -189,9 +189,13 @@ func performDataMigration(sqlite *sql.DB, mariaDB *sql.DB, schema *types.TableSc
 }
 
 // MARK: Batch Processing
+
+// batchSize is the number of rows that are inserted per batch.
+// We are adding here so that tests can use the batches.
+var batchSize = 5000
+
 // processBatches handles processing rows in batches.
 func processBatches(rows *sql.Rows, stmt *sql.Stmt, columnNames []string, tableName string) error {
-	batchSize := 5000
 	batch := make([][]interface{}, 0, batchSize)
 	count := 0
 

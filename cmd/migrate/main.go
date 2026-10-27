@@ -8,22 +8,32 @@ import (
 	"github.com/scribe-org/scribe-server/cmd/migrate/sqlite"
 )
 
+// Function variables allow mocking the config, databases and fatal errors in unit tests.
+var (
+	loadConfig         = LoadConfig
+	setupMariaDB       = mariaDB.SetupMariaDB
+	processSQLiteFiles = sqlite.ProcessSQLiteFiles
+	fatal              = log.Fatal
+)
+
 func main() {
 	// Load configuration.
-	config, err := LoadConfig("config.yaml")
+	config, err := loadConfig("config.yaml")
 	if err != nil {
-		log.Fatal(err)
+		fatal(err)
+		return
 	}
 
 	// MariaDB connection setup with config.
-	mariaDB, err := mariaDB.SetupMariaDB(config.Database)
+	mariaDB, err := setupMariaDB(config.Database)
 	if err != nil {
-		log.Fatal(err)
+		fatal(err)
+		return
 	}
 	defer mariaDB.Close()
 
 	// Process SQLite files.
-	if err := sqlite.ProcessSQLiteFiles(mariaDB); err != nil {
-		log.Fatal(err)
+	if err := processSQLiteFiles(mariaDB); err != nil {
+		fatal(err)
 	}
 }

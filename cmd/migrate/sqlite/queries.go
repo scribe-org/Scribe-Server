@@ -5,6 +5,7 @@ package sqlite
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"path/filepath"
@@ -15,9 +16,14 @@ import (
 	"github.com/scribe-org/scribe-server/cmd/migrate/schema"
 )
 
+var openDatabase = sql.Open
+
+// sqliteDir is the directory of the SQLite files that are migrated.
+// put as a variable so that tests can use other directories.
+var sqliteDir = "./packs/sqlite"
+
 // ProcessSQLiteFiles processes all SQLite files in the specified directory.
 func ProcessSQLiteFiles(mariaDB *sql.DB) error {
-	sqliteDir := "./packs/sqlite"
 	files, err := filepath.Glob(filepath.Join(sqliteDir, "*.sqlite"))
 	if err != nil {
 		return fmt.Errorf("failed to read directory: %v", err)
@@ -43,11 +49,13 @@ func ProcessSQLiteFiles(mariaDB *sql.DB) error {
 	wg.Wait()
 	close(errChan)
 
+	// Return all errors so that a failed migration doesn't exit successfully.
+	var errs []error
 	for err := range errChan {
-		log.Printf("%v", err)
+		errs = append(errs, err)
 	}
 
-	return nil
+	return errors.Join(errs...)
 }
 
 // processSQLiteFile handles processing of a single SQLite file.
@@ -57,11 +65,8 @@ func processSQLiteFile(filePath string, mariaDB *sql.DB) error {
 	// Extract language code.
 	base := filepath.Base(filePath)
 	langCode := strings.TrimSuffix(strings.TrimPrefix(base, "TranslationData.sqlite_"), ".sqlite")
-	if langCode == "" {
-		langCode = strings.Split(base, "_")[0]
-	}
 
-	sqlite, err := sql.Open("sqlite", filePath)
+	sqlite, err := openDatabase("sqlite", filePath)
 	if err != nil {
 		return fmt.Errorf("failed to open SQLite file: %v", err)
 	}
@@ -72,11 +77,13 @@ func processSQLiteFile(filePath string, mariaDB *sql.DB) error {
 		return fmt.Errorf("failed to get tables: %v", err)
 	}
 
+	// Remaining tables will be still migrated if one of them fails.
+	var errs []error
 	for _, table := range tables {
 		if err := mariadb.MigrateTable(sqlite, mariaDB, langCode, table); err != nil {
-			log.Printf("Error migrating table %s: %v", table, err)
+			errs = append(errs, fmt.Errorf("failed to migrate table %s: %w", table, err))
 		}
 	}
 
-	return nil
+	return errors.Join(errs...)
 }

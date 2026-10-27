@@ -633,7 +633,7 @@ func TestGetLanguageVersion_FallbackDate(t *testing.T) {
 		stubLanguageVersion(
 			t,
 			func() ([]string, error) { return []string{"en"}, nil },
-			func(lang string) (map[string]string, error) {
+			func(_ string) (map[string]string, error) {
 				return fallbackVersions, nil
 			},
 		)
