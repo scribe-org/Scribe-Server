@@ -8,6 +8,7 @@ ENV ?= dev
 GIN_MODE ?= debug
 
 # Minimum total test coverage (%) required by CI.
+# Maximum value here should be 95% to allow for emergency patches that don't break CI.
 MIN_COVERAGE ?=95
 
 # Clean any build artifacts.
