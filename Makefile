@@ -103,7 +103,7 @@ generate-db:
 docs:
 	@echo "Generating API documentation..."
 	@command -v swag >/dev/null 2>&1 || { echo "WARNING: 'swag' not in PATH."; }
-	$(shell go env GOPATH)/bin/swag init --generalInfo main.go --output docs/
+	$(shell go env GOPATH)/bin/swag init --generalInfo main.go --output docs/ --exclude ./cmd
 	@echo "Docs generated at docs/"
 	@echo "Swagger UI: http://localhost:8080/swagger/index.html"
 	@echo ""
