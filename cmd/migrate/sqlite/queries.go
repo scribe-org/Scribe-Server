@@ -16,9 +16,14 @@ import (
 	"github.com/scribe-org/scribe-server/cmd/migrate/schema"
 )
 
+var openDatabase = sql.Open
+
+// sqliteDir is the directory of the SQLite files that are migrated.
+// put as a variable so that tests can use other directories.
+var sqliteDir = "./packs/sqlite"
+
 // ProcessSQLiteFiles processes all SQLite files in the specified directory.
 func ProcessSQLiteFiles(mariaDB *sql.DB) error {
-	sqliteDir := "./packs/sqlite"
 	files, err := filepath.Glob(filepath.Join(sqliteDir, "*.sqlite"))
 	if err != nil {
 		return fmt.Errorf("failed to read directory: %v", err)
@@ -60,11 +65,8 @@ func processSQLiteFile(filePath string, mariaDB *sql.DB) error {
 	// Extract language code.
 	base := filepath.Base(filePath)
 	langCode := strings.TrimSuffix(strings.TrimPrefix(base, "TranslationData.sqlite_"), ".sqlite")
-	if langCode == "" {
-		langCode = strings.Split(base, "_")[0]
-	}
 
-	sqlite, err := sql.Open("sqlite", filePath)
+	sqlite, err := openDatabase("sqlite", filePath)
 	if err != nil {
 		return fmt.Errorf("failed to open SQLite file: %v", err)
 	}

@@ -11,6 +11,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	_ "github.com/glebarez/sqlite"
+	"github.com/scribe-org/scribe-server/cmd/migrate/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -195,5 +196,36 @@ func TestGetTableSchema(t *testing.T) {
 		// Partial results shouldn't be returned as if they were complete.
 		assert.EqualError(t, err, "disk I/O error")
 		assert.Nil(t, schema)
+	})
+}
+
+// MARK: Create Table SQL
+
+func TestGenerateCreateTableSQL(t *testing.T) {
+	t.Run("creates the table with its columns in order", func(t *testing.T) {
+		schema := &types.TableSchema{
+			ColumnNames: []string{"wdLexemeId", "count", "lastModified"},
+			ColumnTypes: []string{"TEXT", "BIGINT", "TIMESTAMP"},
+		}
+
+		createSQL := GenerateCreateTableSQL("ENLanguageDataNounsScribe", schema)
+
+		assert.Equal(t, "CREATE TABLE IF NOT EXISTS `ENLanguageDataNounsScribe` (\n"+
+			"    `wdLexemeId` TEXT,\n"+
+			"    `count` BIGINT,\n"+
+			"    `lastModified` TIMESTAMP\n"+
+			") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;", createSQL)
+	})
+
+	t.Run("creates a table that the schema was read from", func(t *testing.T) {
+		db := newSQLiteDB(t, "CREATE TABLE verbs (wdLexemeId TEXT, infinitive TEXT)")
+		schema, err := GetTableSchema(db, "verbs")
+		require.NoError(t, err)
+
+		createSQL := GenerateCreateTableSQL("DELanguageDataVerbsScribe", schema)
+
+		assert.Contains(t, createSQL, "`DELanguageDataVerbsScribe` (\n    `wdLexemeId` TEXT,\n    `infinitive` TEXT\n)")
+		// Note: utf8mb4 is needed to store all characters, e.g. emojis.
+		assert.Contains(t, createSQL, "CHARSET=utf8mb4")
 	})
 }
