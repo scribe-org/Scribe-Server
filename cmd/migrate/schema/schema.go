@@ -32,7 +32,7 @@ func GetTables(db *sql.DB) ([]string, error) {
 		tables = append(tables, name)
 	}
 
-	// check to not return partial results.
+	// Check to not return partial results.
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}

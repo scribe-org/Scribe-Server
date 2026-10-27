@@ -77,7 +77,7 @@ func processSQLiteFile(filePath string, mariaDB *sql.DB) error {
 		return fmt.Errorf("failed to get tables: %v", err)
 	}
 
-	// remaining tables will be still migrated if one of them fails.
+	// Remaining tables will be still migrated if one of them fails.
 	var errs []error
 	for _, table := range tables {
 		if err := mariadb.MigrateTable(sqlite, mariaDB, langCode, table); err != nil {
