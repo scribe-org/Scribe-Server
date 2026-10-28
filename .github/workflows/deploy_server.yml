@@ -2,6 +2,9 @@ name: Deploy Scribe-Server to Toolforge
 
 on:
   workflow_dispatch:
+  # TEMPORARY for testing: run when this branch is pushed to scribe-org.
+  push:
+    branches: [add/workflow-to-update-toolforge]
 
 # Deploys and data updates share this group so that they never run on Toolforge at the same time.
 concurrency:
@@ -20,7 +23,8 @@ jobs:
       - name: Check repository and branch
         id: check
         run: |
-          if [ "$GITHUB_REPOSITORY" = "scribe-org/Scribe-Server" ] && [ "$GITHUB_REF" = "refs/heads/main" ]; then
+          # TEMPORARY for testing: also allow this branch.
+          if [ "$GITHUB_REPOSITORY" = "scribe-org/Scribe-Server" ] && { [ "$GITHUB_REF" = "refs/heads/main" ] || [ "$GITHUB_REF" = "refs/heads/add/workflow-to-update-toolforge" ]; }; then
             echo "is_remote_main=true" >> "$GITHUB_OUTPUT"
           else
             echo "is_remote_main=false" >> "$GITHUB_OUTPUT"
@@ -34,7 +38,6 @@ jobs:
     timeout-minutes: 30
 
     env:
-      DEPLOY_SHA: ${{ github.sha }}
       TOOLFORGE_USER: ${{ secrets.TOOLFORGE_USER }}
       SITE_URL: https://scribe-server.toolforge.org
       START_SCRIPT: /data/project/scribe-server/Scribe-Server/start-script.sh
@@ -45,6 +48,12 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v7
+        # TEMPORARY for testing: deploy main's code from this branch's workflow.
+        with:
+          ref: main
+
+      - name: Get the commit to deploy
+        run: echo "DEPLOY_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Set up Go
         uses: actions/setup-go@v7
@@ -192,8 +201,9 @@ jobs:
           MATRIX_ROOM_ID: ${{ secrets.MATRIX_DATA_ROOM_ID }}
           ACTOR: ${{ github.actor }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         run: |
+          COMMIT_URL="${REPO_URL}/commit/${DEPLOY_SHA}"
           DURATION_SECONDS=$(( $(date +%s) - START_TIME ))
           DURATION=$(printf '%dm %02ds' $((DURATION_SECONDS / 60)) $((DURATION_SECONDS % 60)))
           COMMIT_SUBJECT=$(git log -1 --format=%s)
