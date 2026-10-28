@@ -6,13 +6,14 @@
 
 ## Contents
 
-- [Practical Workflow](#first-steps-as-a-contributor)
+- [Practical Workflow](#practical-workflow)
   - [SSH into Toolforge](#ssh-into-toolforge)
   - [Set Up Go](#set-up-go)
   - [Configure Database](#configure-database)
   - [Create Start Script](#create-start-script)
   - [Build and Run the Server](#build-and-run-the-server)
     - [Building Locally](#building-locally)
+    - [Deploying with GitHub Actions](#deploying-with-github-actions)
   - [Python Tooling Setup](#python-tooling-setup)
   - [Install PyICU](#install-pyicu)
 
@@ -157,6 +158,9 @@ chmod +x ~/Scribe-Server/start-script.sh
 
 ### Build and Run the Server
 
+> [!TIP]
+> The production server can be deployed from GitHub without these steps. See [Deploying with GitHub Actions](#deploying-with-github-actions).
+
 Each time you deploy an update, stop the running service, pull the latest code, rebuild the binary, and restart:
 
 ```bash
@@ -203,6 +207,32 @@ toolforge webservice --mem 4Gi --cpu 2 trixie start \
 
 - The uploaded file is owned by your user, so it's copied as the tool user to make the tool its owner.
 - Build from the same commit that's checked out on Toolforge so that the binary matches the `static` files that are served.
+
+#### Deploying with GitHub Actions
+
+Maintainers can deploy the latest `main` to the production `scribe-server` tool from the [Deploy Scribe-Server to Toolforge](https://github.com/scribe-org/Scribe-Server/actions/workflows/deploy_server.yml) workflow by selecting **Run workflow** on the `main` branch. The workflow:
+
+1. Runs the tests and builds the Linux binary.
+2. Uploads the binary and updates the code on Toolforge with `git pull --ff-only` so that the `static` files match it.
+3. Keeps the current binary as `Scribe-Server.old`, swaps in the new one and restarts the webservice.
+4. Checks that the server is up, and restores `Scribe-Server.old` if it isn't.
+5. Sends a Matrix message saying whether the deploy worked.
+
+Notes:
+
+- Files on Toolforge that aren't tracked by Git (e.g. `config.yaml`, `start-script.sh`, the binaries and the data in `packs`) are never changed by a deploy.
+- If an update would overwrite one of these files, or a file that was edited on Toolforge, the deploy stops before changing the server, as those files can have settings that only exist on Toolforge, like the database password in `config.yaml`. The current server keeps running, and the file can then be checked by hand.
+- Deploys and [data updates](./.github/workflows/update_scribe_data.yml) never run at the same time. A deploy waits for a running data update to finish.
+- `Scribe-Server.old` is kept after a successful deploy so that the previous version can be restored if a problem shows up later:
+
+  ```bash
+  become scribe-server
+  cd ~/Scribe-Server
+  cp Scribe-Server.old Scribe-Server.tmp && mv Scribe-Server.tmp Scribe-Server
+  toolforge webservice stop
+  toolforge webservice --mem 4Gi --cpu 2 trixie start \
+    /data/project/scribe-server/Scribe-Server/start-script.sh
+  ```
 
 <sub><a href="#top">Back to top.</a></sub>
 

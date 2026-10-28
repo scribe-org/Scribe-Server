@@ -8,6 +8,11 @@ on:
   schedule:
     - cron: "0 0 1 * *" # run on the 1st of every month at midnight UTC
 
+# Data updates and server deploys share this group so that they never run on Toolforge at the same time.
+concurrency:
+  group: toolforge-deploy
+  cancel-in-progress: false
+
 jobs:
   check-repository:
     runs-on: ubuntu-latest
@@ -129,7 +134,9 @@ jobs:
             ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org << 'DEPLOY_SCRIPT_EOF'
 
             # Switch to the tool user.
-            become scribe-server
+            # exec replaces the login shell with the tool user's shell. Without it, the rest of the
+            # script would run as the login user after an `exit 1`, and the deployment wouldn't fail.
+            exec become scribe-server
 
             # Running as the tool user (e.g., scribe-server).
             # Current Directory: /data/project/scribe-server

@@ -1,0 +1,277 @@
+name: Deploy Scribe-Server to Toolforge
+
+on:
+  workflow_dispatch:
+
+# Deploys and data updates share this group so that they never run on Toolforge at the same time.
+concurrency:
+  group: toolforge-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check-repository:
+    runs-on: ubuntu-latest
+    outputs:
+      is_remote_main: ${{ steps.check.outputs.is_remote_main }}
+    steps:
+      - name: Check repository and branch
+        id: check
+        run: |
+          if [ "$GITHUB_REPOSITORY" = "scribe-org/Scribe-Server" ] && [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            echo "is_remote_main=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_remote_main=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::This workflow should only run on the main branch of the scribe-org/Scribe-Server repository."
+          fi
+
+  deploy:
+    needs: check-repository
+    if: needs.check-repository.outputs.is_remote_main == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      TOOLFORGE_USER: ${{ secrets.TOOLFORGE_USER }}
+      SITE_URL: https://scribe-server.toolforge.org
+      START_SCRIPT: /data/project/scribe-server/Scribe-Server/start-script.sh
+
+    steps:
+      - name: Record start time
+        run: echo "START_TIME=$(date +%s)" >> "$GITHUB_ENV"
+
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Get the commit to deploy
+        run: echo "DEPLOY_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: "go.mod"
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Build the server
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o Scribe-Server .
+          echo "✅ Built $(ls -lh Scribe-Server | awk '{ print $5 }') binary for ${DEPLOY_SHA::7}"
+
+      - name: Setup SSH for Toolforge deployment
+        uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.TOOLFORGE_SSH_KEY }}
+
+      - name: Upload the server to Toolforge
+        run: |
+          ssh-keyscan -H login.toolforge.org >> ~/.ssh/known_hosts
+
+          echo "📤 Uploading the server to Toolforge..."
+          scp -o ConnectTimeout=60 ./Scribe-Server \
+            "${TOOLFORGE_USER}@login.toolforge.org:/data/project/scribe-server/Scribe-Server.new"
+          echo "✅ Server uploaded."
+
+      - name: Deploy on Toolforge
+        id: deploy
+        run: |
+          {
+            echo "exec become scribe-server"
+            echo "DEPLOY_SHA=${DEPLOY_SHA}"
+            echo "START_SCRIPT=${START_SCRIPT}"
+            cat << 'DEPLOY_SCRIPT_EOF'
+          set -e
+
+          # Running as the tool user in /data/project/scribe-server.
+          cd ./Scribe-Server
+
+          # Update the code so that the served static files match the binary.
+          # --ff-only stops the deploy instead of overwriting changes that were made on Toolforge.
+          echo "📥 Updating the code to ${DEPLOY_SHA}..."
+          git fetch origin main
+          git merge --ff-only "$DEPLOY_SHA"
+
+          if [ ! -f ../Scribe-Server.new ]; then
+            echo "❌ Uploaded server not found."
+            exit 1
+          fi
+
+          # Copy the upload as the tool user so that the tool owns the binary.
+          cp ../Scribe-Server.new ./Scribe-Server.tmp
+          chmod +x ./Scribe-Server.tmp
+          rm ../Scribe-Server.new
+
+          # Keep the current binary as a backup to roll back to.
+          if [ -f ./Scribe-Server ]; then
+            cp ./Scribe-Server ./Scribe-Server.old
+            echo "📦 Backed up the current server to Scribe-Server.old"
+          fi
+
+          # The binary is renamed into place as overwriting it could crash the running server.
+          mv ./Scribe-Server.tmp ./Scribe-Server
+
+          echo "🔄 Restarting the webservice..."
+          toolforge webservice stop || true
+          toolforge webservice --mem 4Gi --cpu 2 trixie start "$START_SCRIPT"
+
+          echo "🎉 Server deployed."
+          DEPLOY_SCRIPT_EOF
+          } | ssh -o ConnectTimeout=60 "${TOOLFORGE_USER}@login.toolforge.org"
+
+      - name: Check that the server is up
+        id: health
+        continue-on-error: true
+        run: |
+          # The webservice can take a minute to start.
+          for attempt in $(seq 1 12); do
+            if curl -fsS -o /dev/null --max-time 10 "${SITE_URL}/api/v1/languages"; then
+              echo "✅ Server is up."
+              exit 0
+            fi
+            echo "⏳ Server isn't up yet (attempt $attempt of 12)..."
+            sleep 10
+          done
+
+          echo "❌ Server didn't start."
+          exit 1
+
+      - name: Restore the previous server
+        if: steps.health.outcome == 'failure'
+        run: |
+          {
+            echo "exec become scribe-server"
+            echo "START_SCRIPT=${START_SCRIPT}"
+            cat << 'ROLLBACK_SCRIPT_EOF'
+          set -e
+          cd ./Scribe-Server
+
+          if [ ! -f ./Scribe-Server.old ]; then
+            echo "❌ No backup to restore."
+            exit 1
+          fi
+
+          # The backup is copied so that it's still available if restoring it needs to be retried.
+          echo "⏪ Restoring the previous server..."
+          cp ./Scribe-Server.old ./Scribe-Server.tmp
+          mv ./Scribe-Server.tmp ./Scribe-Server
+
+          toolforge webservice stop || true
+          toolforge webservice --mem 4Gi --cpu 2 trixie start "$START_SCRIPT"
+          ROLLBACK_SCRIPT_EOF
+          } | ssh -o ConnectTimeout=60 "${TOOLFORGE_USER}@login.toolforge.org"
+
+      - name: Check that the previous server is up
+        id: rollback_health
+        if: steps.health.outcome == 'failure'
+        continue-on-error: true
+        run: |
+          for attempt in $(seq 1 12); do
+            if curl -fsS -o /dev/null --max-time 10 "${SITE_URL}/api/v1/languages"; then
+              echo "✅ Previous server is up."
+              exit 0
+            fi
+            echo "⏳ Previous server isn't up yet (attempt $attempt of 12)..."
+            sleep 10
+          done
+
+          echo "❌ Previous server didn't start."
+          exit 1
+
+      - name: Fail the deploy if the server didn't start
+        if: steps.health.outcome == 'failure'
+        run: |
+          echo "❌ The new server didn't start, so the deploy failed."
+          exit 1
+
+      - name: Send Matrix success notification
+        if: success()
+        env:
+          MATRIX_HOMESERVER: ${{ secrets.MATRIX_HOMESERVER }}
+          MATRIX_TOKEN: ${{ secrets.MATRIX_SCRIBE_BOT_ACCESS_TOKEN }}
+          MATRIX_ROOM_ID: ${{ secrets.MATRIX_DATA_ROOM_ID }}
+          ACTOR: ${{ github.actor }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        run: |
+          COMMIT_URL="${REPO_URL}/commit/${DEPLOY_SHA}"
+          DURATION_SECONDS=$(( $(date +%s) - START_TIME ))
+          DURATION=$(printf '%dm %02ds' $((DURATION_SECONDS / 60)) $((DURATION_SECONDS % 60)))
+          COMMIT_SUBJECT=$(git log -1 --format=%s)
+
+          TITLE="Toolforge Scribe-Server Repo Update Successful! 🎉"
+
+          # jq escapes the commit message for JSON and HTML.
+          JSON_PAYLOAD=$(jq -n \
+            --arg title "$TITLE" \
+            --arg actor "$ACTOR" \
+            --arg sha "${DEPLOY_SHA::7}" \
+            --arg subject "$COMMIT_SUBJECT" \
+            --arg duration "$DURATION" \
+            --arg site "$SITE_URL" \
+            --arg commit_url "$COMMIT_URL" \
+            --arg run_url "$RUN_URL" \
+            '{
+              msgtype: "m.text",
+              format: "org.matrix.custom.html",
+              body: "\($title) - Remote server now fully updated: \($sha) \($subject)",
+              formatted_body: "<h4>\($title)</h4><p>Remote server now fully updated 🚀</p><ul><li><strong>Triggered:</strong> manually by \($actor | @html)</li><li><strong>Deployed:</strong> <a href=\"\($commit_url)\">\($sha)</a> \($subject | @html)</li><li><strong>Duration:</strong> \($duration)</li><li><strong>Visit:</strong> <a href=\"\($site)\">scribe-server.toolforge.org</a></li><li><strong>Docs:</strong> <a href=\"\($site)/docs/index.html\">scribe-server.toolforge.org/docs/index.html</a></li><li><strong>GitHub:</strong> <a href=\"https://github.com/scribe-org/Scribe-Server\">scribe-org/Scribe-Server</a></li></ul><p><a href=\"\($run_url)\">View Full Log</a></p>"
+            }')
+
+          TXN_ID=$(date +%s%N)
+          ROOM_ID=$(jq -rn --arg room "$MATRIX_ROOM_ID" '$room | @uri')
+
+          curl --fail --show-error -X PUT "${MATRIX_HOMESERVER}/_matrix/client/v3/rooms/${ROOM_ID}/send/m.room.message/${TXN_ID}" \
+            -H "Authorization: Bearer ${MATRIX_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "$JSON_PAYLOAD" || echo "⚠️ Failed to send Matrix notification (non-fatal)"
+
+      - name: Send Matrix failure notification
+        if: failure()
+        env:
+          MATRIX_HOMESERVER: ${{ secrets.MATRIX_HOMESERVER }}
+          MATRIX_TOKEN: ${{ secrets.MATRIX_SCRIBE_BOT_ACCESS_TOKEN }}
+          MATRIX_ROOM_ID: ${{ secrets.MATRIX_DATA_ROOM_ID }}
+          ACTOR: ${{ github.actor }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
+          HEALTH_OUTCOME: ${{ steps.health.outcome }}
+          ROLLBACK_OUTCOME: ${{ steps.rollback_health.outcome }}
+        run: |
+          # Say what state the server was left in.
+          if [ "$DEPLOY_OUTCOME" = "skipped" ]; then
+            STATUS="Nothing was changed on Toolforge, so the current server is still running ✅"
+          elif [ "$DEPLOY_OUTCOME" = "failure" ]; then
+            STATUS="The deploy failed on Toolforge. Please check that the server is still running ⚠️"
+          elif [ "$HEALTH_OUTCOME" = "failure" ] && [ "$ROLLBACK_OUTCOME" = "success" ]; then
+            STATUS="The new server didn't start, so the previous server was restored and is running ✅"
+          elif [ "$HEALTH_OUTCOME" = "failure" ]; then
+            STATUS="The new server didn't start and restoring the previous server didn't work. The site may be down ⚠️"
+          else
+            STATUS="Please check that the server is running ⚠️"
+          fi
+
+          TITLE="❌ Toolforge Scribe-Server Repo Update Failed"
+
+          JSON_PAYLOAD=$(jq -n \
+            --arg title "$TITLE" \
+            --arg actor "$ACTOR" \
+            --arg sha "${DEPLOY_SHA::7}" \
+            --arg status "$STATUS" \
+            --arg run_url "$RUN_URL" \
+            '{
+              msgtype: "m.text",
+              format: "org.matrix.custom.html",
+              body: "\($title) - \($status)",
+              formatted_body: "<h4>\($title)</h4><p>\($status)</p><ul><li><strong>Triggered:</strong> manually by \($actor | @html)</li><li><strong>Commit:</strong> \($sha)</li></ul><p><a href=\"\($run_url)\">View Full Log</a></p>"
+            }')
+
+          TXN_ID=$(date +%s%N)
+          ROOM_ID=$(jq -rn --arg room "$MATRIX_ROOM_ID" '$room | @uri')
+
+          curl --fail --show-error -X PUT "${MATRIX_HOMESERVER}/_matrix/client/v3/rooms/${ROOM_ID}/send/m.room.message/${TXN_ID}" \
+            -H "Authorization: Bearer ${MATRIX_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "$JSON_PAYLOAD" || echo "⚠️ Failed to send Matrix notification (non-fatal)"
