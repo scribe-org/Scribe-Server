@@ -6,7 +6,8 @@
 
 [![platforms](https://img.shields.io/static/v1?message=Toolforge&logo=wikimedia-foundation&color=990000&logoColor=white&label=%20)](https://github.com/scribe-org/Scribe-Server)
 [![issues](https://img.shields.io/github/issues/scribe-org/Scribe-Server?label=%20&logo=github)](https://github.com/scribe-org/Scribe-Server/issues)
-[![language](https://img.shields.io/badge/Go%201.20-00ADD8.svg?logo=go&logoColor=ffffff)](https://github.com/scribe-org/Scribe-Server/blob/main/CONTRIBUTING.md)
+[![language](https://img.shields.io/github/go-mod/go-version/scribe-org/Scribe-Server?logo=go&logoColor=ffffff&color=00ADD8)](https://github.com/scribe-org/Scribe-Server/blob/main/CONTRIBUTING.md)
+[![tests](https://img.shields.io/github/actions/workflow/status/scribe-org/Scribe-Server/pr_ci.yaml?branch=main&label=tests&logo=github)](https://github.com/scribe-org/Scribe-Server/actions/workflows/pr_ci.yaml?query=branch%3Amain)
 [![license](https://img.shields.io/github/license/scribe-org/Scribe-Server.svg?label=%20)](https://github.com/scribe-org/Scribe-Server/blob/main/LICENSE.txt)
 [![coc](https://img.shields.io/badge/Contributor%20Covenant-ff69b4.svg)](https://github.com/scribe-org/Scribe-Server/blob/main/.github/CODE_OF_CONDUCT.md)
 [![mastodon](https://img.shields.io/badge/Mastodon-6364FF.svg?logo=mastodon&logoColor=ffffff)](https://wikis.world/@scribe)

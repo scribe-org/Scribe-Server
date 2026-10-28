@@ -62,6 +62,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - Available data and download instructions were linked from the [README.md](README.md).
 - Documentation on how to install and deploy the tools needed for Scribe-Server on Wikimedia's Toolforge was added in [TOOLFORGE.md](TOOLFORGE.md) ([#62](https://github.com/scribe-org/Scribe-Server/issues/62)).
 - OpenAPI/Swagger documentation generation was added for the API, viewable at [scribe-server.toolforge.org/swagger/index.html](https://scribe-server.toolforge.org/swagger/index.html) and [scribe-server.toolforge.org/docs/index.html](https://scribe-server.toolforge.org/docs/index.html) ([#9](https://github.com/scribe-org/Scribe-Server/issues/9), [#19](https://github.com/scribe-org/Scribe-Server/issues/19)).
+- The README shows the Go version from `go.mod` and whether the tests pass on `main`.
 
 ### 🎨 Design
 
