@@ -6,7 +6,7 @@
 
 ## Contents
 
-- [Practical Workflow](#first-steps-as-a-contributor)
+- [Practical Workflow](#practical-workflow)
   - [SSH into Toolforge](#ssh-into-toolforge)
   - [Set Up Go](#set-up-go)
   - [Configure Database](#configure-database)
