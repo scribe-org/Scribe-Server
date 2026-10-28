@@ -21,6 +21,9 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - The Toolforge build was fixed to compile PyICU with the correct Toolforge ICU paths ([#43](https://github.com/scribe-org/Scribe-Server/issues/43)).
 - Deployments only keep the two most recent backups of the SQLite data on Toolforge.
 - The Toolforge webservice was switched from the deprecated `jdk17` image to the `trixie` image, and the server is built with `CGO_ENABLED=0` so that it doesn't depend on the image's system libraries ([#107](https://github.com/scribe-org/Scribe-Server/issues/107)).
+- A workflow was added to deploy the server to Toolforge from GitHub Actions, which restores the previous server if the new one doesn't start and sends a Matrix notification ([#126](https://github.com/scribe-org/Scribe-Server/issues/126)).
+  - Server deploys and data updates never run on Toolforge at the same time.
+  - Failed steps on Toolforge now fail the data update workflow instead of the rest of the deployment running as the login user.
 
 ### ✨ Features
 
