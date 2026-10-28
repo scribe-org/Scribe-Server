@@ -2,9 +2,6 @@ name: Deploy Scribe-Server to Toolforge
 
 on:
   workflow_dispatch:
-  # TEMPORARY for testing: run when this branch is pushed to scribe-org.
-  push:
-    branches: [add/workflow-to-update-toolforge]
 
 # Deploys and data updates share this group so that they never run on Toolforge at the same time.
 concurrency:
@@ -23,8 +20,7 @@ jobs:
       - name: Check repository and branch
         id: check
         run: |
-          # TEMPORARY for testing: also allow this branch.
-          if [ "$GITHUB_REPOSITORY" = "scribe-org/Scribe-Server" ] && { [ "$GITHUB_REF" = "refs/heads/main" ] || [ "$GITHUB_REF" = "refs/heads/add/workflow-to-update-toolforge" ]; }; then
+          if [ "$GITHUB_REPOSITORY" = "scribe-org/Scribe-Server" ] && [ "$GITHUB_REF" = "refs/heads/main" ]; then
             echo "is_remote_main=true" >> "$GITHUB_OUTPUT"
           else
             echo "is_remote_main=false" >> "$GITHUB_OUTPUT"
@@ -48,9 +44,6 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v7
-        # TEMPORARY for testing: deploy main's code from this branch's workflow.
-        with:
-          ref: main
 
       - name: Get the commit to deploy
         run: echo "DEPLOY_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
