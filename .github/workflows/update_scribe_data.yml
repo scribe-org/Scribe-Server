@@ -38,6 +38,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
+      # The migration tool is built here as Go isn't on the PATH of the tool user's shell on Toolforge.
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: "go.mod"
+
+      - name: Build the migration tool
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o migrate-scribe-data ./cmd/migrate
+          echo "✅ Built $(ls -lh migrate-scribe-data | awk '{ print $5 }') migration tool"
+
       - name: Set up Python 3.12
         uses: actions/setup-python@v6
         with:
@@ -120,7 +131,7 @@ jobs:
           ssh-keyscan -H login.toolforge.org >> ~/.ssh/known_hosts
 
           echo "📤 Transferring packages to Toolforge..."
-          scp -o ConnectTimeout=60 ./scribe-data-sqlite.tar.gz ./scribe-data-contracts.tar.gz \
+          scp -o ConnectTimeout=60 ./scribe-data-sqlite.tar.gz ./scribe-data-contracts.tar.gz ./migrate-scribe-data \
             ${{ secrets.TOOLFORGE_USER }}@login.toolforge.org:/data/project/scribe-server/
 
           if [ $? -ne 0 ]; then
@@ -142,7 +153,7 @@ jobs:
             # Current Directory: /data/project/scribe-server
 
             # Move the packages into the Scribe-Server directory.
-            if [ ! -f "./scribe-data-sqlite.tar.gz" ] || [ ! -f "./scribe-data-contracts.tar.gz" ]; then
+            if [ ! -f "./scribe-data-sqlite.tar.gz" ] || [ ! -f "./scribe-data-contracts.tar.gz" ] || [ ! -f "./migrate-scribe-data" ]; then
               echo "❌ Packages not found in project directory."
               exit 1
             fi
@@ -187,9 +198,15 @@ jobs:
               echo "⚠️ Failed to extract data contracts, keeping the current ones."
             fi
 
-            # Run database migration.
-            echo "🔄 Building migration tool..."
-            go build -o ./bin/migrate-scribe-data ./cmd/migrate || { echo "❌ Failed to build migration tool."; exit 1; }
+            # Install the migration tool that was built in the workflow.
+            # The uploaded file is owned by the login user, so it's copied to make the tool user its owner.
+            echo "🔄 Installing migration tool..."
+            mkdir -p ./bin
+            cp ../migrate-scribe-data ./bin/migrate-scribe-data.tmp \
+              && chmod +x ./bin/migrate-scribe-data.tmp \
+              && mv ./bin/migrate-scribe-data.tmp ./bin/migrate-scribe-data \
+              && rm ../migrate-scribe-data \
+              || { echo "❌ Failed to install migration tool."; exit 1; }
 
             echo "🔄 Running migration tool..."
             ./bin/migrate-scribe-data || { echo "❌ Migration failed."; exit 1; }

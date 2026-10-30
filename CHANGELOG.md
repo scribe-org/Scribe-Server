@@ -24,6 +24,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 - A workflow was added to deploy the server to Toolforge from GitHub Actions, which restores the previous server if the new one doesn't start and sends a Matrix notification ([#126](https://github.com/scribe-org/Scribe-Server/issues/126)).
   - Server deploys and data updates never run on Toolforge at the same time.
   - Failed steps on Toolforge now fail the data update workflow instead of the rest of the deployment running as the login user.
+  - The data update workflow builds the migration tool and uploads it to Toolforge, as Go isn't available to the tool user there, so the migration always runs the latest code.
 
 ### ✨ Features
 
