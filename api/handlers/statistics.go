@@ -23,7 +23,7 @@ var (
 // GetLanguageStats handles GET /language-stats?codes=en,fr.
 // @Summary Get statistics for one or multiple languages
 // @Description Returns the number of nouns, verbs, prepositions and profanity entries for the given language codes (null if a language has none).
-// @Tags statistics
+// @Tags Statistics
 // @Accept json
 // @Produce json
 // @Param codes query string false "Comma-separated list of language codes to filter (e.g., fr,de,es)"
