@@ -280,7 +280,7 @@ paths:
             $ref: '#/definitions/models.ErrorResponse'
       summary: Get statistics for one or multiple languages
       tags:
-      - statistics
+      - Statistics
   /api/v1/languages:
     get:
       consumes:

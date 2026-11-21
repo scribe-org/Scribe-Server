@@ -199,7 +199,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "statistics"
+                    "Statistics"
                 ],
                 "summary": "Get statistics for one or multiple languages",
                 "parameters": [
