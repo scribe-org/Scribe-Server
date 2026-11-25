@@ -25,6 +25,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
   - Server deploys and data updates never run on Toolforge at the same time.
   - Failed steps on Toolforge now fail the data update workflow instead of the rest of the deployment running as the login user.
   - The data update workflow builds the migration tool and uploads it to Toolforge, as Go isn't available to the tool user there, so the migration always runs the latest code.
+- Data updates now install the latest `scribe-data` release from PyPI instead of cloning the `main` branch ([#137](https://github.com/scribe-org/Scribe-Server/issues/137)).
 
 ### ✨ Features
 

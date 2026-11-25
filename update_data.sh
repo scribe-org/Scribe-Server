@@ -5,7 +5,6 @@ set -e  # exit immediately on error
 
 # MARK: Config
 
-SCRIBE_DATA_DIR="Scribe-Data"
 TEMP_DIR="/tmp/scribe-data-update"
 PACKS_DIR="./packs/sqlite"
 VENV_DIR="./.venv"
@@ -72,25 +71,6 @@ log "🚀 Starting Scribe-Data update process..."
 log "Working directory: $(pwd)"
 log "Log file: $LOG_FILE"
 
-# MARK: Get Scribe-Data
-
-log "📦 Setting up Scribe-Data repository..."
-if [ ! -d "$SCRIBE_DATA_DIR" ]; then
-    log "Cloning Scribe-Data repository..."
-    git clone --depth=1 https://github.com/scribe-org/Scribe-Data.git "$SCRIBE_DATA_DIR" || {
-        error "Failed to clone Scribe-Data repo"
-        exit 1
-    }
-    success "Repository cloned successfully"
-else
-    log "Repository exists, updating..."
-    cd "$SCRIBE_DATA_DIR"
-    git pull origin main || warning "Failed to update repository, continuing with existing version"
-    cd ..
-fi
-
-cd "$SCRIBE_DATA_DIR"
-
 # MARK: Python / Pip
 
 log "🐍 Checking Python environment..."
@@ -137,13 +117,14 @@ success "Virtual environment activated"
 
 # MARK: Dependencies
 
-log "📚 Installing Scribe-Data dependencies..."
+log "📚 Installing Scribe-Data from PyPI..."
 pip install --upgrade pip
-pip install -e . || {
-    error "Failed to install Scribe-Data dependencies"
+pip install --upgrade scribe-data || {
+    error "Failed to install Scribe-Data from PyPI"
     exit 1
 }
-success "Dependencies installed successfully"
+SCRIBE_DATA_VERSION=$(pip show scribe-data 2>/dev/null | awk '/^Version:/ {print $2}')
+success "Scribe-Data ${SCRIBE_DATA_VERSION:-latest} installed successfully"
 
 # MARK: PyICU
 
@@ -351,7 +332,7 @@ log "Found $SQLITE_FILES SQLite files to copy"
 cd "$PROJECT_ROOT"
 mkdir -p "$PACKS_DIR"
 log "📁 Copying SQLite files to server..."
-cp -f "$TEMP_DIR/$SCRIBE_DATA_DIR/scribe_data_sqlite_export"/*.sqlite "$PACKS_DIR/" || {
+cp -f "$TEMP_DIR/scribe_data_sqlite_export"/*.sqlite "$PACKS_DIR/" || {
     error "Failed to copy SQLite files to $PACKS_DIR"
     exit 1
 }
@@ -370,7 +351,7 @@ SERVER_CONTRACTS_DIR="./contracts"
 log "📜 Copying data contracts to server..."
 rm -rf "$SERVER_CONTRACTS_DIR.new"
 mkdir -p "$SERVER_CONTRACTS_DIR.new"
-cp -f "$TEMP_DIR/$SCRIBE_DATA_DIR/$CONTRACTS_DIR"/*.yaml "$SERVER_CONTRACTS_DIR.new/" || {
+cp -f "$TEMP_DIR/$CONTRACTS_DIR"/*.yaml "$SERVER_CONTRACTS_DIR.new/" || {
     error "Failed to copy data contracts to $SERVER_CONTRACTS_DIR"
     rm -rf "$SERVER_CONTRACTS_DIR.new"
     exit 1
@@ -405,7 +386,7 @@ DURATION_SECONDS=$(( $(date +%s) - START_EPOCH ))
 success "✨ Scribe-Data update process completed successfully at $END_TIME"
 
 log "📊 Update Summary:"
-log "  • Repository: Updated/Cloned"
+log "  • Scribe-Data: ${SCRIBE_DATA_VERSION:-latest} (PyPI)"
 log "  • Virtual Environment: Reused or created at $VENV_DIR"
 log "  • Dependencies: Installed"
 log "  • Languages processed: ${#TARGET_LANGUAGES[@]} (${TARGET_LANGUAGES[*]})"
