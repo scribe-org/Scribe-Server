@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Scribe SQLite Database Download</title>
+    <title>Download the SQLite databases — Scribe-Server</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -116,24 +116,6 @@
         letter-spacing: -0.01em;
       }
 
-      .brand-mark {
-        width: 30px;
-        height: 30px;
-        border-radius: 8px;
-        background: linear-gradient(
-          145deg,
-          var(--scribe-blue-lighter),
-          var(--scribe-blue-darker)
-        );
-        display: grid;
-        place-items: center;
-        font-family: var(--mono);
-        font-weight: 600;
-        font-size: 0.82rem;
-        color: #071019;
-        flex-shrink: 0;
-      }
-
       .nav-links {
         display: flex;
         align-items: center;
@@ -154,6 +136,38 @@
       .nav-links a:hover {
         color: var(--text-primary);
         background: var(--bg-1);
+      }
+
+      .nav-links .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--bg-0);
+        background: var(--scribe-blue);
+        font-weight: 600;
+      }
+
+      .nav-links .cta:hover {
+        background: var(--scribe-blue-lighter);
+        color: var(--bg-0);
+      }
+
+      .nav-links .cta .github-icon {
+        flex-shrink: 0;
+      }
+
+      .back-link {
+        display: inline-block;
+        font-family: var(--mono);
+        font-size: 0.82rem;
+        color: var(--text-distinct);
+        text-decoration: none;
+        margin-bottom: 18px;
+      }
+
+      .back-link:hover {
+        color: var(--text-primary);
+        text-decoration: underline;
       }
 
       /* Main Content */
@@ -321,7 +335,7 @@
         margin-top: 18px;
       }
 
-      @media (max-width: 640px) {
+      @media (max-width: 720px) {
         .nav-links span.hide-mobile,
         .nav-links a.hide-mobile {
           display: none;
@@ -338,12 +352,34 @@
     <header>
       <nav class="nav">
         <a href="/" class="brand">
-          <span class="brand-mark">S</span>
-          Scribe-Server
+          <img
+            src="/images/ScribeServerLogoWhite.png"
+            alt="The Scribe-Server logo."
+            width="144px"
+            height="36px"
+          />
         </a>
         <div class="nav-links">
-          <a href="/" class="hide-mobile">Back to Home</a>
-          <a href="/docs/index.html">API Docs</a>
+          <a href="/#endpoints" class="hide-mobile">API</a>
+          <a href="/#languages" class="hide-mobile">Languages</a>
+          <a href="/#downloads" class="hide-mobile">Downloads</a>
+          <a href="/docs/index.html" class="hide-mobile">Docs</a>
+          <a href="https://github.com/scribe-org/Scribe-Server" class="cta">
+            <svg
+              class="github-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+              />
+            </svg>
+            GitHub
+          </a>
         </div>
       </nav>
     </header>
@@ -351,8 +387,9 @@
     <main>
       <div class="wrap">
         <div class="section-head">
+          <a href="/" class="back-link">← Back to main page</a>
           <div class="section-eyebrow">Data packs</div>
-          <h1>Scribe SQLite Database Download</h1>
+          <h1>Download the SQLite databases</h1>
           <p class="section-desc">
             You can click any of the links below to download the most recent
             Scribe-Data SQLite database. Each file is a complete, versioned
@@ -378,28 +415,35 @@
           <a
             href="/"
             class="brand"
-            style="margin-bottom: 12px; display: inline-flex"
+            style="margin-bottom: 6px; display: inline-flex"
           >
-            <span class="brand-mark">S</span>
-            Scribe-Server
+            <img
+              src="/images/ScribeServerLogoWhite.png"
+              alt="The Scribe-Server logo."
+              width="144px"
+              height="36px"
+            />
           </a>
           <p class="footer-note">
             Backend service for Scribe data downloads.<br />
-            Scribe is part of the
+            Scribe is a
             <a
-              href="https://www.wikimedia.org/"
+              href="https://www.mediawiki.org/wiki/New_Developers#Scribe"
               style="color: var(--scribe-blue-lighter); text-decoration: none"
-              >Wikimedia</a
-            >
-            ecosystem.
+              >Wikimedia project for new developers</a
+            >.
           </p>
         </div>
         <div class="footer-links">
-          <a href="https://github.com/scribe-org/Scribe-Server">GitHub</a>
           <a href="https://scri.be">scri.be</a>
           <a href="/docs/index.html">API docs</a>
+          <a href="https://github.com/scribe-org/Scribe-Server">GitHub</a>
           <a href="https://matrix.to/#/#scribe_community:matrix.org"
             >Matrix chat</a
+          >
+          <a
+            href="https://github.com/scribe-org/Scribe-Server/blob/main/LICENSE.txt"
+            >GPL-3.0</a
           >
         </div>
       </div>
@@ -408,6 +452,20 @@
     MARK: Script
     -->
     <script>
+      const LANGUAGE_CODES = {
+        English: "en",
+        French: "fr",
+        German: "de",
+        Italian: "it",
+        Portuguese: "pt",
+        Russian: "ru",
+        Spanish: "es",
+        Swedish: "sv",
+      };
+      const CODE_TO_LANGUAGE = Object.fromEntries(
+        Object.entries(LANGUAGE_CODES).map(([name, code]) => [code, name]),
+      );
+
       // Fetch and display available SQLite files.
       async function loadDownloads() {
         const list = document.getElementById("download-list");
@@ -422,14 +480,26 @@
             count.textContent = `${files.length} file${files.length === 1 ? "" : "s"}`;
 
             files.forEach((file) => {
+              const code = file.slice(0, 2).toLowerCase();
+              const language = CODE_TO_LANGUAGE[code];
+              const label = language ? `${file} (${language})` : file;
+
               const row = document.createElement("a");
               row.href = `/packs/sqlite/${file}`;
               row.className = "download-row";
               row.download = file;
               row.innerHTML = `
                 <span class="download-name">
-                  <span class="download-icon" aria-hidden="true">◆</span>
-                  ${file}
+                  <span class="download-icon" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                      <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"></path>
+                      <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"></path>
+                    </svg>
+                  </span>
+                  ${label}
                 </span>
                 <span class="download-action">Download →</span>
               `;
