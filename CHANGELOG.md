@@ -70,6 +70,7 @@ Emojis for the following are chosen based on [gitmoji](https://gitmoji.dev/).
 
 - The website for Scribe-Server has been developed with a modern design with easy to follow documentation ([#50](https://github.com/scribe-org/Scribe-Server/issues/50), [#71](https://github.com/scribe-org/Scribe-Server/issues/71)).
 - Icons and favicons were added to make the website presentable ([#33](https://github.com/scribe-org/Scribe-Server/issues/33)).
+- The SQLite database download UI has been standardized with the rest of the platform ([#14](https://github.com/scribe-org/Scribe-Server/issues/141)).
 
 ### ✅ Tests
 
